@@ -538,23 +538,52 @@ function pop(x,y,s,col){parts.push({x,y,vx:0,vy:-24,life:.9,max:.9,col,k:"txt",s
 
 /* =============== input =============== */
 
-/* =============== music: looped track (art/music.mp3) =============== */
-const musicBytes=fetch("art/music.mp3").then(r=>r.ok?r.arrayBuffer():null).catch(()=>null);
+/* =============== music: dark synth loop, built live (no files) =============== */
 const music=(()=>{
-  let bus=null,lp=null,buf=null,src=null,loading=null,want=false,rate=1,calmMode=false;
-  function init(){if(bus||!AC)return;bus=AC.createGain();bus.gain.value=0;lp=AC.createBiquadFilter();lp.type="lowpass";lp.frequency.value=20000;bus.connect(lp);lp.connect(AC.destination)}
-  function load(){if(buf||loading||!AC)return loading;loading=(musicBytes||fetch("art/music.mp3").then(r=>r.arrayBuffer())).then(a=>{if(!a)throw 0;return a}).then(a=>new Promise((ok,no)=>AC.decodeAudioData(a,ok,no))).then(b=>{buf=b;if(want)play()}).catch(()=>{loading=null});return loading}
-  function play(){if(!buf||src||!AC)return;src=AC.createBufferSource();src.buffer=buf;src.loop=true;src.playbackRate.value=rate;src.connect(bus);src.start()}
+  let bus=null,lp=null,timer=null,step=0,next=0,on=false,intensity=0,bpm=112,nbuf=null;
+  // original dark-minimal track: D minor, Dm  Bb  Gm  A
+  const ROOTS=[38,34,43,45];
+  const CH=[[0,3,7],[0,4,7],[0,3,7],[0,4,7]];
+  const GL=[86,89,93,81,84,88];
+  const hz=m=>440*Math.pow(2,(m-69)/12);
+  function init(){if(bus||!AC)return;bus=AC.createGain();bus.gain.value=0;lp=AC.createBiquadFilter();lp.type="lowpass";lp.frequency.value=12000;bus.connect(lp);lp.connect(AC.destination);
+    const n=AC.sampleRate*.4|0;nbuf=AC.createBuffer(1,n,AC.sampleRate);const c=nbuf.getChannelData(0);for(let i=0;i<n;i++)c[i]=Math.random()*2-1}
+  function osc(type,f,t,d,vol,cut,att){const o=AC.createOscillator(),g=AC.createGain();o.type=type;o.frequency.setValueAtTime(f,t);let out=o;
+    if(cut){const fl=AC.createBiquadFilter();fl.type="lowpass";fl.Q.value=5;fl.frequency.setValueAtTime(cut*2,t);fl.frequency.exponentialRampToValueAtTime(cut*.6,t+d);o.connect(fl);out=fl}
+    out.connect(g);g.connect(bus);
+    if(att){g.gain.setValueAtTime(.0001,t);g.gain.linearRampToValueAtTime(vol,t+att);g.gain.setValueAtTime(vol,t+d*.7);g.gain.exponentialRampToValueAtTime(.0001,t+d)}
+    else{g.gain.setValueAtTime(vol,t);g.gain.exponentialRampToValueAtTime(.0001,t+d)}
+    o.start(t);o.stop(t+d+.02)}
+  function kick(t){const o=AC.createOscillator(),g=AC.createGain();o.frequency.setValueAtTime(220,t);o.frequency.exponentialRampToValueAtTime(70,t+.12);g.gain.setValueAtTime(.7,t);g.gain.exponentialRampToValueAtTime(.001,t+.28);o.connect(g);g.connect(bus);o.start(t);o.stop(t+.3);nz(t,.012,.35,1800)}
+  function nz(t,d,vol,hp){const s=AC.createBufferSource(),f=AC.createBiquadFilter(),g=AC.createGain();s.buffer=nbuf;f.type="highpass";f.frequency.value=hp;g.gain.setValueAtTime(vol,t);g.gain.exponentialRampToValueAtTime(.001,t+d);s.connect(f);f.connect(g);g.connect(bus);s.start(t);s.stop(t+d+.02)}
+  function pad(root,ch,t,d,vol){ch.forEach(iv=>{[-7,7].forEach(dt=>{const o=AC.createOscillator();o.detune.value=dt;o.type="sawtooth";o.frequency.value=hz(root+12+iv);const f=AC.createBiquadFilter();f.type="lowpass";f.frequency.value=1600;const g=AC.createGain();
+    g.gain.setValueAtTime(.0001,t);g.gain.linearRampToValueAtTime(vol,t+d*.35);g.gain.linearRampToValueAtTime(.0001,t+d);o.connect(f);f.connect(g);g.connect(bus);o.start(t);o.stop(t+d+.05)})})}
+  function glitch(t){const n=2+(Math.random()*3|0);for(let k=0;k<n;k++){const tt=t+k*.035;osc("square",hz(GL[Math.random()*GL.length|0]),tt,.03,.03);if(Math.random()<.5)nz(tt,.02,.06,5000)}}
+  function play16(i,t){const bar=Math.floor(i/16)%4,s16=i%16,root=ROOTS[bar],dur=60/bpm/4;
+    if(s16===0)pad(root,CH[bar],t,dur*16,intensity<0?.03:.026);
+    if(intensity<0){ // menu / results: cold pad, low pulse, the odd glitch
+      if(s16%8===0)osc("sawtooth",hz(root+12),t,dur*6,.08,700);
+      if(s16===10&&Math.random()<.5)glitch(t);
+      return}
+    // pulsing 8th-note bass, filter opens as levels go up
+    if(s16%2===0){const bn=root+(s16%8===6?7:0);osc("sawtooth",hz(bn+12),t,dur*1.7,.15,700+intensity*150);osc("sine",hz(bn),t,dur*1.7,.14)}
+    if(s16===0||s16===8||(intensity>=2&&s16===11))kick(t);
+    if(s16%4===2)nz(t,.05,.1,7000);if(s16%4===0)nz(t,.02,.04,9000);
+    if(intensity>=1&&(s16===4||s16===12))nz(t,.2,.2,1800);
+    if(intensity>=1&&s16%4===3&&Math.random()<.35)glitch(t);
+    if(intensity>=2&&s16%2===1)nz(t,.02,.03,9000);
+    if(intensity>=3&&(s16===0||s16===6||s16===10))osc("triangle",hz(root+24+CH[bar][(s16/4|0)%3]),t,dur*3,.05,0,.03);
+  }
+  function tick(){if(!AC||!on)return;while(next<AC.currentTime+.12){play16(step,next);next+=60/bpm/4;step++}}
   function fade(v,sec){if(!bus)return;const t=AC.currentTime;bus.gain.cancelScheduledValues(t);bus.gain.setValueAtTime(bus.gain.value,t);bus.gain.linearRampToValueAtTime(v,t+sec)}
-  function start(vol){if(!AC||muted)return;init();want=true;load();play();fade(vol,.5)}
-  function stop(){want=false;if(!bus)return;fade(0,.3);const s=src;setTimeout(()=>{if(!want&&s===src&&src){try{src.stop()}catch(e){}src.disconnect();src=null}},350)}
-  function setRate(r){rate=r;if(src)src.playbackRate.setTargetAtTime(r,AC.currentTime,.4)}
+  function start(){if(!AC||muted)return;init();if(!on){on=true;step=0;next=AC.currentTime+.05;timer=setInterval(tick,25)}fade(.85,.4)}
+  function stop(){if(!on)return;fade(0,.3);setTimeout(()=>{if(bus&&bus.gain.value<.01){on=false;clearInterval(timer)}},400)}
   return{
-    preload(){if(AC){init();load()}},
-    game(){calmMode=false;setRate(1);if(lp&&AC)lp.frequency.setTargetAtTime(20000,AC.currentTime,.1);start(.75)},
-    level(st){if(!calmMode)setRate(1+Math.min(3,st)*.02)},
-    calm(){calmMode=true;setRate(1);if(lp&&AC)lp.frequency.setTargetAtTime(900,AC.currentTime,.3);start(.45)},
-    stop
+    game(){intensity=0;bpm=100;if(lp)lp.frequency.setTargetAtTime(12000,AC.currentTime,.05);start()},
+    level(st){intensity=Math.min(3,st);bpm=Math.min(124,100+st*6)},
+    calm(){intensity=-1;bpm=84;if(lp&&AC)lp.frequency.setTargetAtTime(1400,AC.currentTime,.3);start()},
+    stop,
+    sync(){if(muted||document.hidden)stop();else if(state==="play"||state==="ready")this.game()}
   };
 })();
 function flap(){ac();if(state==="ready"){state="play";$("hint").classList.remove("on");$("coach").classList.remove("on")}if(state!=="play")return;
