@@ -52,6 +52,10 @@ button,input{font-family:inherit}
 .well canvas{position:static;width:auto;height:auto}
 .rule b{font-weight:600;color:#fff}
 .field{margin-bottom:12px}
+.consent{display:flex;gap:10px;align-items:flex-start;font-size:13.5px;line-height:1.3;margin:2px 2px 12px;color:#e7efe9;cursor:pointer}
+.consent input{width:22px;height:22px;flex:0 0 22px;margin-top:1px;accent-color:#3f9a4e}
+.ferr{display:none;background:#b8362a;color:#fff;border:3px solid var(--edge);padding:6px 10px;font-size:14px;margin:-4px 0 12px}
+.ferr.on{display:block}
 .field label{display:block;font-size:14px;margin:0 0 5px 2px;color:#dfe8e2}
 input{width:100%;height:50px;background:#1d2723;color:#e6f4ec;border:3px solid #121815;box-shadow:inset 3px 3px 0 #0b100e;padding:0 12px;font-size:19px;outline:none;border-radius:0}
 input:focus{border-color:var(--warn)}
@@ -215,7 +219,10 @@ input::placeholder{color:#5f7068}
         <div class="rule"><div class="well"><canvas id="icoKey"></canvas></div><div><b>Plain gold keys are worth 2.</b> Sparkling ones are honeytokens. Grab three and you're out.</div></div>
         <div class="rule"><div class="well"><canvas id="icoIps"></canvas></div><div><b>Every 5 pipes, a new level</b> adds a trap: moving decoys, striped walls, then red IPS beams.</div></div>
       </div>
-      <div class="field"><label for="nick">Call sign</label><input id="nick" maxlength="14" placeholder="e.g. NIGHTSHIFT" autocomplete="off" spellcheck="false"></div>
+      <div class="field"><label for="nick">Your name</label><input id="nick" maxlength="40" placeholder="e.g. Priya Sharma" autocomplete="name"></div>
+      <div class="field"><label for="email">Work email</label><input id="email" type="email" maxlength="120" placeholder="you@company.com" autocomplete="email" inputmode="email"></div>
+      <label class="consent"><input type="checkbox" id="consent"><span>WhizHack can store my name and email to run the game and its leaderboard, and may contact me about it.</span></label>
+      <div class="ferr" id="ferr"></div>
       <button class="btn" id="btnPlay">Start</button>
       <div class="pair"><button class="btn grey" id="btnLb1">Leaderboard</button><button class="btn grey" id="btnInfo">The defences</button></div>
       <div class="note">Score <b id="unlockN">10</b> for a free comic at the WhizHack booth.</div>
@@ -514,7 +521,7 @@ function flap(){ac();if(state==="ready"){state="play";$("hint").classList.remove
   bot.vy=FLAP;bot.flapT=.12;sfx.flap();
   for(let i=0;i<3;i++)parts.push({x:bot.x-4,y:bot.y+6,vx:rnd(-30,-10),vy:rnd(20,50),life:.3,max:.3,col:R()<.5?"#f2a23a":"#ffe08a",k:"px",g:0})}
 stage.addEventListener("pointerdown",e=>{if(e.target.closest(".ov.on,button,input"))return;e.preventDefault();flap()});
-addEventListener("keydown",e=>{if(e.target.tagName==="INPUT"){if(e.key==="Enter"&&state==="menu")startRun();return}
+addEventListener("keydown",e=>{if(e.target.tagName==="INPUT"){if(e.key==="Enter"&&state==="menu"&&checkPlayer())startRun();return}
   if(e.code==="Space"||e.code==="ArrowUp"||e.code==="KeyW"){e.preventDefault();if(state==="ready"||state==="play")flap();else if(state==="over"&&performance.now()-overAt>700)startRun()}});
 
 /* =============== flow =============== */
@@ -844,7 +851,7 @@ async function makeCard(){
   return cv2;
 }
 async function openCard(){const cv2=await makeCard();$("cardImg").src=cv2.toDataURL("image/png");show("card")}
-async function shareCard(){
+async function shareCard(){window.__ddLog("share_card","score "+score);
   if(!cardCanvas)await makeCard();
   const blob=await new Promise(r=>cardCanvas.toBlob(r,"image/png"));
   const file=new File([blob],"decoy-dash-score.png",{type:"image/png"});
@@ -868,43 +875,54 @@ redrawIcons();
 icon("icoIps",x=>{x.fillStyle="#3a1210";x.fillRect(4,0,8,3);x.fillRect(4,13,8,3);x.globalAlpha=.4;x.fillStyle="#ff4a3a";x.fillRect(6,3,4,10);x.globalAlpha=1;x.fillStyle="#ff7a6a";x.fillRect(7,3,2,10)},16,16,2.4);
 icon("icoKey",x=>{x.drawImage(KEY,0,0);x.drawImage(KEY,0,8);x.fillStyle="#63d6b4";[[1,9],[11,7],[6,14],[13,12]].forEach(([a,b])=>x.fillRect(a,b,1,1))},14,15,2.6);
 
-/* =============== call sign =============== */
-const nickEl=$("nick");nickEl.value=store.get("nick","");
-const clean=v=>(v||"").replace(/[^\w\- .@]/g,"").trim().slice(0,14);
-function getNick(){let n=clean(nickEl.value);if(n)return n;let d=store.get("defNick",null);if(!d){d="Bot-"+Math.floor(100+R()*900);store.set("defNick",d)}return d}
-function saveNick(){const n=clean(nickEl.value);if(n)store.set("nick",n)}
+/* =============== player + database =============== */
+const API_URL="https://juemnyijhvqlpxrvsibg.supabase.co", API_KEY="sb_publishable_LDopq-erBLDteakwk08pOQ_qKnIafQI";
+let DEVICE=store.get("device",null);
+if(!DEVICE){DEVICE=(crypto.randomUUID?crypto.randomUUID():Date.now().toString(36)+Math.random().toString(36).slice(2,12));store.set("device",DEVICE)}
+async function rpc(fn,args){const r=await fetch(API_URL+"/rest/v1/rpc/"+fn,{method:"POST",headers:{"Content-Type":"application/json",apikey:API_KEY},body:JSON.stringify(args||{})});
+  if(!r.ok){let m="Error "+r.status;try{m=(await r.json()).message||m}catch(e){}throw new Error(m)}const t=await r.text();return t?JSON.parse(t):null}
+let rq=Promise.resolve();const queue=(fn,args)=>{rq=rq.then(()=>rpc(fn,args).catch(()=>{}));return rq};
+window.__ddLog=(kind,detail)=>queue("log_event",{p_device:DEVICE,p_kind:kind,p_detail:detail||null});
+
+const nickEl=$("nick"),emailEl=$("email"),consentEl=$("consent");
+nickEl.value=store.get("name",store.get("nick",""));emailEl.value=store.get("email","");consentEl.checked=!!store.get("consent",false);
+const clean=v=>(v||"").replace(/[<>&"]/g,"").replace(/\s+/g," ").trim().slice(0,40);
+function getNick(){const n=clean(nickEl.value)||store.get("name","");return n.split(" ")[0].slice(0,14)||"Player"}
+function saveNick(){}
+const EMAIL_RE=/^[^@\s]+@[^@\s]+\.[^@\s]{2,}$/;
+function formError(m){const e=$("ferr");e.textContent=m;e.classList.toggle("on",!!m)}
+let registered=store.get("regKey",null);
+[nickEl,emailEl,consentEl].forEach(el=>el.addEventListener("input",()=>formError("")));
+function checkPlayer(){
+  const n=clean(nickEl.value),em=(emailEl.value||"").trim().toLowerCase();
+  if(n.length<2){formError("Please enter your name.");nickEl.focus();return false}
+  if(!EMAIL_RE.test(em)){formError("Please enter a valid work email.");emailEl.focus();return false}
+  if(!consentEl.checked){formError("Please tick the box so we can store your details.");return false}
+  formError("");store.set("name",n);store.set("nick",n.split(" ")[0]);store.set("email",em);store.set("consent",true);
+  const key=n+"|"+em;if(registered!==key){registered=key;store.set("regKey",key);queue("register_player",{p_device:DEVICE,p_name:n,p_email:em,p_consent:true})}
+  return true}
 
 /* =============== leaderboards =============== */
 function recordLocal(){if(score<=0)return;const L=store.get("local",[]);L.push({nick:getNick(),best:score,lv:runLvMax});L.sort((a,b)=>b.best-a.best);store.set("local",L.slice(0,15))}
-let DB=null,UID=null,gRows=null,gState="loading",myRemote=0,wq=Promise.resolve(),lbTab="global";
-(async()=>{try{
-  if(!window.claude||typeof window.claude.use!=="function"){gState="off";renderLb();return}
-  const[d,u]=await Promise.all([window.claude.use("db"),window.claude.use("user")]);DB=d;if(!DB){gState="off";renderLb();return}
-  if(u){try{UID=await u.id()}catch(e){}}
-  const tm=setTimeout(()=>{if(gState==="loading"){gState="slow";renderLb()}},10000);
-  DB.collection("scores").orderBy("best","desc").limit(25).onSnapshot(s=>{if(!s.metadata.fromCache)clearTimeout(tm);
-    gRows=s.docs.map(d=>{const v=d.data()||{};return{id:d.id,nick:clean(String(v.nick||""))||"Bot",best:Math.max(0,Math.min(9999,+v.best||0)),lv:Math.max(0,Math.min(3,+v.lv||0))}});
-    const mine=gRows.find(r=>r.id===UID);if(mine)myRemote=Math.max(myRemote,mine.best);gState="ok";renderLb()},()=>{clearTimeout(tm);gState="off";renderLb()});
-  if(UID){try{const s=await DB.doc("scores/"+UID).get();if(s.exists)myRemote=+((s.data()||{}).best)||0}catch(e){}}
-}catch(e){gState="off";renderLb()}})();
-function submitGlobal(){if(!DB||!UID)return;const sc=best;if(sc<=myRemote)return;const body={nick:getNick(),best:sc,lv:Math.max(runLvMax,lvOf(sc)),ts:Date.now()};
-  wq=wq.then(()=>DB.doc("scores/"+UID).set(body).then(()=>{myRemote=sc}).catch(()=>{}))}
+let gRows=null,gState="loading",lbTab="global",lbTimer=null;
+async function loadBoard(){try{const rows=await rpc("leaderboard");gRows=(rows||[]).map(r=>({nick:clean(String(r.name||""))||"Player",best:+r.best_score||0,lv:Math.max(0,Math.min(3,+r.deepest_level||0))}));gState="ok"}catch(e){gState=gRows?"ok":"off"}renderLb()}
+function submitGlobal(){queue("submit_run",{p_device:DEVICE,p_score:score,p_level:runLvMax,p_caught_by:deathReason||null}).then(()=>{if(ovs.lb.classList.contains("on")||$("tv").classList.contains("on"))loadBoard()})}
 function fill(el,rows,me){el.innerHTML=rows.map((r,i)=>`<div class="lr${me(r)?" me":""}"><span class="n">${i+1}</span><span class="nm"></span><span class="lv">${LV[r.lv||0].id}</span><span class="sc">${r.best}</span></div>`).join("");
   el.querySelectorAll(".nm").forEach((n,i)=>n.textContent=rows[i].nick)}
 function renderLb(){
   const el=$("lbList");$("tGlobal").classList.toggle("down",lbTab==="global");$("tLocal").classList.toggle("down",lbTab==="local");
   if(lbTab==="local"){const L=store.get("local",[]);L.length?fill(el,L.slice(0,10),()=>false):el.innerHTML=`<div class="empty">No runs on this phone yet. Play one and it gets logged here.</div>`}
-  else if(gState==="ok"&&gRows&&gRows.length)fill(el,gRows.slice(0,10),r=>r.id===UID);
-  else el.innerHTML=`<div class="empty">${gState==="ok"?"Nobody has made it in yet. The top spot is yours to take.":gState==="loading"?"Fetching the shift log…":gState==="slow"?"Can't reach the shared log right now. Your runs are under This phone.":"The shared log isn't available here. Your runs are under This phone."}</div>`;
-  if($("tv").classList.contains("on")){const tv=$("tvList"),rows=(gState==="ok"&&gRows&&gRows.length)?gRows.slice(0,10):store.get("local",[]).slice(0,10);
+  else if(gState==="ok"&&gRows&&gRows.length)fill(el,gRows.slice(0,10),r=>r.nick===getNick()&&r.best===best);
+  else el.innerHTML=`<div class="empty">${gState==="ok"?"Nobody has made it in yet. The top spot is yours to take.":gState==="loading"?"Fetching the shift log…":"Can't reach the leaderboard right now. Your runs are under This phone."}</div>`;
+  if($("tv").classList.contains("on")){const tv=$("tvList"),rows=(gState==="ok"&&gRows&&gRows.length)?gRows.slice(0,10):[];
     rows.length?fill(tv,rows,()=>false):tv.innerHTML=`<div class="empty">Waiting for the first intruder.</div>`}
 }
 $("tGlobal").onclick=()=>{lbTab="global";renderLb()};$("tLocal").onclick=()=>{lbTab="local";renderLb()};
 
 /* =============== buttons =============== */
 let backTo="start";
-$("btnPlay").onclick=startRun;$("btnAgain").onclick=startRun;
-const openLb=f=>{backTo=f;lbTab=gState==="off"?"local":"global";renderLb();show("lb")};
+$("btnPlay").onclick=()=>{if(checkPlayer())startRun()};$("btnAgain").onclick=startRun;
+const openLb=f=>{backTo=f;lbTab="global";gState=gRows?"ok":"loading";renderLb();show("lb");loadBoard()};
 $("btnLb1").onclick=()=>openLb("start");$("btnLb2").onclick=()=>openLb("over");
 $("btnInfo").onclick=()=>{backTo="start";show("info")};
 document.querySelectorAll("[data-close]").forEach(b=>b.onclick=()=>{if(ovs.staff.classList.contains("on")){if(location.hash==="#staff")history.replaceState(null,"",location.pathname+location.search);show(state==="over"?"over":"start");return}show(backTo)});
@@ -912,7 +930,7 @@ $("mute").onclick=e=>{e.stopPropagation();muted=!muted;store.set("mute",muted);s
 $("btnShare").onclick=openCard;
 $("unlStay").onclick=()=>{clearInterval(unlTimer);show("over")};
 $("btnCardBack").onclick=()=>show("over");
-$("btnCopyCap").onclick=async()=>{try{await navigator.clipboard.writeText(caption());toast("Caption copied")}catch(e){toast("Copying isn't allowed here")}};
+$("btnCopyCap").onclick=async()=>{window.__ddLog("caption_copy","");try{await navigator.clipboard.writeText(caption());toast("Caption copied")}catch(e){toast("Copying isn't allowed here")}};
 $("btnShareCard").onclick=shareCard;
 $("vBtn").onclick=()=>{const s=verify($("vIn").value),o=$("vOut");o.style.display="block";
   o.innerHTML=s==null?`<h2 style="margin:0 0 4px;color:#b8362a">Not valid</h2>This code wasn't printed by the game. Check it for typos.`
@@ -921,7 +939,7 @@ $("vBtn").onclick=()=>{const s=verify($("vIn").value),o=$("vOut");o.style.displa
 $("vIn").addEventListener("keydown",e=>{if(e.key==="Enter")$("vBtn").click()});
 
 /* =============== hash views =============== */
-function route(){const h=location.hash;$("tv").classList.toggle("on",h==="#board");if(h==="#board")renderLb();
+function route(){const h=location.hash;$("tv").classList.toggle("on",h==="#board");clearInterval(lbTimer);if(h==="#board"){renderLb();loadBoard();lbTimer=setInterval(loadBoard,10000)}
   if(h==="#staff"){show("staff");state="menu";$("hud").classList.remove("on");$("score").classList.remove("on");$("hint").classList.remove("on")}}
 addEventListener("hashchange",route);route();
 })();

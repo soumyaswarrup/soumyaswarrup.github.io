@@ -146,6 +146,18 @@ body.is-locked .locked{display:block}
   addEventListener("scroll",()=>{const h=document.documentElement;prog.style.width=(h.scrollTop/(h.scrollHeight-h.clientHeight)*100)+"%";
     const r=host.getBoundingClientRect();chip.classList.toggle("on",r.top<innerHeight*.5&&r.bottom>innerHeight*.5)},{passive:true});
 
+  // reading analytics (anonymous device id shared with the game)
+  const DEV=get("device");
+  const log=(kind,detail)=>{if(!DEV)return;fetch("https://juemnyijhvqlpxrvsibg.supabase.co/rest/v1/rpc/log_event",{method:"POST",keepalive:true,
+    headers:{"Content-Type":"application/json",apikey:"sb_publishable_LDopq-erBLDteakwk08pOQ_qKnIafQI"},body:JSON.stringify({p_device:DEV,p_kind:kind,p_detail:detail||null})}).catch(()=>{})};
+  log("comic_open",s?("score "+s):"");
+  let maxSeen=0,sent=0;
+  const io2=new IntersectionObserver(es=>{es.forEach(e=>{if(e.isIntersecting){const n=+e.target.dataset.n;if(n>maxSeen)maxSeen=n}})},{threshold:.5});
+  pgs.forEach(p=>io2.observe(p));
+  setInterval(()=>{if(maxSeen>sent&&(maxSeen-sent>=4||maxSeen===N)){sent=maxSeen;log("comic_page","page "+maxSeen)}},3000);
+  addEventListener("pagehide",()=>{if(maxSeen>sent){sent=maxSeen;log("comic_page","page "+maxSeen)}});
+  document.querySelectorAll('a[download]').forEach(a=>a.addEventListener("click",()=>log("pdf_download","")));
+
   // confetti
   if(!matchMedia("(prefers-reduced-motion: reduce)").matches){const hero=document.getElementById("hero"),cols=["#ffd84d","#5ff5d0","#ff6b6b","#fff","#d6a8ff"];
     for(let i=0;i<46;i++){const c=document.createElement("b");c.className="confetti";c.style.left=Math.random()*100+"%";c.style.background=cols[i%cols.length];
