@@ -311,9 +311,10 @@ input::placeholder{color:#5f7068}
       <div class="unl-k">COMIC UNLOCKED</div>
       <div class="unl-t">You crossed <span>10!</span></div>
       <p class="unl-p">Thanks for playing! You scored <b id="unlScore">10</b>, so <b>The Decoy Files #1</b> is yours to read.</p>
-      <p class="unl-c" id="unlCount">Opening your comic in 3...</p>
-      <a class="btn" id="unlGo" href="#">Read the comic now</a>
-      <button class="btn grey" id="unlStay" style="margin-top:12px">Stay and play again</button>
+      <p class="unl-c" id="unlCount">Your comic is ready whenever you are.</p>
+      <a class="btn" id="unlGo" href="#">Read the comic</a>
+      <button class="btn li" id="unlLinkedIn" style="margin-top:12px">Share on LinkedIn</button>
+      <button class="btn grey" id="unlStay" style="margin-top:12px">Back to my results</button>
     </div>
   </div>
 
@@ -573,10 +574,8 @@ let unlTimer=null;
 function comicUnlock(sc){
   const url=COMIC_URL+"?s="+sc;$("unlScore").textContent=sc;const go=$("unlGo");go.href=url;
   if(!ON_PAGES){go.target="_blank";go.rel="noopener"}
+  $("unlCount").textContent="Your comic is ready whenever you are.";
   show("unlock");sfx.level();buzz([40,30,40]);
-  if(!ON_PAGES){$("unlCount").textContent="Tap below to open it.";return}
-  let n=3;$("unlCount").textContent="Opening your comic in "+n+"...";
-  clearInterval(unlTimer);unlTimer=setInterval(()=>{n--;if(n<=0){clearInterval(unlTimer);location.href=url}else $("unlCount").textContent="Opening your comic in "+n+"..."},1000);
 }
 
 /* =============== vouchers =============== */
@@ -862,7 +861,7 @@ async function makeCard(){
   return cv2;
 }
 let cardBlob=null;
-async function prepCard(){try{const cv2=await makeCard();cardBlob=await new Promise(r=>cv2.toBlob(r,"image/png"))}catch(e){cardBlob=null}}
+async function prepCard(){try{const cv2=await makeCard();cardBlob=await new Promise(r=>cv2.toBlob(r,"image/png"));try{sessionStorage.setItem("dd_card",cv2.toDataURL("image/jpeg",0.9));sessionStorage.setItem("dd_caption",caption())}catch(e){}}catch(e){cardBlob=null}}
 async function shareLinkedIn(){
   window.__ddLog("share_card","linkedin score "+score);
   const text=caption();
@@ -976,6 +975,7 @@ $("mute").onclick=e=>{e.stopPropagation();muted=!muted;store.set("mute",muted);s
 $("btnShare").onclick=openCard;
 $("btnLinkedIn").onclick=shareLinkedIn;
 $("unlStay").onclick=()=>{clearInterval(unlTimer);show("over")};
+$("unlLinkedIn").onclick=()=>shareLinkedIn();
 $("btnCardBack").onclick=()=>show("over");
 $("btnCopyCap").onclick=async()=>{window.__ddLog("caption_copy","");try{await navigator.clipboard.writeText(caption());toast("Caption copied")}catch(e){toast("Copying isn't allowed here")}};
 $("btnShareCard").onclick=shareLinkedIn;

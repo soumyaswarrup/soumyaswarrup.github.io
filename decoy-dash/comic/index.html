@@ -39,6 +39,7 @@ body{background:#121018;color:#f4f1ff;font-family:Inter,system-ui,sans-serif;min
 .btn{display:flex;align-items:center;justify-content:center;height:54px;border:3px solid #000;box-shadow:4px 4px 0 #000;font-family:Bangers,sans-serif;font-size:22px;letter-spacing:.05em;text-decoration:none;color:#111;background:#ffd84d;cursor:pointer;transition:transform .06s}
 .btn:active{transform:translate(3px,3px);box-shadow:1px 1px 0 #000}
 .btn.teal{background:#5ff5d0}.btn.full{grid-column:1/-1;background:#ff6b6b;color:#fff;-webkit-text-stroke:.6px #000;font-size:26px}
+.btn.li{grid-column:1/-1;background:#0a66c2;color:#fff;cursor:pointer;width:100%}
 .btn:focus-visible{outline:3px solid #fff;outline-offset:3px}
 
 .voucher{background:#fff;color:#111;border:4px solid #000;box-shadow:6px 6px 0 #000;padding:14px 16px;margin-bottom:26px;display:none}
@@ -96,6 +97,7 @@ body.is-locked .locked{display:block}
       <a class="btn full" href="#read">Start reading</a>
       <a class="btn teal" href="The-Decoy-Files-1.pdf" download>Download PDF</a>
       <a class="btn" href="../">Play again</a>
+      <button class="btn li" id="shareLi" type="button">Share on LinkedIn</button>
     </div>
 
     <div class="voucher" id="voucher">
@@ -131,6 +133,21 @@ body.is-locked .locked{display:block}
   const shown=s||best;
   document.getElementById("scoreRow").innerHTML=`<span>SCORE <b>${shown}</b></span><span>RANK <b>${rank(shown)}</b></span>`;
   document.getElementById("voucher").classList.add("on");
+
+  // share on LinkedIn: card image from the game run if we have it
+  document.getElementById("shareLi").onclick=async()=>{
+    log("share_card","linkedin comic score "+shown);
+    const link="https://soumyaswarrup.github.io/decoy-dash/";
+    let text=null;try{text=sessionStorage.getItem("dd_caption")}catch(e){}
+    if(!text)text=`I scored ${shown} in Decoy Dash and made rank ${rank(shown)}, slipping past the decoys inside an OT plant. Think you can beat me? ${link} #AISS2026 #OTSecurity #Deception @WhizHack`;
+    try{await navigator.clipboard.writeText(text)}catch(e){}
+    let blob=null;try{const d=sessionStorage.getItem("dd_card");if(d)blob=await (await fetch(d)).blob()}catch(e){}
+    const file=blob?new File([blob],"decoy-dash-score.jpg",{type:"image/jpeg"}):null;
+    if(file&&navigator.canShare&&navigator.canShare({files:[file]})){
+      try{await navigator.share({files:[file],text});return}catch(e){if(e&&e.name==="AbortError")return}}
+    if(blob){try{const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="decoy-dash-score.jpg";document.body.appendChild(a);a.click();a.remove()}catch(e){}}
+    window.open("https://www.linkedin.com/feed/?shareActive=true&text="+encodeURIComponent(text),"_blank","noopener");
+  };
 
   // pages
   const host=document.getElementById("pages"),N=16;
