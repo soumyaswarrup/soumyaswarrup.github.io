@@ -5,6 +5,14 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <title>Decoy Dash — WhizHack</title>
 <meta name="theme-color" content="#1b201e">
+<meta name="description" content="Sneak a rogue bot through a power plant network without getting caught by decoys. A WhizHack game about deception in OT security.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Decoy Dash: can you get deeper into the plant?">
+<meta property="og:description" content="Sneak through the plant network. Every easy way in is a trap. Score 10 to unlock the comic.">
+<meta property="og:url" content="https://soumyaswarrup.github.io/decoy-dash/">
+<meta property="og:image" content="https://soumyaswarrup.github.io/decoy-dash/art/og.jpg">
+<meta property="og:image:width" content="1200"><meta property="og:image:height" content="627">
+<meta name="twitter:card" content="summary_large_image">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -65,6 +73,8 @@ input::placeholder{color:#5f7068}
   font-size:22px;font-weight:600;letter-spacing:.03em;color:#fff;background:var(--go);border:3px solid var(--edge);
   box-shadow:inset 0 3px 0 var(--go-hi),inset 0 -5px 0 var(--go-lo),0 5px 0 var(--edge);transform:translateY(0);transition:transform .05s;text-shadow:0 2px 0 var(--go-lo)}
 .btn:active,.btn.down{transform:translateY(4px);box-shadow:inset 0 3px 0 var(--go-hi),inset 0 -5px 0 var(--go-lo),0 1px 0 var(--edge)}
+.btn.li{background:#0a66c2;box-shadow:inset 0 3px 0 #3d8be0,inset 0 -5px 0 #074a8c,0 5px 0 var(--edge);text-shadow:0 2px 0 #074a8c;font-size:19px}
+.btn.li:active{box-shadow:inset 0 3px 0 #3d8be0,inset 0 -5px 0 #074a8c,0 1px 0 var(--edge)}
 .btn.grey{background:var(--grey);color:var(--ink);text-shadow:0 1px 0 var(--grey-hi);box-shadow:inset 0 3px 0 var(--grey-hi),inset 0 -5px 0 var(--grey-lo),0 5px 0 var(--edge);height:46px;font-size:17px}
 .btn.grey:active,.btn.grey.down{box-shadow:inset 0 3px 0 var(--grey-hi),inset 0 -5px 0 var(--grey-lo),0 1px 0 var(--edge)}
 .btn:focus-visible{outline:3px solid var(--warn);outline-offset:3px}
@@ -220,7 +230,7 @@ input::placeholder{color:#5f7068}
         <div class="rule"><div class="well"><canvas id="icoIps"></canvas></div><div><b>Every 5 pipes, a new level</b> adds a trap: moving decoys, striped walls, then red IPS beams.</div></div>
       </div>
       <div class="field"><label for="nick">Your name</label><input id="nick" maxlength="40" placeholder="e.g. Priya Sharma" autocomplete="name"></div>
-      <div class="field"><label for="email">Work email</label><input id="email" type="email" maxlength="120" placeholder="you@company.com" autocomplete="email" inputmode="email"></div>
+      <div class="field"><label for="email">Work email</label><input id="email" type="email" maxlength="120" placeholder="you@yourcompany.com" autocomplete="email" inputmode="email"></div>
       <label class="consent"><input type="checkbox" id="consent"><span>WhizHack can store my name and email to run the game and its leaderboard, and may contact me about it.</span></label>
       <div class="ferr" id="ferr"></div>
       <button class="btn" id="btnPlay">Start</button>
@@ -244,6 +254,7 @@ input::placeholder{color:#5f7068}
     </div>
     <div class="btns">
       <button class="btn" id="btnAgain">Fly again</button>
+      <button class="btn li" id="btnLinkedIn"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><rect width="24" height="24" rx="3" fill="#fff"/><path fill="#0a66c2" d="M6.9 9.3H4.3V19h2.6V9.3zM5.6 8.1a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3zM19.7 13.6c0-2.6-1.4-4.5-4-4.5-1.3 0-2.2.7-2.6 1.4V9.3h-2.5V19h2.6v-5.1c0-1.3.6-2.3 1.9-2.3 1.2 0 1.8.9 1.8 2.3V19h2.6v-5.4z"/></svg>Share on LinkedIn</button>
       <div class="pair" style="margin-top:0"><button class="btn grey" id="btnShare">Score card</button><button class="btn grey" id="btnLb2">Leaderboard</button></div>
     </div>
   </div>
@@ -252,8 +263,8 @@ input::placeholder{color:#5f7068}
   <div class="ov" id="ovLb">
     <div class="paper">
       <div class="ph"><b>Shift log</b><span>AISS 2026</span></div>
-      <h2>Deepest intruders</h2>
-      <div class="tabs"><button class="btn grey" id="tGlobal">Everyone</button><button class="btn grey" id="tLocal">This phone</button></div>
+      <h2>Today's top 5</h2>
+      <div class="tabs"><button class="btn grey" id="tGlobal">Today</button><button class="btn grey" id="tLocal">This phone</button></div>
       <div class="lb" id="lbList"></div>
     </div>
     <button class="btn grey" data-close>Close</button>
@@ -290,7 +301,7 @@ input::placeholder{color:#5f7068}
     <img id="cardImg" alt="Your Decoy Dash score card">
     <p class="cardhint">Press and hold the card to save it, or share it straight from here.</p>
     <div class="btns">
-      <button class="btn" id="btnShareCard">Share card</button>
+      <button class="btn li" id="btnShareCard">Share on LinkedIn</button>
       <div class="pair" style="margin-top:0"><button class="btn grey" id="btnCopyCap">Copy caption</button><button class="btn grey" id="btnCardBack">Back</button></div>
     </div>
   </div>
@@ -310,8 +321,8 @@ input::placeholder{color:#5f7068}
 </div>
 
 <div id="tv">
-  <div class="plate" style="text-align:left;padding:2vh 3vh"><h1>DECOY DASH</h1><div style="font-size:2.6vh">Scan the QR, score 10, collect your comic at the WhizHack booth</div></div>
-  <div class="paper"><div class="ph"><b>Shift log</b><span>Deepest intruders</span></div><div class="lb" id="tvList"></div></div>
+  <div class="plate" style="text-align:left;padding:2vh 3vh"><h1>DECOY DASH</h1><div style="font-size:2.6vh">Today's top 5. Scan the QR, score 10, unlock the comic at the WhizHack booth</div></div>
+  <div class="paper"><div class="ph"><b>Shift log</b><span>Today's top 5</span></div><div class="lb" id="tvList"></div></div>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
@@ -521,7 +532,7 @@ function flap(){ac();if(state==="ready"){state="play";$("hint").classList.remove
   bot.vy=FLAP;bot.flapT=.12;sfx.flap();
   for(let i=0;i<3;i++)parts.push({x:bot.x-4,y:bot.y+6,vx:rnd(-30,-10),vy:rnd(20,50),life:.3,max:.3,col:R()<.5?"#f2a23a":"#ffe08a",k:"px",g:0})}
 stage.addEventListener("pointerdown",e=>{if(e.target.closest(".ov.on,button,input"))return;e.preventDefault();flap()});
-addEventListener("keydown",e=>{if(e.target.tagName==="INPUT"){if(e.key==="Enter"&&state==="menu"&&checkPlayer())startRun();return}
+addEventListener("keydown",e=>{if(e.target.tagName==="INPUT"){if(e.key==="Enter"&&state==="menu"){checkPlayer().then(ok=>{if(ok)startRun()})}return}
   if(e.code==="Space"||e.code==="ArrowUp"||e.code==="KeyW"){e.preventDefault();if(state==="ready"||state==="play")flap();else if(state==="over"&&performance.now()-overAt>700)startRun()}});
 
 /* =============== flow =============== */
@@ -538,7 +549,7 @@ function die(reason,label){
 function finish(){
   state="over";overAt=performance.now();$("hud").classList.remove("on");$("score").classList.remove("on");
   const isBest=score>best;if(isBest){best=score;store.set("best",best)}
-  recordLocal();submitGlobal();
+  recordLocal();submitGlobal();cardBlob=null;setTimeout(prepCard,50);
   const L=LV[runLvMax];
   const C={
     decoy:deathShift?["Caught by a shifting decoy","ZeroHack OT keeps moving its decoys around the network, so an intruder can never build a reliable map of which devices are real."]
@@ -575,10 +586,10 @@ function mkCode(sc){let r="";for(let i=0;i<4;i++)r+=ALPH[(R()*ALPH.length)|0];re
 function verify(code){const m=/^DD-(\d{1,4})-([A-Z0-9]{4})-([A-Z0-9]{2})$/.exec(code.trim().toUpperCase());if(!m)return null;return chk(+m[1],m[2])===m[3]?+m[1]:null}
 function renderStub(){
   const el=$("stub");let c=store.get("code",null);
-  if(best>=UNLOCK){if(!c||c.score<best){c={code:mkCode(best),score:best};store.set("code",c)}
-    el.innerHTML=`<div>Free comic voucher</div><div class="code">${c.code}</div><small>Show this at the WhizHack booth for a printed copy. <a href="${COMIC_URL}" style="color:#1d4f7a;font-weight:600">Read the comic online</a></small>`}
+  if(best>=UNLOCK){
+    el.innerHTML=`<div>Comic unlocked</div><div class="code" style="font-size:24px">The Decoy Files #1</div><small><a href="${COMIC_URL}" style="color:#1d4f7a;font-weight:600">Read it online</a>, or ask at the WhizHack booth for a printed copy.</small>`}
   else{let m="";for(let i=0;i<UNLOCK;i++)m+=`<i class="${i<best?"on":""}"></i>`;
-    el.innerHTML=`<div>Comic voucher: ${best} of ${UNLOCK}</div><div class="meter">${m}</div><small>Score ${UNLOCK} in one run and a voucher prints here.</small>`}
+    el.innerHTML=`<div>Comic unlock: ${best} of ${UNLOCK}</div><div class="meter">${m}</div><small>Score ${UNLOCK} in one run to unlock the comic.</small>`}
 }
 
 /* =============== HUD bits =============== */
@@ -850,6 +861,22 @@ async function makeCard(){
   c.fillText(SHARE_URL?"at the WhizHack booth.":"Score 10 for a free comic.",tx2,1308);
   return cv2;
 }
+let cardBlob=null;
+async function prepCard(){try{const cv2=await makeCard();cardBlob=await new Promise(r=>cv2.toBlob(r,"image/png"))}catch(e){cardBlob=null}}
+async function shareLinkedIn(){
+  window.__ddLog("share_card","linkedin score "+score);
+  const text=caption();
+  try{await navigator.clipboard.writeText(text)}catch(e){}
+  if(!cardBlob)await prepCard();
+  const file=cardBlob?new File([cardBlob],"decoy-dash-score.png",{type:"image/png"}):null;
+  if(file&&navigator.canShare&&navigator.canShare({files:[file]})){
+    toast("Caption copied. Pick LinkedIn, then paste it");
+    try{await navigator.share({files:[file],text});return}catch(e){if(e&&e.name==="AbortError")return}}
+  // desktop: save the card, open the LinkedIn post box with the caption filled in
+  if(cardBlob){try{const a=document.createElement("a");a.href=URL.createObjectURL(cardBlob);a.download="decoy-dash-score.png";document.body.appendChild(a);a.click();a.remove()}catch(e){}}
+  window.open("https://www.linkedin.com/feed/?shareActive=true&text="+encodeURIComponent(text),"_blank","noopener");
+  toast("Card saved. Attach it to your LinkedIn post");
+}
 async function openCard(){const cv2=await makeCard();$("cardImg").src=cv2.toDataURL("image/png");show("card")}
 async function shareCard(){window.__ddLog("share_card","score "+score);
   if(!cardCanvas)await makeCard();
@@ -893,45 +920,65 @@ const EMAIL_RE=/^[^@\s]+@[^@\s]+\.[^@\s]{2,}$/;
 function formError(m){const e=$("ferr");e.textContent=m;e.classList.toggle("on",!!m)}
 let registered=store.get("regKey",null);
 [nickEl,emailEl,consentEl].forEach(el=>el.addEventListener("input",()=>formError("")));
-function checkPlayer(){
+const PERSONAL=new Set(["gmail.com","googlemail.com","yahoo.com","yahoo.co.in","yahoo.in","ymail.com","rocketmail.com","hotmail.com","hotmail.co.in","outlook.com","outlook.in","live.com","live.in","msn.com","icloud.com","me.com","mac.com","aol.com","protonmail.com","proton.me","pm.me","zohomail.com","zohomail.in","gmx.com","gmx.net","mail.com","yandex.com","yandex.ru","mail.ru","rediffmail.com","rediff.com","tutanota.com","tuta.io","fastmail.com","hey.com","qq.com","163.com","126.com","duck.com","indiatimes.com","sify.com"]);
+const TEMP_RE=/(mailinator|yopmail|guerrilla|sharklasers|10minute|20minute|tempmail|temp-mail|tmpmail|throwaway|trashmail|trash-mail|dispostable|maildrop|getnada|fakeinbox|fakemail|burner|spam|discard|mailnesia|mohmal|emailondeck|1secmail|mailsac|dropmail|minuteinbox|mytemp|tempinbox|tempr\.|wegwerf|jetable)/;
+const WORK_MSG={personal:"Please use your work email. Personal addresses like Gmail, Yahoo or Outlook aren't accepted.",temporary:"Temporary or disposable emails aren't accepted. Please use your work email.",invalid:"Please enter a valid work email."};
+function emailKind(em){if(!EMAIL_RE.test(em))return"invalid";const d=em.split("@")[1];if(PERSONAL.has(d))return"personal";if(TEMP_RE.test(d))return"temporary";return"ok"}
+let checking=false;
+async function checkPlayer(){
+  if(checking)return false;
   const n=clean(nickEl.value),em=(emailEl.value||"").trim().toLowerCase();
   if(n.length<2){formError("Please enter your name.");nickEl.focus();return false}
-  if(!EMAIL_RE.test(em)){formError("Please enter a valid work email.");emailEl.focus();return false}
+  const k=emailKind(em);if(k!=="ok"){formError(WORK_MSG[k]);emailEl.focus();return false}
   if(!consentEl.checked){formError("Please tick the box so we can store your details.");return false}
-  formError("");store.set("name",n);store.set("nick",n.split(" ")[0]);store.set("email",em);store.set("consent",true);
-  const key=n+"|"+em;if(registered!==key){registered=key;store.set("regKey",key);queue("register_player",{p_device:DEVICE,p_name:n,p_email:em,p_consent:true})}
+  formError("");
+  const key=n+"|"+em;
+  if(registered!==key){
+    checking=true;const bt=$("btnPlay"),old=bt.textContent;bt.textContent="Checking…";bt.classList.add("down");
+    try{await Promise.race([rpc("register_player",{p_device:DEVICE,p_name:n,p_email:em,p_consent:true}),new Promise((_,r)=>setTimeout(()=>r(new Error("timeout")),6000))]);
+      registered=key;store.set("regKey",key)}
+    catch(e){const m=String(e.message||"");
+      if(/work email/.test(m)){formError(WORK_MSG.personal);return false}
+      if(/temporary/.test(m)){formError(WORK_MSG.temporary);return false}
+      if(/bad email/.test(m)){formError(WORK_MSG.invalid);return false}
+      // network trouble: let them play, retry the registration in the background
+      queue("register_player",{p_device:DEVICE,p_name:n,p_email:em,p_consent:true});}
+    finally{checking=false;bt.textContent=old;bt.classList.remove("down")}
+  }
+  store.set("name",n);store.set("nick",n.split(" ")[0]);store.set("email",em);store.set("consent",true);
   return true}
 
 /* =============== leaderboards =============== */
 function recordLocal(){if(score<=0)return;const L=store.get("local",[]);L.push({nick:getNick(),best:score,lv:runLvMax});L.sort((a,b)=>b.best-a.best);store.set("local",L.slice(0,15))}
 let gRows=null,gState="loading",lbTab="global",lbTimer=null;
-async function loadBoard(){try{const rows=await rpc("leaderboard");gRows=(rows||[]).map(r=>({nick:clean(String(r.name||""))||"Player",best:+r.best_score||0,lv:Math.max(0,Math.min(3,+r.deepest_level||0))}));gState="ok"}catch(e){gState=gRows?"ok":"off"}renderLb()}
+async function loadBoard(){try{const rows=await rpc("leaderboard_today");gRows=(rows||[]).map(r=>({nick:clean(String(r.name||""))||"Player",best:+r.best_score||0,lv:Math.max(0,Math.min(3,+r.deepest_level||0))}));gState="ok"}catch(e){gState=gRows?"ok":"off"}renderLb()}
 function submitGlobal(){queue("submit_run",{p_device:DEVICE,p_score:score,p_level:runLvMax,p_caught_by:deathReason||null}).then(()=>{if(ovs.lb.classList.contains("on")||$("tv").classList.contains("on"))loadBoard()})}
 function fill(el,rows,me){el.innerHTML=rows.map((r,i)=>`<div class="lr${me(r)?" me":""}"><span class="n">${i+1}</span><span class="nm"></span><span class="lv">${LV[r.lv||0].id}</span><span class="sc">${r.best}</span></div>`).join("");
   el.querySelectorAll(".nm").forEach((n,i)=>n.textContent=rows[i].nick)}
 function renderLb(){
   const el=$("lbList");$("tGlobal").classList.toggle("down",lbTab==="global");$("tLocal").classList.toggle("down",lbTab==="local");
   if(lbTab==="local"){const L=store.get("local",[]);L.length?fill(el,L.slice(0,10),()=>false):el.innerHTML=`<div class="empty">No runs on this phone yet. Play one and it gets logged here.</div>`}
-  else if(gState==="ok"&&gRows&&gRows.length)fill(el,gRows.slice(0,10),r=>r.nick===getNick()&&r.best===best);
-  else el.innerHTML=`<div class="empty">${gState==="ok"?"Nobody has made it in yet. The top spot is yours to take.":gState==="loading"?"Fetching the shift log…":"Can't reach the leaderboard right now. Your runs are under This phone."}</div>`;
-  if($("tv").classList.contains("on")){const tv=$("tvList"),rows=(gState==="ok"&&gRows&&gRows.length)?gRows.slice(0,10):[];
+  else if(gState==="ok"&&gRows&&gRows.length)fill(el,gRows.slice(0,5),r=>r.nick===getNick()&&r.best===best);
+  else el.innerHTML=`<div class="empty">${gState==="ok"?"Nobody has played today yet. The top spot is yours to take.":gState==="loading"?"Fetching the shift log…":"Can't reach the leaderboard right now. Your runs are under This phone."}</div>`;
+  if($("tv").classList.contains("on")){const tv=$("tvList"),rows=(gState==="ok"&&gRows&&gRows.length)?gRows.slice(0,5):[];
     rows.length?fill(tv,rows,()=>false):tv.innerHTML=`<div class="empty">Waiting for the first intruder.</div>`}
 }
 $("tGlobal").onclick=()=>{lbTab="global";renderLb()};$("tLocal").onclick=()=>{lbTab="local";renderLb()};
 
 /* =============== buttons =============== */
 let backTo="start";
-$("btnPlay").onclick=()=>{if(checkPlayer())startRun()};$("btnAgain").onclick=startRun;
+$("btnPlay").onclick=async()=>{if(await checkPlayer())startRun()};$("btnAgain").onclick=startRun;
 const openLb=f=>{backTo=f;lbTab="global";gState=gRows?"ok":"loading";renderLb();show("lb");loadBoard()};
 $("btnLb1").onclick=()=>openLb("start");$("btnLb2").onclick=()=>openLb("over");
 $("btnInfo").onclick=()=>{backTo="start";show("info")};
 document.querySelectorAll("[data-close]").forEach(b=>b.onclick=()=>{if(ovs.staff.classList.contains("on")){if(location.hash==="#staff")history.replaceState(null,"",location.pathname+location.search);show(state==="over"?"over":"start");return}show(backTo)});
 $("mute").onclick=e=>{e.stopPropagation();muted=!muted;store.set("mute",muted);setMuteUI()};
 $("btnShare").onclick=openCard;
+$("btnLinkedIn").onclick=shareLinkedIn;
 $("unlStay").onclick=()=>{clearInterval(unlTimer);show("over")};
 $("btnCardBack").onclick=()=>show("over");
 $("btnCopyCap").onclick=async()=>{window.__ddLog("caption_copy","");try{await navigator.clipboard.writeText(caption());toast("Caption copied")}catch(e){toast("Copying isn't allowed here")}};
-$("btnShareCard").onclick=shareCard;
+$("btnShareCard").onclick=shareLinkedIn;
 $("vBtn").onclick=()=>{const s=verify($("vIn").value),o=$("vOut");o.style.display="block";
   o.innerHTML=s==null?`<h2 style="margin:0 0 4px;color:#b8362a">Not valid</h2>This code wasn't printed by the game. Check it for typos.`
    :s<UNLOCK?`<h2 style="margin:0 0 4px">Too low</h2>Real code, but the score is ${s}. Vouchers start at ${UNLOCK}.`

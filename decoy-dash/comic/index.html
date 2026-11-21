@@ -100,8 +100,7 @@ body.is-locked .locked{display:block}
 
     <div class="voucher" id="voucher">
       <div class="t bang">WANT THE PRINTED COPY?</div>
-      <div class="c" id="vcode"></div>
-      <small>Show this code at the WhizHack booth and collect a printed comic, while stocks last.</small>
+      <small style="font-size:16px;color:#222">Ask at the <b>WhizHack booth</b>. We'll hand you one, while stocks last.</small>
     </div>
 
     <div class="readerhead" id="read"><h2 class="bang">THE DECOY FILES #1</h2><span>16 pages, scroll to read</span></div>
@@ -131,7 +130,7 @@ body.is-locked .locked{display:block}
   const rank=v=>v>=30?"Process Ghost":v>=18?"PLC Whisperer":v>=10?"Lateral Mover":v>=5?"Port Scanner":"Script Kiddie";
   const shown=s||best;
   document.getElementById("scoreRow").innerHTML=`<span>SCORE <b>${shown}</b></span><span>RANK <b>${rank(shown)}</b></span>`;
-  const code=get("code"); if(code&&code.code){document.getElementById("vcode").textContent=code.code;document.getElementById("voucher").classList.add("on")}
+  document.getElementById("voucher").classList.add("on");
 
   // pages
   const host=document.getElementById("pages"),N=16;
