@@ -535,6 +535,46 @@ function burst(x,y,n,cols_,spd=80,life=.6){for(let i=0;i<n;i++){const a=R()*6.28
 function pop(x,y,s,col){parts.push({x,y,vx:0,vy:-24,life:.9,max:.9,col,k:"txt",s})}
 
 /* =============== input =============== */
+
+/* =============== music: dark synth loop, built live (no files) =============== */
+const music=(()=>{
+  let bus=null,lp=null,timer=null,step=0,next=0,on=false,intensity=0,bpm=112,nbuf=null;
+  // A minor, "server room" progression: Am  F  C  G
+  const ROOTS=[45,41,48,43];
+  const ARP=[0,12,7,12,3,12,7,15];
+  const LEAD=[[76,null,74,null,72,null,69,null],[77,null,76,null,72,null,null,72],[79,null,76,null,74,72,null,null],[74,null,71,null,67,null,71,74]];
+  const hz=m=>440*Math.pow(2,(m-69)/12);
+  function init(){if(bus||!AC)return;bus=AC.createGain();bus.gain.value=0;lp=AC.createBiquadFilter();lp.type="lowpass";lp.frequency.value=12000;bus.connect(lp);lp.connect(AC.destination);
+    const n=AC.sampleRate*.4|0;nbuf=AC.createBuffer(1,n,AC.sampleRate);const c=nbuf.getChannelData(0);for(let i=0;i<n;i++)c[i]=Math.random()*2-1}
+  function osc(type,f,t,d,vol,cut){const o=AC.createOscillator(),g=AC.createGain();o.type=type;o.frequency.setValueAtTime(f,t);let out=o;
+    if(cut){const fl=AC.createBiquadFilter();fl.type="lowpass";fl.Q.value=6;fl.frequency.setValueAtTime(cut*2.2,t);fl.frequency.exponentialRampToValueAtTime(cut*.5,t+d);o.connect(fl);out=fl}
+    out.connect(g);g.connect(bus);g.gain.setValueAtTime(vol,t);g.gain.exponentialRampToValueAtTime(.0001,t+d);o.start(t);o.stop(t+d+.02)}
+  function kick(t){const o=AC.createOscillator(),g=AC.createGain();o.frequency.setValueAtTime(140,t);o.frequency.exponentialRampToValueAtTime(42,t+.12);g.gain.setValueAtTime(.55,t);g.gain.exponentialRampToValueAtTime(.001,t+.22);o.connect(g);g.connect(bus);o.start(t);o.stop(t+.25)}
+  function nz(t,d,vol,hp){const s=AC.createBufferSource(),f=AC.createBiquadFilter(),g=AC.createGain();s.buffer=nbuf;f.type="highpass";f.frequency.value=hp;g.gain.setValueAtTime(vol,t);g.gain.exponentialRampToValueAtTime(.001,t+d);s.connect(f);f.connect(g);g.connect(bus);s.start(t);s.stop(t+d+.02)}
+  function play16(i,t){const bar=Math.floor(i/16)%4,s16=i%16,root=ROOTS[bar],dur=60/bpm/4;
+    if(intensity<0){ // menu / results: slow drone with data blips
+      if(s16===0)osc("sawtooth",hz(root-12),t,dur*16,.06,300);
+      if(s16%4===2&&Math.random()<.55)osc("square",hz(root+24+ARP[(i>>2)%8]),t,.07,.025);
+      return}
+    if(s16%4===0)kick(t);
+    nz(t,s16%2?.03:.05,s16%4===2?.09:.04,7000);
+    osc("sawtooth",hz(root-12+(s16%8===6?12:0)),t,dur*.9,.16,220+intensity*60);
+    if(intensity>=1)osc("square",hz(root+12+ARP[s16%8]),t,dur*.8,.035,1800);
+    if(intensity>=2&&(s16===4||s16===12))nz(t,.14,.22,1500);
+    if(intensity>=3){const n=LEAD[bar][s16>>1];if(s16%2===0&&n)osc("triangle",hz(n),t,dur*1.8,.07)}
+  }
+  function tick(){if(!AC||!on)return;while(next<AC.currentTime+.12){play16(step,next);next+=60/bpm/4;step++}}
+  function fade(v,sec){if(!bus)return;const t=AC.currentTime;bus.gain.cancelScheduledValues(t);bus.gain.setValueAtTime(bus.gain.value,t);bus.gain.linearRampToValueAtTime(v,t+sec)}
+  function start(){if(!AC||muted)return;init();if(!on){on=true;step=0;next=AC.currentTime+.05;timer=setInterval(tick,25)}fade(.5,.4)}
+  function stop(){if(!on)return;fade(0,.3);setTimeout(()=>{if(bus&&bus.gain.value<.01){on=false;clearInterval(timer)}},400)}
+  return{
+    game(){intensity=0;bpm=112;if(lp)lp.frequency.setTargetAtTime(12000,AC.currentTime,.05);start()},
+    level(st){intensity=Math.min(3,st);bpm=Math.min(140,112+st*7)},
+    calm(){intensity=-1;bpm=96;if(lp&&AC)lp.frequency.setTargetAtTime(1400,AC.currentTime,.3);start()},
+    stop,
+    sync(){if(muted||document.hidden)stop();else if(state==="play"||state==="ready")this.game()}
+  };
+})();
 function flap(){ac();if(state==="ready"){state="play";$("hint").classList.remove("on");$("coach").classList.remove("on")}if(state!=="play")return;
   bot.vy=FLAP;bot.flapT=.12;sfx.flap();
   for(let i=0;i<3;i++)parts.push({x:bot.x-4,y:bot.y+6,vx:rnd(-30,-10),vy:rnd(20,50),life:.3,max:.3,col:R()<.5?"#f2a23a":"#ffe08a",k:"px",g:0})}
@@ -546,7 +586,7 @@ addEventListener("keydown",e=>{if(e.target.tagName==="INPUT"){if(e.key==="Enter"
 const ovs={start:$("ovStart"),over:$("ovOver"),lb:$("ovLb"),info:$("ovInfo"),staff:$("ovStaff"),card:$("ovCard"),unlock:$("ovUnlock")};
 let overAt=0;
 function show(n){for(const k in ovs)ovs[k].classList.toggle("on",k===n)}
-function startRun(){ac();saveNick();reset();state="ready";show(null);$("hud").classList.add("on");$("score").classList.add("on");$("hint").classList.add("on");$("coach").classList.add("on")}
+function startRun(){ac();music.game();saveNick();reset();state="ready";show(null);$("hud").classList.add("on");$("score").classList.add("on");$("hint").classList.add("on");$("coach").classList.add("on")}
 function die(reason,label){
   if(state!=="play")return;state="dying";deathReason=reason;deathLabel=label||"";dieT=0;bot.alive=false;hideTip();
   if(reason==="ips"){flashCol="#ff4a3a"}
@@ -554,7 +594,7 @@ function die(reason,label){
   else{sfx.crash();buzz(120);flash=.45;if(reason!=="ips")flashCol="#ffffff";shake=.3;burst(bot.x,bot.y,22,["#f2a23a","#ffe08a","#aab3c8","#474e63"],120,.7);bot.vy=Math.min(bot.vy,-120)}
 }
 function finish(){
-  state="over";overAt=performance.now();$("hud").classList.remove("on");$("score").classList.remove("on");
+  state="over";music.calm();overAt=performance.now();$("hud").classList.remove("on");$("score").classList.remove("on");
   const isBest=score>best;if(isBest){best=score;store.set("best",best)}
   recordLocal();submitGlobal();cardBlob=null;setTimeout(prepCard,50);
   const L=LV[runLvMax];
@@ -609,7 +649,7 @@ const LV_TIPS=[null,
  "<b>New: moving decoys.</b> The device gaps now slide up and down. Still avoid them.",
  "<b>New: segment walls.</b> A striped bar splits the gap. Fly above or below it.",
  "<b>New: IPS beams.</b> Red beams switch on and off. Pass when the beam is off."];
-function enterLevel(z,st){if(st>=1&&st<=3)setTimeout(()=>{if(state==="play")showTip(LV_TIPS[st],"warn",3200)},450);
+function enterLevel(z,st){music.level(st);if(st>=1&&st<=3)setTimeout(()=>{if(state==="play")showTip(LV_TIPS[st],"warn",3200)},450);
   const lap=Math.floor(st/4)+1;const b=$("banner");$("bannerText").textContent=LV[z].id+" "+LV[z].name+(lap>1?"  (lap "+lap+")":"");b.classList.remove("go");void b.offsetWidth;b.classList.add("go");sfx.level();flash=.2;flashCol="#ffffff"}
 
 /* =============== update =============== */
@@ -904,7 +944,7 @@ async function shareCard(){window.__ddLog("share_card","score "+score);
 /* =============== loop =============== */
 let last=performance.now(),acc=0,paused=false;
 function frame(now){const dt=Math.min(.05,(now-last)/1000);last=now;if(!paused){acc+=dt;while(acc>=STEP){update(STEP);acc-=STEP}}render();requestAnimationFrame(frame)}
-document.addEventListener("visibilitychange",()=>{paused=document.hidden;last=performance.now()});
+document.addEventListener("visibilitychange",()=>{paused=document.hidden;last=performance.now();if(document.hidden)music.stop();else if(state!=="menu"&&!muted)(state==="over"?music.calm():music.game())});
 requestAnimationFrame(frame);
 
 /* =============== start-screen icons =============== */
@@ -985,7 +1025,7 @@ const openLb=f=>{backTo=f;lbTab="global";gState=gRows?"ok":"loading";renderLb();
 $("btnLb1").onclick=()=>openLb("start");$("btnLb2").onclick=()=>openLb("over");
 $("btnInfo").onclick=()=>{backTo="start";show("info")};
 document.querySelectorAll("[data-close]").forEach(b=>b.onclick=()=>{if(ovs.staff.classList.contains("on")){if(location.hash==="#staff")history.replaceState(null,"",location.pathname+location.search);show(state==="over"?"over":"start");return}show(backTo)});
-$("mute").onclick=e=>{e.stopPropagation();muted=!muted;store.set("mute",muted);setMuteUI()};
+$("mute").onclick=e=>{e.stopPropagation();ac();muted=!muted;store.set("mute",muted);setMuteUI();if(muted)music.stop();else if(state==="over")music.calm();else if(state==="play"||state==="ready")music.game()};
 $("btnShare").onclick=openCard;
 $("btnLinkedIn").onclick=shareLinkedIn;
 $("unlStay").onclick=()=>{clearInterval(unlTimer);show("over")};
