@@ -3,201 +3,90 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Soumya Swarup Sahoo — cybersecurity, games and comics</title>
-<meta name="description" content="Soumya Swarup Sahoo: Associate Product Specialist in cybersecurity at WhizHack. Browser games and comics that explain security, plus OpenSec Weekly and FlowType.">
+<title>Soumya Swarup Sahoo — cybersecurity GTM, pre-sales and product</title>
+<meta name="description" content="Soumya Swarup Sahoo: Associate Product Specialist in cybersecurity at WhizHack. GTM messaging, product documentation, tender compliance and proposals. Writes OpenSec Weekly.">
 <meta name="theme-color" content="#0d0c14">
 <meta property="og:title" content="Soumya Swarup Sahoo">
-<meta property="og:description" content="Cybersecurity product work, plus games and comics that make security stick.">
+<meta property="og:description" content="Cybersecurity GTM, pre-sales and product, plus games and comics that make security stick.">
 <meta property="og:url" content="https://soumyaswarrup.github.io/">
 <meta property="og:image" content="https://soumyaswarrup.github.io/decoy-dash/art/og.jpg">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bangers&family=Inter:wght@400;500;600;700&family=Pixelify+Sans:wght@500;700&display=swap" rel="stylesheet">
-<style>
-*{box-sizing:border-box;margin:0;padding:0}
-html{scroll-behavior:smooth}
-body{background:#0d0c14;color:#f1effa;font-family:Inter,system-ui,sans-serif;line-height:1.5;
-  background-image:radial-gradient(rgba(255,255,255,.05) 1px,transparent 1.4px);background-size:10px 10px}
-a{color:inherit}
-.wrap{max-width:980px;margin:0 auto;padding:max(20px,env(safe-area-inset-top)) 18px 50px}
-.bang{font-family:Bangers,Impact,sans-serif;letter-spacing:.04em;font-weight:400}
-.px{font-family:"Pixelify Sans",monospace;font-variant-ligatures:none}
-
-nav{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:22px}
-nav .me{font-size:22px}
-nav .links{display:flex;gap:14px;font-size:14.5px;font-weight:600}
-nav .links a{text-decoration:none;color:#c9c4e6}
-nav .links a:hover{color:#ffd84d}
-
-.hero{position:relative;border:4px solid #000;background:#5b4bd6;box-shadow:8px 8px 0 #000;padding:34px 26px 28px;overflow:hidden}
-.hero::before{content:"";position:absolute;inset:-60%;background:repeating-conic-gradient(rgba(255,255,255,.08) 0 9deg,transparent 9deg 18deg);animation:spin 50s linear infinite}
-@keyframes spin{to{transform:rotate(360deg)}}
-.hero>*{position:relative}
-.tag{display:inline-block;background:#ffd84d;color:#111;border:3px solid #000;padding:3px 12px;font-size:17px;box-shadow:3px 3px 0 #000;transform:rotate(-1.5deg)}
-.hero h1{font-size:clamp(46px,9vw,88px);line-height:.92;margin:16px 0 12px;color:#fff;-webkit-text-stroke:3px #000;paint-order:stroke fill;text-shadow:5px 5px 0 #000}
-.hero h1 em{font-style:normal;color:#5ff5d0}
-.hero p{font-size:18px;max-width:640px;color:#fff;font-weight:500}
-.hero p b{color:#ffd84d;font-weight:700}
-.cta{display:flex;flex-wrap:wrap;gap:12px;margin-top:22px}
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:50px;padding:0 20px;border:3px solid #000;box-shadow:4px 4px 0 #000;font-family:Bangers,sans-serif;font-size:21px;letter-spacing:.05em;text-decoration:none;color:#111;background:#ffd84d;transition:transform .06s}
-.btn:active{transform:translate(3px,3px);box-shadow:1px 1px 0 #000}
-.btn.li{background:#0a66c2;color:#fff}.btn.gh{background:#fff}.btn.teal{background:#5ff5d0}.btn.red{background:#ff6b6b;color:#fff;-webkit-text-stroke:.5px #000}
-.btn:focus-visible{outline:3px solid #fff;outline-offset:3px}
-
-section{margin-top:46px}
-.sh{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-bottom:16px;flex-wrap:wrap}
-.sh h2{font-size:40px;color:#ffd84d;-webkit-text-stroke:1.5px #000;paint-order:stroke fill;text-shadow:3px 3px 0 #000}
-.sh span{color:#a9a3c7;font-size:15px}
-
-.games{display:grid;grid-template-columns:1fr 1fr;gap:22px}
-.game{border:4px solid #000;box-shadow:8px 8px 0 #000;background:#1b1928;display:flex;flex-direction:column}
-.shot{position:relative;aspect-ratio:16/9;overflow:hidden;border-bottom:4px solid #000;background:#111}
-.shot img{width:100%;height:100%;object-fit:cover;display:block}
-.shot .badge{position:absolute;left:10px;top:10px;background:#000;color:#fff;font-size:15px;padding:3px 10px}
-.game .body{padding:18px 18px 20px;display:flex;flex-direction:column;gap:10px;flex:1}
-.game h3{font-size:34px;line-height:1}
-.game.dd h3{color:#63d6b4}.game.mr h3{color:#8f8fff}
-.game .for{font-size:13.5px;color:#a9a3c7;font-weight:600;text-transform:uppercase;letter-spacing:.06em}
-.game p{font-size:15.5px;color:#dcd8ef}
-.chips{display:flex;flex-wrap:wrap;gap:6px}
-.chips i{font-style:normal;font-size:12.5px;font-weight:600;background:#2a2740;border:2px solid #000;padding:2px 8px;color:#e9e6ff}
-.game .row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:auto;padding-top:6px}
-.game .row .btn{width:100%;padding:0 10px}
-.game.dd .play{background:#3f9a4e;color:#fff}.game.mr .play{background:#6363f1;color:#fff}
-.comic{display:flex;gap:12px;align-items:center;background:#0f0e18;border:3px solid #000;padding:10px;text-decoration:none}
-.comic img{width:58px;height:84px;object-fit:cover;border:2px solid #000;flex:0 0 auto}
-.comic b{display:block;font-family:Bangers,sans-serif;font-weight:400;font-size:21px;letter-spacing:.04em;color:#ffd84d;line-height:1}
-.comic small{font-size:13px;color:#a9a3c7}
-
-.how{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
-.step{background:#1b1928;border:3px solid #000;box-shadow:5px 5px 0 #000;padding:16px}
-.step .n{font-size:30px;color:#ff6b6b}
-.step h4{font-size:17px;margin:2px 0 6px}
-.step p{font-size:14.5px;color:#cfcae6}
-
-.work{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
-.card{background:#f4efe0;color:#1d1a24;border:4px solid #000;box-shadow:6px 6px 0 #000;padding:18px}
-.card h3{font-size:26px;line-height:1.05;margin-bottom:6px}
-.card p{font-size:14.5px}
-.card a{font-weight:700;color:#3c2fb3}
-
-.about{display:grid;grid-template-columns:1.2fr 1fr;gap:22px;align-items:start}
-.about .text p{font-size:16.5px;color:#dcd8ef;margin-bottom:12px}
-.about .text b{color:#fff}
-.skills{background:#1b1928;border:3px solid #000;box-shadow:5px 5px 0 #000;padding:16px}
-.skills h4{font-size:24px;color:#5ff5d0;margin-bottom:8px}
-.skills ul{list-style:none;display:grid;gap:8px}
-.skills li{font-size:14.5px;padding-left:18px;position:relative;color:#e2def5}
-.skills li::before{content:"";position:absolute;left:0;top:7px;width:9px;height:9px;background:#ffd84d;border:2px solid #000}
-
-.contact{text-align:center;border:4px solid #000;background:#ffd84d;color:#111;box-shadow:8px 8px 0 #000;padding:28px 18px}
-.contact h2{font-size:44px}
-.contact p{font-size:16.5px;max-width:520px;margin:6px auto 18px}
-.contact .cta{justify-content:center}
-footer{margin-top:30px;text-align:center;font-size:13px;color:#8d87a3}
-
-@media (max-width:760px){
-  .games,.how,.work,.about{grid-template-columns:1fr}
-  nav .links{display:none}
-  .hero{padding:26px 18px 22px}.hero p{font-size:16.5px}
-}
-@media (prefers-reduced-motion:reduce){.hero::before{animation:none}}
-</style>
+<link rel="stylesheet" href="/site.css">
 </head>
 <body>
 <div class="wrap">
-  <nav>
-    <div class="me bang">SOUMYA SWARUP SAHOO</div>
-    <div class="links"><a href="#games">Games</a><a href="#work">Work</a><a href="#about">About</a><a href="#contact">Contact</a></div>
+  <nav style="flex-wrap:wrap">
+    <a class="me bang" href="/" style="text-decoration:none">SOUMYA SWARUP SAHOO</a>
+    <div class="links"><a class="on" href="/">Home</a><a href="/games/">Games</a><a href="https://www.linkedin.com/newsletters/opensec-weekly-7224090788576555011/" target="_blank" rel="noopener">Newsletter</a><a href="#contact">Contact</a></div>
   </nav>
 
   <header class="hero">
-    <span class="tag bang">CYBERSECURITY · PRODUCT · STORYTELLING</span>
+    <span class="tag bang">CYBERSECURITY · GTM · PRE-SALES</span>
     <h1 class="bang">I MAKE SECURITY <em>STICK.</em></h1>
-    <p>I'm Soumya, an <b>Associate Product Specialist</b> in cybersecurity at <b>WhizHack Technologies</b>. I turn complex security products into things people actually remember: go-to-market messaging, product docs and tender responses, and lately, <b>browser games and comics</b> that teach security in 60 seconds.</p>
+    <p>I'm Soumya, an <b>Associate Product Specialist</b> in cybersecurity at <b>WhizHack Technologies</b>. I sit where security products meet the people who buy them: go-to-market messaging, product documentation, tender compliance and proposals. I also write <b>OpenSec Weekly</b>, an independent security newsletter.</p>
     <div class="cta">
-      <a class="btn red" href="#games">Play the games</a>
       <a class="btn li" href="https://www.linkedin.com/in/soumyaswarrup/" target="_blank" rel="noopener">LinkedIn</a>
+      <a class="btn teal" href="https://www.linkedin.com/newsletters/opensec-weekly-7224090788576555011/" target="_blank" rel="noopener">Read OpenSec Weekly</a>
       <a class="btn gh" href="https://github.com/soumyaswarrup" target="_blank" rel="noopener">GitHub</a>
     </div>
   </header>
 
-  <section id="games">
-    <div class="sh"><h2 class="bang">THE GAMES</h2><span>Tap to fly. Built for phones. Score 10 to unlock the comic.</span></div>
-    <div class="games">
-      <article class="game dd">
-        <div class="shot"><img src="decoy-dash/art/og.jpg" alt="Decoy Dash game artwork" loading="lazy"><span class="badge px">OT SECURITY</span></div>
-        <div class="body">
-          <div class="for">WhizHack · AISS 2026 booth</div>
-          <h3 class="bang">DECOY DASH</h3>
-          <p>Fly a rogue bot through a power plant's network. Every easy way in is a trap: decoy PLCs, fake credentials, shifting sensors, segment walls and inline IPS beams. A game about deception in OT security.</p>
-          <div class="chips"><i>Deception</i><i>Honeytokens</i><i>Micro-segmentation</i><i>Inline IPS</i></div>
-          <a class="comic" href="decoy-dash/comic/"><img src="decoy-dash/comic/pages/page-01.jpg" alt="" loading="lazy"><span><b>THE DECOY FILES #1</b><small>16-page comic, unlocked in the game</small></span></a>
-          <div class="row"><a class="btn play" href="decoy-dash/">Play</a><a class="btn" href="decoy-dash/#board">Leaderboard</a></div>
-        </div>
-      </article>
+  <div class="facts">
+    <div class="fact"><b>2–3 YEARS</b><span>in cybersecurity product, GTM and pre-sales</span></div>
+    <div class="fact"><b>OPENSEC</b><span>independent weekly security newsletter on LinkedIn</span></div>
+    <div class="fact"><b>7 FRAMEWORKS</b><span>MITRE ATT&amp;CK, IEC 62443, ISO 27001, DPDPA and more</span></div>
+    <div class="fact"><b>GOV + ENT</b><span>tender responses for government and enterprise buyers</span></div>
+  </div>
 
-      <article class="game mr">
-        <div class="shot"><img src="merge-rush/comic/pages/page-01.jpg" alt="Checkmate comic cover from Merge Rush" loading="lazy" style="object-position:50% 22%"><span class="badge px">APPSEC</span></div>
-        <div class="body">
-          <div class="for">Inspired by CodeAnt AI</div>
-          <h3 class="bang">MERGE RUSH</h3>
-          <p>Fly Ant and your pull request to production. Dodge bugs, moving vulnerabilities, IaC misconfigurations and quality gates, and skip the vulnerable packages. A game about AI code review.</p>
-          <div class="chips"><i>AI code review</i><i>SAST</i><i>SCA</i><i>IaC scanning</i></div>
-          <a class="comic" href="merge-rush/comic/"><img src="merge-rush/comic/pages/page-01.jpg" alt="" loading="lazy"><span><b>CHECKMATE #1</b><small>46-page comic, unlocked in the game</small></span></a>
-          <div class="row"><a class="btn play" href="merge-rush/">Play</a><a class="btn" href="merge-rush/#board">Leaderboard</a></div>
-        </div>
-      </article>
+  <section id="what">
+    <div class="sh"><h2 class="bang">WHAT I DO</h2></div>
+    <div class="xp">
+      <div class="step"><div class="n bang">GTM MESSAGING</div><h4>Positioning security products</h4><p>Turning platform capabilities into messaging, explainers and campaign copy that buyers actually understand.</p></div>
+      <div class="step"><div class="n bang">PRE-SALES DOCS</div><h4>Tenders and proposals</h4><p>Compliance matrices, scope-of-work extraction, pre-bid clarifications and proposal writing for government and enterprise tenders.</p></div>
+      <div class="step"><div class="n bang">PRODUCT DOCS</div><h4>Documentation</h4><p>Product documentation and solution notes, including research proposals for EDR and honeypot solutions.</p></div>
+      <div class="step"><div class="n bang">CONTENT</div><h4>Security writing</h4><p>OpenSec Weekly, plus company newsletter pieces like a Swiss Cheese Model take on ransomware defence.</p></div>
+      <div class="step"><div class="n bang">FOUNDER'S OFFICE</div><h4>Founder-adjacent work</h4><p>Cross-functional work with leadership, including business development research across Southeast Asia and the Middle East.</p></div>
+      <div class="step"><div class="n bang">EXPERIENCES</div><h4>Games, comics and CTFs</h4><p>Booth games with unlockable comics, and a GRC-themed CTF challenge (ProboCTF) built for Probo.</p></div>
     </div>
   </section>
 
-  <section>
-    <div class="sh"><h2 class="bang">HOW THEY WORK AT A BOOTH</h2></div>
-    <div class="how">
-      <div class="step"><div class="n bang">1. SCAN</div><h4>A QR on the stand</h4><p>Visitors play on their own phone in 30 to 60 seconds. No app, no install.</p></div>
-      <div class="step"><div class="n bang">2. LEARN</div><h4>Every obstacle is a real feature</h4><p>Each run ends by explaining which product capability caught you, so the pitch lands while they're having fun.</p></div>
-      <div class="step"><div class="n bang">3. UNLOCK</div><h4>A comic as the reward</h4><p>Score 10 to unlock the comic. Players sign up with a work email, which gives the team qualified leads and a live leaderboard for the big screen.</p></div>
+  <section id="stack">
+    <div class="sh"><h2 class="bang">WHAT I WORK WITH</h2></div>
+    <div class="two">
+      <div class="box">
+        <h4 class="bang">PRODUCTS</h4>
+        <p>The ZeroHack platform at WhizHack, presented as one unified platform, and WhizRange, WhizHack's cyber range for hands-on training.</p>
+        <div class="pills"><i>SIEM</i><i>SOAR</i><i>UEBA</i><i>NIDS / NBAD</i><i>EDR</i><i>Deception</i><i>OT security</i><i>Cyber range</i></div>
+      </div>
+      <div class="box">
+        <h4 class="bang">FRAMEWORKS &amp; STANDARDS</h4>
+        <p>The frameworks and regulations behind the compliance matrices and the messaging.</p>
+        <div class="pills y"><i>MITRE ATT&amp;CK</i><i>IEC 62443</i><i>ISO 27001</i><i>CERT-In</i><i>DPDPA</i><i>SOC 2</i><i>PCI DSS</i></div>
+      </div>
     </div>
   </section>
 
   <section id="work">
-    <div class="sh"><h2 class="bang">OTHER THINGS I BUILD</h2></div>
+    <div class="sh"><h2 class="bang">PROJECTS</h2></div>
     <div class="work">
       <div class="card"><h3 class="bang">OPENSEC WEEKLY</h3><p>A cybersecurity newsletter I run independently, read by a substantial community of subscribers. <a href="https://www.linkedin.com/newsletters/opensec-weekly-7224090788576555011/" target="_blank" rel="noopener">Subscribe on LinkedIn</a></p></div>
       <div class="card"><h3 class="bang">FLOWTYPE</h3><p>An open-source voice dictation app for Windows, macOS and Linux, in the spirit of Wispr Flow. <a href="https://github.com/soumyaswarrup/FlowType" target="_blank" rel="noopener">View on GitHub</a></p></div>
-      <div class="card"><h3 class="bang">TENDERS &amp; PROPOSALS</h3><p>Compliance matrices, scope-of-work extractions and proposals for government and enterprise cybersecurity tenders.</p></div>
+      <div class="card"><h3 class="bang">PROBOCTF</h3><p>A GRC-themed capture-the-flag challenge built for Probo, turning compliance into something people solve, not skim.</p></div>
     </div>
   </section>
 
-  <section id="about">
-    <div class="sh"><h2 class="bang">ABOUT</h2></div>
-    <div class="about">
-      <div class="text">
-        <p>I've spent the last few years since graduating in 2023 at the meeting point of <b>security products and the people who buy them</b>. At WhizHack my work spans GTM messaging, product documentation, compliance matrices for tenders, proposal writing and founder-adjacent work.</p>
-        <p>The games and comics come from one belief: <b>people remember stories, not spec sheets.</b> If someone gets caught by a decoy in a game, they understand deception technology better than any datasheet could teach them.</p>
-      </div>
-      <div class="skills">
-        <h4 class="bang">WHAT I DO</h4>
-        <ul>
-          <li>Go-to-market messaging for security products</li>
-          <li>Product documentation and explainers</li>
-          <li>Tender compliance and proposal writing</li>
-          <li>Interactive booth experiences: games and comics</li>
-          <li>Security writing (<a href="https://www.linkedin.com/newsletters/opensec-weekly-7224090788576555011/" target="_blank" rel="noopener" style="color:#ffd84d">OpenSec Weekly</a>)</li>
-        </ul>
-      </div>
-    </div>
-  </section>
 
   <section id="contact">
     <div class="contact">
       <h2 class="bang">LET'S TALK</h2>
-      <p>Want a game or comic for your product or event, or just want to talk security? Find me on LinkedIn.</p>
-      <div class="cta"><a class="btn li" href="https://www.linkedin.com/in/soumyaswarrup/" target="_blank" rel="noopener">Connect on LinkedIn</a><a class="btn gh" href="https://github.com/soumyaswarrup" target="_blank" rel="noopener">GitHub</a></div>
+      <p>Security GTM, pre-sales, tenders, or a game or comic for your product or event. The fastest way to reach me is LinkedIn.</p>
+      <div class="cta"><a class="btn li" href="https://www.linkedin.com/in/soumyaswarrup/" target="_blank" rel="noopener">Connect on LinkedIn</a><a class="btn teal" href="https://www.linkedin.com/newsletters/opensec-weekly-7224090788576555011/" target="_blank" rel="noopener">OpenSec Weekly</a><a class="btn gh" href="https://github.com/soumyaswarrup" target="_blank" rel="noopener">GitHub</a></div>
     </div>
   </section>
 
-  <footer>© 2026 Soumya Swarup Sahoo. Merge Rush and Checkmate are independent fan work inspired by CodeAnt AI, not official CodeAnt AI publications.</footer>
+  <footer>© 2026 Soumya Swarup Sahoo</footer>
 </div>
 </body>
 </html>
