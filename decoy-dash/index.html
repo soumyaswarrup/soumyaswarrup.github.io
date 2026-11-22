@@ -27,7 +27,7 @@
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;height:100%;overflow:hidden;overscroll-behavior:none}
-body{font-family:"Pixelify Sans",monospace;color:#f1f3ec;display:flex;justify-content:center;align-items:center;
+body{font-family:"Pixelify Sans",monospace;font-variant-ligatures:none;font-feature-settings:"liga" 0,"clig" 0;color:#f1f3ec;display:flex;justify-content:center;align-items:center;
   background-color:#1b201e;
   background-image:linear-gradient(rgba(255,255,255,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.025) 1px,transparent 1px);
   background-size:8px 8px}
@@ -121,7 +121,7 @@ input::placeholder{color:#5f7068}
 #tip b{font-weight:700}
 
 /* ---------- overlays ---------- */
-.ov{position:absolute;inset:0;display:none;flex-direction:column;justify-content:center;padding:calc(var(--sat) + 16px) 14px calc(var(--sab) + 16px);background:rgba(10,12,22,.55);overflow-y:auto}
+.ov{position:absolute;inset:0;display:none;flex-direction:column;justify-content:safe center;padding:calc(var(--sat) + 16px) 14px calc(var(--sab) + 16px);background:rgba(10,12,22,.55);overflow-y:auto}
 .ov.on{display:flex}
 .ov > *{flex:0 0 auto}
 
@@ -137,7 +137,7 @@ input::placeholder{color:#5f7068}
 .kv[hidden]{display:none}.kv{display:flex;justify-content:space-between;border-top:2px dotted var(--paper-line);padding:5px 0;font-size:16px}
 .kv span:last-child{font-weight:600}
 .lesson{border-top:2px dotted var(--paper-line);padding-top:8px;margin-top:2px;font-size:15.5px}
-.best{display:inline-block;background:var(--ink);color:var(--paper);padding:1px 6px;font-size:13px;margin-left:6px;vertical-align:2px}
+.best[hidden]{display:none}.best{display:inline-block;background:var(--ink);color:var(--paper);padding:1px 6px;font-size:13px;margin-left:6px;vertical-align:2px}
 .stub{margin-top:12px;border-top:3px dashed #8e8670;padding-top:10px;position:relative}
 .stub::before{content:"✂";position:absolute;top:-14px;left:-2px;background:var(--paper);padding:0 3px;font-size:16px;color:#8e8670}
 .stub .code{font-size:30px;font-weight:700;letter-spacing:.04em;margin:2px 0;color:#1b1813}
@@ -874,7 +874,7 @@ async function makeCard(){
   lv=lvSave;ctx=saved.ctx;W=saved.W;scroll=saved.scroll;S=saved.S;
   if(CARD_BG)c.drawImage(CARD_BG,0,0,CW,CH);else c.drawImage(lo,0,0,LW*4,LH*4);
   if(CARD_BG){c.fillStyle="rgba(10,10,30,.18)";c.fillRect(0,0,CW,CH)}
-  const font=(w,sz)=>c.font=`${w} ${sz}px "Pixelify Sans", monospace`;
+  const font=(w,sz)=>c.font=`${w} ${sz}px "Pixelify Sans", monospace`;try{c.fontVariantLigatures="none"}catch(e){}
   const R_=(col,x,y,w,h)=>{c.fillStyle=col;c.fillRect(x,y,w,h)};
   // header
   c.save();c.translate(72,60);c.rotate(-.025);font(500,30);const head="I played Decoy Dash at AISS 2026",hw=c.measureText(head).width+40;
