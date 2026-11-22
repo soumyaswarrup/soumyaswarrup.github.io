@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover,interactive-widget=resizes-visual">
 <title>Merge Rush — a CodeAnt AI game</title>
-<meta name="theme-color" content="#1b201e">
+<meta name="theme-color" content="#0a0a0a">
 <meta name="description" content="Fly your pull request to production without getting flagged. A game about CodeAnt AI code review, SAST, secret scanning and quality gates.">
 <meta property="og:type" content="website">
 <meta property="og:title" content="Merge Rush: can your PR make it to production?">
@@ -16,17 +16,17 @@
 <link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 :root{
-  --panel:#4b4a7a; --panel-hi:#7472b0; --panel-lo:#2f2e55; --edge:#141226;
+  --panel:#3f3fb8; --panel-hi:#6363f1; --panel-lo:#2a2a80; --edge:#0a0a0a;
   --steel:#c9ccc4; --ink:#29251f; --paper:#ece6d3; --paper-line:#bdb59c;
-  --go:#3f9a4e; --go-hi:#74c47f; --go-lo:#225a2c;
+  --go:#1f8a4c; --go-hi:#4cc07c; --go-lo:#11552d;
   --grey:#b8bdb4; --grey-hi:#e3e6de; --grey-lo:#868b83;
-  --warn:#e8b92e; --red:#b8362a; --lamp:#ff6b8b;
+  --warn:#e8b92e; --red:#b8362a; --lamp:#ff6b6b;
   --sat:env(safe-area-inset-top,0px); --sab:env(safe-area-inset-bottom,0px);
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;height:100%;overflow:hidden;overscroll-behavior:none}
 body{font-family:"Pixelify Sans",monospace;font-variant-ligatures:none;font-feature-settings:"liga" 0,"clig" 0;color:#f1f3ec;display:flex;justify-content:center;align-items:center;
-  background-color:#16142a;
+  background-color:#0a0a0a;
   background-image:linear-gradient(rgba(255,255,255,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.025) 1px,transparent 1px);
   background-size:8px 8px}
 #stage{position:relative;height:100%;width:min(100vw,calc(100vh * .66));width:min(100vw,calc(100lvh * .66));overflow:hidden;touch-action:none;user-select:none;-webkit-user-select:none;background:#11131f}
@@ -54,7 +54,7 @@ button,input{font-family:inherit}
 .intro{font-size:16.5px;line-height:1.35;margin:14px 2px 14px;color:#f3f6f0;text-shadow:0 2px 0 rgba(0,0,0,.25)}
 .rules{display:grid;gap:10px;margin-bottom:14px}
 .rule{display:grid;grid-template-columns:52px 1fr;gap:12px;align-items:center;font-size:15px;line-height:1.28}
-.well{width:52px;height:52px;background:#1c1a33;border:3px solid #100e1f;box-shadow:inset 3px 3px 0 #08071a;display:grid;place-items:center}
+.well{width:52px;height:52px;background:#141420;border:3px solid #0a0a0a;box-shadow:inset 3px 3px 0 #05050c;display:grid;place-items:center}
 .well canvas{position:static;width:auto;height:auto}
 .rule b{font-weight:600;color:#fff}
 .field{margin-bottom:12px}
@@ -63,9 +63,9 @@ button,input{font-family:inherit}
 .ferr{display:none;background:#b8362a;color:#fff;border:3px solid var(--edge);padding:6px 10px;font-size:14px;margin:-4px 0 12px}
 .ferr.on{display:block}
 .field label{display:block;font-size:14px;margin:0 0 5px 2px;color:#dfe8e2}
-input{width:100%;height:50px;background:#1c1a33;color:#e6f4ec;border:3px solid #100e1f;box-shadow:inset 3px 3px 0 #08071a;padding:0 12px;font-size:19px;outline:none;border-radius:0}
+input{width:100%;height:50px;background:#141420;color:#e6f4ec;border:3px solid #0a0a0a;box-shadow:inset 3px 3px 0 #05050c;padding:0 12px;font-size:19px;outline:none;border-radius:0}
 input:focus{border-color:var(--warn)}
-input::placeholder{color:#6d6a96}
+input::placeholder{color:#7a7aa8}
 
 .btn{text-decoration:none;display:flex;align-items:center;justify-content:center;gap:8px;width:100%;height:56px;cursor:pointer;
   font-size:22px;font-weight:600;letter-spacing:.03em;color:#fff;background:var(--go);border:3px solid var(--edge);
@@ -87,17 +87,17 @@ input::placeholder{color:#6d6a96}
 .lvplate i{width:12px;height:12px;border:2px solid #24261f;display:block}
 .lvplate span{font-weight:400}
 .hudR{display:flex;flex-direction:column;align-items:flex-end;gap:7px}
-.ann{display:flex;gap:4px;background:#2a2845;border:3px solid #121614;padding:4px;box-shadow:3px 3px 0 rgba(0,0,0,.4)}
-.ann i{font-style:normal;width:26px;height:18px;display:grid;place-items:center;font-size:11px;background:#3a3858;color:#6c7a73;border:2px solid #1a1f1c}
-.ann i.lit{background:var(--lamp);color:#3a0f1c;box-shadow:0 0 12px rgba(255,107,139,.75);animation:blink .5s steps(1) 4}
-@keyframes blink{50%{background:#a8324f}}
+.ann{display:flex;gap:4px;background:#1a1a24;border:3px solid #121614;padding:4px;box-shadow:3px 3px 0 rgba(0,0,0,.4)}
+.ann i{font-style:normal;width:26px;height:18px;display:grid;place-items:center;font-size:11px;background:#2b2b38;color:#6c7a73;border:2px solid #1a1f1c}
+.ann i.lit{background:var(--lamp);color:#3a0f0f;box-shadow:0 0 12px rgba(255,107,107,.75);animation:blink .5s steps(1) 4}
+@keyframes blink{50%{background:#a83232}}
 #mute{pointer-events:auto;width:38px;height:32px;padding:0;font-size:14px;background:var(--grey);color:var(--ink);border:3px solid var(--edge);box-shadow:inset 0 2px 0 var(--grey-hi),inset 0 -3px 0 var(--grey-lo),0 3px 0 var(--edge);cursor:pointer}
 #score{position:absolute;left:0;right:0;top:calc(var(--sat) + 70px);text-align:center;font-size:68px;font-weight:700;line-height:1;pointer-events:none;opacity:0;color:#fff;
   text-shadow:4px 0 0 #1b1a24,-4px 0 0 #1b1a24,0 4px 0 #1b1a24,0 -4px 0 #1b1a24,4px 4px 0 #1b1a24,-4px 4px 0 #1b1a24,4px -4px 0 #1b1a24,-4px -4px 0 #1b1a24,0 8px 0 rgba(0,0,0,.35)}
 #score.on{opacity:1}
 #score.bump{animation:bump .16s steps(2)}
 @keyframes bump{0%{transform:translateY(-5px)}100%{transform:none}}
-#coach{position:absolute;left:12px;right:12px;bottom:calc(var(--sab) + 54px);background:rgba(22,20,42,.92);border:3px solid #121614;box-shadow:4px 4px 0 rgba(0,0,0,.45);padding:9px 11px;font-size:13.5px;line-height:1.35;pointer-events:none;display:none}
+#coach{position:absolute;left:12px;right:12px;bottom:calc(var(--sab) + 54px);background:rgba(10,10,18,.92);border:3px solid #121614;box-shadow:4px 4px 0 rgba(0,0,0,.45);padding:9px 11px;font-size:13.5px;line-height:1.35;pointer-events:none;display:none}
 #coach.on{display:block}
 #coach div{display:flex;gap:8px;align-items:center;padding:2px 0}
 #coach i{flex:0 0 12px;height:12px;border:2px solid #0b0f0d}
@@ -176,7 +176,7 @@ input::placeholder{color:#6d6a96}
 #toast{position:absolute;left:50%;bottom:calc(var(--sab) + 22px);transform:translateX(-50%);background:var(--steel);color:var(--ink);border:3px solid var(--edge);padding:7px 14px 8px;font-size:16px;box-shadow:4px 4px 0 rgba(0,0,0,.45);display:none;z-index:9;white-space:nowrap}
 #toast.on{display:block}
 
-#tv{position:fixed;inset:0;z-index:20;display:none;padding:4vh 6vw;background:#16142a;
+#tv{position:fixed;inset:0;z-index:20;display:none;padding:4vh 6vw;background:#0a0a0a;
   background-image:linear-gradient(rgba(255,255,255,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.03) 1px,transparent 1px);background-size:12px 12px}
 #tv.on{display:flex;flex-direction:column;gap:3vh}
 #tv .plate h1{font-size:8vh}
@@ -199,7 +199,7 @@ input::placeholder{color:#6d6a96}
   <div id="hud">
     <div class="lvplate"><i id="lvSwatch"></i><b id="lvId">L3</b><span id="lvName">Operations</span></div>
     <div class="hudR">
-      <div class="ann" title="Secrets leaked"><i>S1</i><i>S2</i><i>S3</i></div>
+      <div class="ann" title="Vulnerable packages"><i>V1</i><i>V2</i><i>V3</i></div>
       <button id="mute" aria-label="Sound">♪</button>
     </div>
   </div>
@@ -207,9 +207,9 @@ input::placeholder{color:#6d6a96}
   <div id="hint"><div>Tap to fly</div></div>
   <div id="coach">
     <div><i style="background:#e9e6da"></i><span><b>Tap</b> anywhere to fly up. Go through the <b>empty</b> gaps.</span></div>
-    <div><i style="background:#ff6b8b"></i><span>A gap with a <b>bug</b> in it fails review. Avoid it.</span></div>
-    <div><i style="background:#3fd17a"></i><span><b>Green fix badge</b> = +2 points.</span></div>
-    <div><i style="background:#ff6b8b;box-shadow:0 0 6px #ff6b8b"></i><span><b>Sparkling key</b> = a hard-coded secret. 3 secrets and your PR is blocked.</span></div>
+    <div><i style="background:#ff6b6b"></i><span>A gap with a <b>bug</b> in it fails review. Avoid it.</span></div>
+    <div><i style="background:#c08a4a"></i><span><b>Plain package</b> = +2 points.</span></div>
+    <div><i style="background:#ff6b6b;box-shadow:0 0 6px #ff6b6b"></i><span><b>Sparkling package</b> = known vulnerability. 3 and your PR is blocked.</span></div>
     <div><i style="background:#e8473a"></i><span>Every 5 blocks you pass, a new CodeAnt check joins in.</span></div>
   </div>
   <div id="banner"><span class="dymo" id="bannerText">Now entering SAST</span></div>
@@ -224,7 +224,7 @@ input::placeholder{color:#6d6a96}
       <div class="rules">
         <div class="rule"><div class="well"><canvas id="icoBot"></canvas></div><div><b>Tap to fly</b> and thread the gaps between the code blocks.</div></div>
         <div class="rule"><div class="well"><canvas id="icoPlc"></canvas></div><div><b>A gap with a bug in it fails review.</b> Fly into it and CodeAnt flags your PR.</div></div>
-        <div class="rule"><div class="well"><canvas id="icoKey"></canvas></div><div><b>Green fixes are worth 2.</b> Sparkling keys are hard-coded secrets. Grab three and secret scanning blocks you.</div></div>
+        <div class="rule"><div class="well"><canvas id="icoKey"></canvas></div><div><b>Plain packages are worth 2.</b> Sparkling ones are vulnerable dependencies. Grab three and you're blocked.</div></div>
         <div class="rule"><div class="well"><canvas id="icoIps"></canvas></div><div><b>Every 5 blocks, a new check</b> joins in: moving vulnerabilities, IaC misconfig walls, then red quality gates.</div></div>
       </div>
       <div class="field"><label for="nick">Your name</label><input id="nick" maxlength="40" placeholder="e.g. Priya Sharma" autocomplete="name"></div>
@@ -277,7 +277,8 @@ input::placeholder{color:#6d6a96}
       <p><b>SAST.</b> Finds security holes like SQL injection and XSS before they merge.</p>
       <p><b>Secret scanning.</b> Catches API keys, tokens and passwords committed to code.</p>
       <p><b>IaC scanning.</b> Flags cloud misconfigurations in Terraform, Kubernetes and Docker files.</p>
-      <p><b>Quality gates and SCA.</b> Blocks risky merges, vulnerable dependencies, dead code, duplication and over-complex code.</p>
+      <p><b>Dependency scanning (SCA).</b> Flags open-source packages with known vulnerabilities.</p>
+      <p><b>Quality gates.</b> Block risky merges, dead code, duplication and over-complex code.</p>
       <p><b>PR summaries.</b> Explains each change in plain words so reviewers move faster.</p>
       <button class="btn" data-close style="margin-top:6px">Back</button>
     </div>
@@ -359,14 +360,14 @@ document.addEventListener("focusout",e=>{if(e.target.matches("input[type=email],
 
 /* =============== levels (CodeAnt checks) =============== */
 const LV=[
- {id:"PR",name:"Code Review",at:0,medium:"DIFF",pipe:["#1f1d3a","#3b3870","#6662b8","#a9a6ee","#524ea0"],
-  sky:["#141233","#1c1a45","#2a2560","#3d2f73","#5b3a80","#7d4a8a"],far:"#2e2a5c",mid:"#1c1a3a",win:"#7ee0ff"},
- {id:"SAST",name:"Security Scan",at:8,medium:"SAST",pipe:["#0f2a33","#1e5466","#2f8aa6","#86d6ee","#26718a"],
-  sky:["#0e1a33","#132447","#1a335c","#24406e","#34507e","#4a6390"],far:"#24385e",mid:"#142240",win:"#9dffcf"},
- {id:"IAC",name:"Infra Config",at:18,medium:"IAC",pipe:["#2e2108","#6b4d14","#c99a2e","#f2d98a","#9e7a22"],
-  sky:["#1a1430","#26193d","#3a2244","#55304a","#7a404c","#a3584c"],far:"#3a2a4c",mid:"#22182f",win:"#ffd27a"},
- {id:"GATE",name:"Quality Gate",at:30,medium:"GATE",pipe:["#331018","#6a2032","#b83a58","#f08aa4","#8f2c45"],
-  sky:["#100c1e","#181232","#24173e","#341a40","#4f1f40","#76283f"],far:"#2a1a3a",mid:"#170f22",win:"#ff8aa8"}
+ {id:"PR",name:"Code Review",at:0,medium:"DIFF",pipe:["#0a0a0a","#24242c","#383844","#7a7a90","#2e2e38"],
+  sky:["#07070d","#0a0a14","#0e0e1e","#13132b","#1a1a3d","#26265e"],far:"#1b1b3a",mid:"#101024",win:"#6363f1"},
+ {id:"SAST",name:"Security Scan",at:8,medium:"SAST",pipe:["#0a0a0a","#1f2a30","#2f3e48","#6f8a99","#27343c"],
+  sky:["#06090d","#08101a","#0b1624","#0f1e31","#152a44","#1e3a5c"],far:"#16263c",mid:"#0c1626",win:"#7ee0ff"},
+ {id:"IAC",name:"Infra Config",at:18,medium:"IAC",pipe:["#0a0a0a","#2e2820","#463c2e","#9a8a6e","#3a3226"],
+  sky:["#0d0a06","#14100a","#1d160d","#281e12","#362818","#4a351f"],far:"#2e2216",mid:"#18120b",win:"#ffd27a"},
+ {id:"GATE",name:"Quality Gate",at:30,medium:"GATE",pipe:["#0a0a0a","#30201f","#4a2e2e","#a07070","#3c2626"],
+  sky:["#0d0607","#16090b","#200c10","#2c1015","#3c151c","#521b25"],far:"#33141b",mid:"#1c0b0f",win:"#ff6b6b"}
 ];
 const LEVEL_LEN=5;const stageOf=p=>Math.floor(p/LEVEL_LEN),lvOf=p=>stageOf(p)%4;
 const hx=h=>[parseInt(h.slice(1,3),16),parseInt(h.slice(3,5),16),parseInt(h.slice(5,7),16)];
@@ -386,23 +387,23 @@ function txt(s,x,y,col,al="l",sc=1){s=String(s).toUpperCase();if(al==="c")x-=tw(
 /* =============== sprites =============== */
 function sprite(rows,pal){const w=Math.max(...rows.map(r=>r.length)),h=rows.length,c=document.createElement("canvas");c.width=w;c.height=h;const x=c.getContext("2d");
   rows.forEach((r,y)=>{for(let i=0;i<r.length;i++){const ch=r[i];if(ch!=="."&&pal[ch]){x.fillStyle=pal[ch];x.fillRect(i,y,1,1)}}});return c}
-const BOTP={k:"#1b1220",A:"#c2412d",a:"#ff8a5c",B:"#a8352a",b:"#e06040",H:"#d4492f",e:"#fff4e0",W:"#cfeeff",w:"#7fb2d6"};
+const BOTP={k:"#2a2a80",o:"#6363f1",A:"#0f0f1e",c:"#ffffff",r:"#ff6b6b",g:"#4cc07c",i:"#a5a5ff",B:"#4c4cd9",H:"#6363f1",h:"#c8c8ff",e:"#ffffff",W:"#3a3a8a",w:"#7a7ae0",l:"#a5a5ff"};
 const BOT_ROWS=[
-"............k...k.",
-".............k.k..",
-"...wwww.....kkkk..",
-"..wWWWWw...kHHHHk.",
-"..wWWWWWw.kHHHeHHk",
-"...wWWWWwkkHHHHHHk",
-".kkkk.wwkBBkHHHHk.",
-"kAAAAkkkBBBBkkkk..",
-"kAaAAAkBBbBBk.....",
-"kAAAAAkkBBBBk.....",
-".kkkk.k.kkkk......",
-"..k..k...k..k.....",
-".k..k.....k..k...."];
+"...............l.....l..",
+"................l...l...",
+"......wwwww......l.l....",
+".....wWWWWWw....kkkkk...",
+"......wwwww....kHhHHHk..",
+".ooooooooo.....kHHHeHk..",
+"orrAcccccAokkkkkHHHHHk..",
+"oAAAAAAAAAokBBBkHHHHHkl.",
+"oAgggAiiiAokBBBkkkkkk...",
+"oAAAAAAAAAokkkkk........",
+"oiiiAccAAAo.l.l.........",
+".ooooooooo.l...l........",
+"..........l.....l......."];
 let BOT=sprite(BOT_ROWS,BOTP);
-let BOT_OFF=sprite(BOT_ROWS,{...BOTP,A:"#5a2a2a",a:"#6a3a3a",B:"#4a2424",b:"#5a2a2a",H:"#5a2a2a",e:"#7a6a6a",W:"#6a7a88",w:"#4a5a66"});
+let BOT_OFF=sprite(BOT_ROWS,{...BOTP,o:"#3a3a6a",B:"#2e2e55",H:"#3a3a6a",h:"#4a4a7a",e:"#777777",c:"#6a6a88",r:"#6a4a4a",g:"#4a6a55",i:"#5a5a80",W:"#2a2a44",w:"#4a4e66",l:"#55557a"});
 function rotSet(src){const out=[];const sw=src.width,sh=src.height,sd=src.getContext("2d").getImageData(0,0,sw,sh).data;
   for(let k=0;k<=16;k++){const a=-0.5+k*0.125,S=Math.ceil(Math.hypot(sw,sh))+2,c=document.createElement("canvas");c.width=S;c.height=S;const x=c.getContext("2d"),img=x.createImageData(S,S),cs=Math.cos(a),sn=Math.sin(a);
     for(let y=0;y<S;y++)for(let i=0;i<S;i++){const dx=i-S/2+.5,dy=y-S/2+.5,sx=Math.round(cs*dx+sn*dy+sw/2-.5),sy=Math.round(-sn*dx+cs*dy+sh/2-.5);
@@ -448,7 +449,7 @@ const PLC_ROWS=a=>a?[
 "...kRRkRk...",
 "....kkkk....",
 ".k........k."];
-const PLCP={k:"#120d1c",H:"#4a2266",e:"#ffd0dc",R:"#8e44c9",r:"#ff5c7a"};
+const PLCP={k:"#0a0a0a",H:"#5a5a6e",e:"#ffffff",R:"#8a8aa0",r:"#ff4a4a"};
 const PLC=[sprite(PLC_ROWS(1),PLCP),sprite(PLC_ROWS(0),PLCP)];
 const KEY_ROWS=[
 ".kkk........",
@@ -458,16 +459,16 @@ const KEY_ROWS=[
 ".kkkkkkyykyk",
 "......kk.kk."];
 const KEY=sprite(KEY_ROWS,{k:"#5a3f07",y:"#f2c230",Y:"#fff0a8"});
-const FIX=sprite([
-"..kkkkkk..",
-".kGGGGGGk.",
-"kGGGGGGWGk",
-"kGGGGGWWGk",
-"kGWGGWWGGk",
-"kGWWWWGGGk",
-"kGGWWGGGGk",
-".kGGGGGGk.",
-"..kkkkkk.."],{k:"#0d3b1e",G:"#3fd17a",W:"#f4fff6"});
+const PKG=sprite([
+"kkkkkkkkkk",
+"kTTTttTTTk",
+"kTTTttTTTk",
+"kkkkkkkkkk",
+"kBBBttBBBk",
+"kBBBttBBBk",
+"kBBBttBBBk",
+"kBBBBBBBBk",
+"kkkkkkkkkk"],{k:"#3a2612",T:"#e0b878",B:"#c08a4a",t:"#f2e2b8"});
 
 /* =============== scenery =============== */
 function mkFar(){const r=rng(42),items=[];let x=0;const tile=560;
@@ -484,7 +485,7 @@ function mkMid(){const r=rng(7),items=[];let x=0;const tile=420;
     else{items.push({k:"rack",x,w:50+r()*40|0,h:20+r()*14|0});x+=70+r()*20}}
   return{tile,items}}
 const FAR=mkFar(), MID=mkMid();
-for(const i of FAR.items){if(i.k==="tower"){i.k="block";i.h+=24}else if(i.k==="pylon"){i.k="block";i.w=14;i.h=70}}
+for(const i of FAR.items){if(i.k==="tower"){i.k="block";i.h+=24}else if(i.k==="pylon"){i.k="block";i.w=14;i.h=70}else if(i.k==="stack"){i.k="block";i.w+=6;i.h-=20}}
 for(const i of MID.items){if(i.k==="tank"){i.k="rack"}}
 const STARS=(()=>{const r=rng(3);return [...Array(55)].map(()=>({x:r(),y:r()*.5,b:r()}))})();
 
@@ -508,7 +509,7 @@ const buzz=ms=>{try{navigator.vibrate&&navigator.vibrate(ms)}catch(e){}};
 let state="menu",t=0,scroll=0,speed=80,shake=0,flash=0,flashCol="#ffffff";
 let bot,cols,parts,pipes,score,alerts,lv,deathReason,deathLabel,deathShift=false,dieT,lastGapC,colIdx,runLvMax=0,seenDecoyTip,seenHoneyTip,seenKeyTip,intro={};
 let best=store.get("best",0);
-const DECOYS=[["NPE","NULL"],["SQLI","QUERY"],["XSS","EVAL"],["RACE","COND"],["LEAK","MEMORY"],["N+1","QUERY"],["OFF-1","LOOP"],["DEAD","CODE"],["DUPE","LOGIC"],["CVE","OLD DEP"]];
+const DECOYS=[["NPE","NULL"],["SQLI","QUERY"],["XSS","EVAL"],["RACE","COND"],["LEAK","MEMORY"],["N+1","QUERY"],["OFF-1","LOOP"],["DEAD","CODE"],["DUPE","LOGIC"],["SECRET","API KEY"]];
 function reset(){
   bot={x:0,y:140,vy:0,ang:0,flapT:0,alive:true};
   cols=[];parts=[];pipes=0;score=0;alerts=0;lv=0;speed=80;colIdx=0;lastGapC=140;deathReason=null;deathLabel="";deathShift=false;dieT=0;runLvMax=0;intro={};
@@ -617,7 +618,7 @@ function startRun(){ac();music.game();saveNick();reset();state="ready";show(null
 function die(reason,label){
   if(state!=="play")return;state="dying";deathReason=reason;deathLabel=label||"";dieT=0;bot.alive=false;hideTip();
   if(reason==="ips"){flashCol="#ff4a3a"}
-  if(reason==="decoy"||reason==="honey"){sfx.caught();buzz([60,40,60,40,120]);flash=.6;flashCol="#ff6b8b";bot.vy=0}
+  if(reason==="decoy"||reason==="honey"){sfx.caught();buzz([60,40,60,40,120]);flash=.6;flashCol="#ff6b6b";bot.vy=0}
   else{sfx.crash();buzz(120);flash=.45;if(reason!=="ips")flashCol="#ffffff";shake=.3;burst(bot.x,bot.y,22,["#f2a23a","#ffe08a","#aab3c8","#474e63"],120,.7);bot.vy=Math.min(bot.vy,-120)}
 }
 function finish(){
@@ -629,8 +630,8 @@ function finish(){
     decoy:deathShift?["Flagged by SAST","That vulnerability kept moving, but CodeAnt's SAST traces how data flows through your code, so it was caught before merge."]
       :["Flagged in code review","CodeAnt's AI review reads every pull request line by line with your whole codebase in view. That bug never reached main."],
     seg:["Blocked by IaC scanning","CodeAnt scans Terraform, Kubernetes and Docker files and stops cloud misconfigurations before they ship."],
-    ips:["Stopped at the quality gate","CodeAnt's quality gates block a merge that fails security or quality checks, including vulnerable dependencies."],
-    honey:["Three secrets committed","Those keys were hard-coded API keys and tokens. CodeAnt's secret scanning catches them in the PR, before anyone can steal them."],
+    ips:["Stopped at the quality gate","CodeAnt's quality gates block any merge that fails your security or quality checks."],
+    honey:["Three vulnerable packages","Those packages had known vulnerabilities. CodeAnt's dependency scanning (SCA) flags them in the PR, before they reach production."],
     pipe:["Hit a code block","Messy, complex code leaves narrow paths. CodeAnt flags dead code, duplication and complexity so there's room to ship."],
     ground:["Broke the build","Rushed changes break things. CodeAnt's PR summaries and one-click fixes help you ship fast without crashing."],
     ceiling:["Tried to skip review","There's no way around the pipeline. Every change goes through a pull request, and CodeAnt reviews them all."]
@@ -718,10 +719,10 @@ function collide(){
       const z=lvOf(pipes);if(z!==lv){lv=z;runLvMax=Math.max(runLvMax,z);setLvUI(z);enterLevel(z,stageOf(pipes))}}
     for(const k of c.keys){if(k.got)continue;const kx=c.x+k.dx,ky=k.y+Math.sin(t*3+k.ph)*2;
       if((kx-bx)**2+(ky-by)**2<(r+7)**2){k.got=true;
-        if(k.honey){alerts++;setPips();sfx.honey();buzz(80);flash=.3;flashCol="#ff6b8b";pop(kx,ky-8,"SECRET!","#ff6b8b");burst(kx,ky,10,["#ff6b8b","#ffd0dc"],60,.5);
-          showTip(alerts<3?`<b>Secret leaked! ${alerts} of 3.</b> Sparkling keys are hard-coded secrets. Grab only green fixes.`:"<b>3 of 3.</b> Secret scanning blocked your PR.","alarm",3000);
+        if(k.honey){alerts++;setPips();sfx.honey();buzz(80);flash=.3;flashCol="#ff6b6b";pop(kx,ky-8,"VULN DEP!","#ff6b6b");burst(kx,ky,10,["#ff6b6b","#ffd6d6"],60,.5);
+          showTip(alerts<3?`<b>Vulnerable package! ${alerts} of 3.</b> Sparkling boxes have known vulnerabilities. Grab only plain ones.`:"<b>3 of 3.</b> Dependency scanning blocked your PR.","alarm",3000);
           if(alerts>=3)return die("honey")}
-        else{score+=2;bump();sfx.key();pop(kx,ky-8,"+2 FIX","#9dffb8");if(!seenKeyTip){seenKeyTip=true;showTip("<b>One-click fix: +2 points.</b> Green badges are CodeAnt fixes. Keep grabbing them.","good",2400)}burst(kx,ky,10,["#3fd17a","#f4fff6"],70,.5)}}}
+        else{score+=2;bump();sfx.key();pop(kx,ky-8,"+2 SAFE DEP","#f2e2b8");if(!seenKeyTip){seenKeyTip=true;showTip("<b>Clean package: +2 points.</b> Plain boxes are safe dependencies. Keep grabbing them.","good",2400)}burst(kx,ky,10,["#c08a4a","#f2e2b8"],70,.5)}}}
     if(!seenDecoyTip&&c.gaps.some(g=>g.decoy)&&c.x<W-20){seenDecoyTip=true;showTip("<b>Two gaps ahead.</b> The one with a bug in it fails review. Fly through the clean one.","warn",3000)}
   }
 }
@@ -795,7 +796,7 @@ function drawCol(c){
     for(let i=0;i<w;i++)F(strip[i],x+i,a,1,b-a);
     for(let y=a+30;y<b-8;y+=40){F(P[1],x+1,y,w-2,2);F(P[3],x+1,y+2,w-2,1)}
     // faux syntax-highlighted code lines
-    ctx.globalAlpha=.55;for(let y=a+5;y<b-4;y+=5){if(y<-4||y>GROUND)continue;const q=(y*7+c.idx*13)&1023;if(q%7===0)continue;F(["#ff9ad5","#9ad8ff","#ffe08a","#b6f2a0","#e9e6da"][q%5],x+3+(q%3)*2,y,3+(q%11),1)}ctx.globalAlpha=1;
+    ctx.globalAlpha=.8;for(let y=a+5;y<b-4;y+=5){if(y<-4||y>GROUND)continue;const q=(y*7+c.idx*13)&1023;if(q%7===0)continue;F(["#6363f1","#4cc07c","#ff6b6b","#e9e9f2","#a5a5ff"][((q*37)>>3)%5],x+3+(q%3)*2,y,3+(q%11),1)}ctx.globalAlpha=1;
     // pipe marker (ISO-style label band)
     if(b-a>46){const my=Math.round((Math.max(a,0)+Math.min(b,GROUND))/2);if(my>12&&my<GROUND-12){
       F("#e9e6da",x+1,my-5,w-2,11);F("#1d1b26",x+1,my-6,w-2,1);F("#1d1b26",x+1,my+6,w-2,1);
@@ -808,7 +809,7 @@ function drawCol(c){
     for(const cy of[g.y-8,g.y+g.h]){
       F("#2a2c2b",x-3,cy,w+6,8);F("#8c908a",x-2,cy+1,w+4,6);F("#c2c5be",x-2,cy+1,w+4,1);F("#5b5f5a",x-2,cy+6,w+4,1);
       F("#3a3d3a",x,cy+3,2,2);F("#3a3d3a",x+w-2,cy+3,2,2);F("#3a3d3a",x+w/2-1-7,cy+3,2,2);F("#3a3d3a",x+w/2-1+7,cy+3,2,2);
-      const on=((t*2+c.idx)%1)<.6;F(g.decoy?(on?"#ff6b8b":"#a8324f"):(on?"#f2b35a":"#7a5a2a"),x+w/2-1,cy+3,2,2);
+      const on=((t*2+c.idx)%1)<.6;F(g.decoy?(on?"#ff6b6b":"#a83232"):(on?"#f2b35a":"#7a5a2a"),x+w/2-1,cy+3,2,2);
     }
     if(g.decoy)drawDecoy(x,g.y,w,g.h,g);
   }
@@ -818,24 +819,24 @@ function drawCol(c){
     F("#3a1210",bx-3,rg.y,8,3);F("#3a1210",bx-3,rg.y+rg.h-3,8,3);F(on?"#ff4a3a":warn&&((t*12)|0)%2?"#ff4a3a":"#6a2018",bx,rg.y+1,2,1);F(on?"#ff4a3a":"#6a2018",bx,rg.y+rg.h-2,2,1);
     if(on){ctx.globalAlpha=.35;F("#ff4a3a",bx-2,rg.y+3,6,rg.h-6);ctx.globalAlpha=1;F("#ff7a6a",bx,rg.y+3,2,rg.h-6);for(let yy=rg.y+3;yy<rg.y+rg.h-3;yy+=3)if(R()<.5)F("#fff0e8",bx+(R()<.5?0:1),yy,1,1)}
     else{ctx.fillStyle=warn?"#ff4a3a":"#5a1a14";for(let yy=rg.y+4;yy<rg.y+rg.h-4;yy+=4)FR(bx,yy,1,1)}}
-  if(c.shift&&c.gaps.some(g=>g.decoy)){const g=c.gaps.find(g=>g.decoy),up=Math.cos(t*1.7+c.ph)<0;txt(up?"^":"v",x+w+5,g.y+g.h/2-2,"#ff6b8b")}
+  if(c.shift&&c.gaps.some(g=>g.decoy)){const g=c.gaps.find(g=>g.decoy),up=Math.cos(t*1.7+c.ph)<0;txt(up?"^":"v",x+w+5,g.y+g.h/2-2,"#ff6b6b")}
 }
 function drawDecoy(x,y,w,h,g){
-  ctx.globalAlpha=.10+.05*Math.sin(t*4);F("#ff6b8b",x,y,w,h);ctx.globalAlpha=1;
-  const o=(t*16|0)%4;ctx.fillStyle="#ff6b8b";for(let yy=y+o;yy<y+h;yy+=4){FR(x,yy,1,2);FR(x+w-1,yy,1,2)}
+  ctx.globalAlpha=.10+.05*Math.sin(t*4);F("#ff6b6b",x,y,w,h);ctx.globalAlpha=1;
+  const o=(t*16|0)%4;ctx.fillStyle="#ff6b6b";for(let yy=y+o;yy<y+h;yy+=4){FR(x,yy,1,2);FR(x+w-1,yy,1,2)}
   const cx=x+w/2,cy=Math.round(y+h/2+Math.sin(t*2.4)*1.5);const dI=(im,a,b)=>ctx.drawImage(im,px(a),px(b));
-  if(PLC_IMG){const pw=Math.round(PLC_IMG.naturalWidth/PLC_K),ph=Math.round(PLC_IMG.naturalHeight/PLC_K);ctx.globalAlpha=.25+.15*Math.sin(t*5);F("#ff6b8b",Math.round(cx-pw/2)-2,cy-Math.round(ph/2)-2,pw+4,ph+4);ctx.globalAlpha=1;
+  if(PLC_IMG){const pw=Math.round(PLC_IMG.naturalWidth/PLC_K),ph=Math.round(PLC_IMG.naturalHeight/PLC_K);ctx.globalAlpha=.25+.15*Math.sin(t*5);F("#ff6b6b",Math.round(cx-pw/2)-2,cy-Math.round(ph/2)-2,pw+4,ph+4);ctx.globalAlpha=1;
     ctx.imageSmoothingEnabled=true;ctx.drawImage(PLC_IMG,px(cx-pw/2),px(cy-ph/2),pw,ph);ctx.imageSmoothingEnabled=false;if(((t*3)|0)%2)F("#9dffb0",Math.round(cx-pw/2)+4,cy-Math.round(ph/2)+9,1,1);
-    txt(g.label[0],cx,cy-Math.round(ph/2)-8,"#ffd0dc","c");}
+    txt(g.label[0],cx,cy-Math.round(ph/2)-8,"#ffd6d6","c");}
   else{dI(PLC[((t*3)|0)%2],cx-6,cy-7);
-  txt(g.label[0],cx,cy-16,"#ffd0dc","c");}
-  if(((t*2)|0)%2===0)txt(g.label[1],cx,cy+(PLC_IMG?Math.round(PLC_IMG.naturalHeight/PLC_K/2)+3:11),"#ff6b8b","c");
-  if(g.sprung){ctx.globalAlpha=.35;F("#ff6b8b",x,y,w,h);ctx.globalAlpha=1}
+  txt(g.label[0],cx,cy-16,"#ffd6d6","c");}
+  if(((t*2)|0)%2===0)txt(g.label[1],cx,cy+(PLC_IMG?Math.round(PLC_IMG.naturalHeight/PLC_K/2)+3:11),"#ff6b6b","c");
+  if(g.sprung){ctx.globalAlpha=.35;F("#ff6b6b",x,y,w,h);ctx.globalAlpha=1}
 }
 function drawKey(x,y,k){
-  const X=x-6,Y=Math.round(y-3);if(!k.honey){ctx.drawImage(FIX,px(x-5),px(Math.round(y-4)));return}ctx.drawImage(KEY,px(X),px(Y));
-  if(k.honey){const p=t*5+k.ph;for(let i=0;i<3;i++){const a=p+i*2.1,on=((t*6+i)|0)%2===0;if(on)F(i?"#ff6b8b":"#fff0f4",Math.round(x+Math.cos(a)*9),Math.round(y+Math.sin(a)*6),1,1)}
-    if(((t*4+k.ph)|0)%2===0)F("#ff6b8b",X+1,Y+1,1,1)}
+  const X=x-5,Y=Math.round(y-4);ctx.drawImage(PKG,px(X),px(Y));
+  if(k.honey){const p=t*5+k.ph;for(let i=0;i<3;i++){const a=p+i*2.1,on=((t*6+i)|0)%2===0;if(on)F(i?"#ff6b6b":"#fff0f0",Math.round(x+Math.cos(a)*9),Math.round(y+Math.sin(a)*6),1,1)}
+    if(((t*4+k.ph)|0)%2===0)F("#ff6b6b",X+1,Y+1,1,1)}
 }
 function drawBot(){
   const x=bot.x,y=bot.y;
@@ -844,11 +845,11 @@ function drawBot(){
 }
 function drawCage(){
   const p=Math.min(1,dieT/.3),x=bot.x,y=bot.y,drop=Math.round((1-p)*24);
-  for(let i=-12;i<=12;i+=4)F("#ff6b8b",x+i,y-12-drop,1,25);F("#ff6b8b",x-13,y-13-drop,27,2);F("#ff6b8b",x-13,y+12-drop,27,2);
-  const s=deathReason==="honey"?"CODEANT: SECRET FOUND":"CODEANT: BUG FLAGGED",wd=tw(s)+8;let lx=Math.round(Math.max(2,Math.min(W-wd-2,x-wd/2))),ly=y-30;
+  for(let i=-12;i<=12;i+=4)F("#ff6b6b",x+i,y-12-drop,1,25);F("#ff6b6b",x-13,y-13-drop,27,2);F("#ff6b6b",x-13,y+12-drop,27,2);
+  const s=deathReason==="honey"?"CODEANT: VULN DEP":"CODEANT: BUG FLAGGED",wd=tw(s)+8;let lx=Math.round(Math.max(2,Math.min(W-wd-2,x-wd/2))),ly=y-30;
   if(ly<4)ly=y+18;
-  F("#3a0f1c",lx,ly,wd,11);F("#ff6b8b",lx,ly,wd,1);F("#ff6b8b",lx,ly+10,wd,1);F("#ff6b8b",lx,ly,1,11);F("#ff6b8b",lx+wd-1,ly,1,11);
-  txt(s,lx+4,ly+3,"#ffd0dc");
+  F("#3a0f0f",lx,ly,wd,11);F("#ff6b6b",lx,ly,wd,1);F("#ff6b6b",lx,ly+10,wd,1);F("#ff6b6b",lx,ly,1,11);F("#ff6b6b",lx+wd-1,ly,1,11);
+  txt(s,lx+4,ly+3,"#ffd6d6");
 }
 function drawParts(){for(const p of parts){const a=Math.max(0,p.life/p.max);ctx.globalAlpha=a>.5?1:a*2;
   if(p.k==="txt")txt(p.s,p.x,p.y,p.col,"c");else F(p.col,p.x,p.y,1,1);}ctx.globalAlpha=1}
@@ -857,7 +858,7 @@ function drawGround(){
   F("#1e1d1a",-4,y,W+8,4);ctx.fillStyle="#e8b92e";const so=o%8;
   for(let x=-16-so;x<W+16;x+=8){ctx.beginPath();ctx.moveTo(x,y+4);ctx.lineTo(x+4,y);ctx.lineTo(x+8,y);ctx.lineTo(x+4,y+4);ctx.closePath();ctx.fill()}
   F("#121311",-4,y+4,W+8,1);
-  F("#2a2840",-4,y+5,W+8,H-y);
+  F("#1a1a22",-4,y+5,W+8,H-y);
   ctx.fillStyle="#2a2f2c";for(let yy=y+7;yy<H;yy+=4)FR(-4,yy,W+8,1);
   ctx.fillStyle="#555d58";const o2=o%5;for(let x=-o2;x<W+5;x+=5)FR(x,y+5,1,H-y);
   F("rgba(0,0,0,.35)",-4,y+16,W+8,H-y);
@@ -869,9 +870,9 @@ function rankOf(sc){return sc>=30?"Merge Master":sc>=18?"Staff Engineer":sc>=10?
 const CAUGHT={
   decoy:()=>deathShift?["Flagged: "+deathLabel.split(" ")[0],"What caught it: ","CodeAnt SAST",". It traces data through the code, so moving vulnerabilities still get caught."]
                        :["Flagged: "+deathLabel.split(" ")[0],"What caught it: ","CodeAnt AI code review",". Line-by-line review of every PR with full codebase context."],
-  honey:()=>["Committed 3 secrets","What caught it: ","CodeAnt secret scanning",". Hard-coded keys and tokens get flagged right in the PR."],
+  honey:()=>["Pulled in 3 vulnerable deps","What caught it: ","CodeAnt SCA",". Packages with known vulnerabilities get flagged before they merge."],
   seg:()=>["Hit a misconfig wall","What stopped it: ","CodeAnt IaC scanning",". Cloud misconfigurations are caught before deploy."],
-  ips:()=>["Blocked at the gate","What stopped it: ","CodeAnt quality gates",". Risky merges and vulnerable dependencies don't get through."],
+  ips:()=>["Blocked at the gate","What stopped it: ","CodeAnt quality gates",". Merges that fail security or quality checks don't get through."],
   pipe:()=>["Hit a code block","What stopped it: ","complex code",". CodeAnt flags dead code, duplication and complexity."],
   ground:()=>["Broke the build","What stopped it: ","my own flying",". CodeAnt's checks were waiting further down."],
   ceiling:()=>["Tried to skip review","What stopped it: ","the pipeline",". Every change goes through a pull request."]
@@ -909,18 +910,18 @@ async function makeCard(){
   font(600,40);const rk="Rank: "+rankOf(score),rw=c.measureText(rk).width+44;R_("#29251f",962-rw,447,rw,74);c.fillStyle="#f2c230";c.fillText(rk,962-rw+22,497);
   // Purdue ladder
   for(let i=0;i<4;i++){const y=604+i*68,st=i<runLvMax?"past":i===runLvMax?"on":"off";
-    if(st==="on"){c.fillStyle="rgba(255,107,139,.35)";c.fillRect(66,y-6,56,56)}
-    R_("#121614",72,y,44,44);R_(st==="on"?"#ff6b8b":st==="past"?"#5b6e66":"#2a2845",77,y+5,34,34);
+    if(st==="on"){c.fillStyle="rgba(255,107,107,.35)";c.fillRect(66,y-6,56,56)}
+    R_("#121614",72,y,44,44);R_(st==="on"?"#ff6b6b":st==="past"?"#5b6e66":"#1a1a24",77,y+5,34,34);
     font(st==="on"?600:400,32);c.fillStyle=st==="on"?"#ffffff":"#cfd2e8";c.fillText(LV[i].id,135,y+34);c.fillText(LV[i].name,213,y+34)}
   // bot + cage
   const cx=798,cy=704;
-  if(trapped){c.imageSmoothingEnabled=false;{const bh=Math.round(150*BOT.height/BOT.width);c.drawImage(BOT,cx-75,cy-bh/2+6,150,bh)}R_("#ff6b8b",658,604,280,10);R_("#ff6b8b",658,794,280,10);for(let x=666;x<=930;x+=52)R_("#ff6b8b",x,604,8,200)}
+  if(trapped){c.imageSmoothingEnabled=false;{const bh=Math.round(150*BOT.height/BOT.width);c.drawImage(BOT,cx-75,cy-bh/2+6,150,bh)}R_("#ff6b6b",658,604,280,10);R_("#ff6b6b",658,794,280,10);for(let x=666;x<=930;x+=52)R_("#ff6b6b",x,604,8,200)}
   else{c.imageSmoothingEnabled=false;{const bh=Math.round(150*BOT_OFF.height/BOT_OFF.width);c.save();c.translate(cx,cy+10);c.rotate(.35);c.drawImage(BOT_OFF,-75,-bh/2,150,bh);c.restore()}for(const[a,b,col]of[[-110,-40,"#f2a23a"],[96,-60,"#ffe08a"],[-80,70,"#aab3c8"],[110,40,"#f2a23a"],[20,-100,"#ffe08a"]])R_(col,cx+a,cy+b,10,10)}
   font(500,32);const tg=info[0],tw2=c.measureText(tg).width+40,tx=Math.min(1008-tw2,Math.max(560,cx-tw2/2));
-  R_(trapped?"#ff6b8b":"#e8b92e",tx,822,tw2,64);R_(trapped?"#3a0f1c":"#2a2618",tx+5,827,tw2-10,54);c.fillStyle=trapped?"#ffd0dc":"#ffe9a8";c.fillText(tg,tx+20,866);
+  R_(trapped?"#ff6b6b":"#e8b92e",tx,822,tw2,64);R_(trapped?"#3a0f0f":"#2a2618",tx+5,827,tw2-10,54);c.fillStyle=trapped?"#ffd6d6":"#ffe9a8";c.fillText(tg,tx+20,866);
   // USP strip
   R_("#121614",72,930,936,160);R_("rgba(14,15,34,.92)",77,935,926,150);
-  font(400,29);const words=[];info[1].split(" ").forEach(w=>w&&words.push([w,"#e9e6da",400]));info[2].split(" ").forEach(w=>words.push([w,"#ff6b8b",600]));
+  font(400,29);const words=[];info[1].split(" ").forEach(w=>w&&words.push([w,"#e9e6da",400]));info[2].split(" ").forEach(w=>words.push([w,"#ff6b6b",600]));
   const tail=info[3];const first=tail[0]===".";if(first){words[words.length-1][0]+=".";}
   (first?tail.slice(1):tail).trim().split(" ").forEach(w=>w&&words.push([w,"#e9e6da",400]));
   let x=100,y=980;for(const[w,col,wt]of words){font(wt,29);const ww=c.measureText(w+" ").width;if(x+ww>985){x=100;y+=40}c.fillStyle=col;c.fillText(w,x,y);x+=ww}
@@ -982,7 +983,7 @@ function redrawIcons(){icon("icoBot",x=>x.drawImage(BOT,0,0),BOT.width,BOT.heigh
   if(PLC_IMG)icon("icoPlc",x=>x.drawImage(PLC_IMG,0,0),PLC_IMG.naturalWidth,PLC_IMG.naturalHeight,30/PLC_IMG.naturalWidth);else icon("icoPlc",x=>x.drawImage(PLC[0],0,0),12,14,2.6)}
 redrawIcons();
 icon("icoIps",x=>{x.fillStyle="#3a1210";x.fillRect(4,0,8,3);x.fillRect(4,13,8,3);x.globalAlpha=.4;x.fillStyle="#ff4a3a";x.fillRect(6,3,4,10);x.globalAlpha=1;x.fillStyle="#ff7a6a";x.fillRect(7,3,2,10)},16,16,2.4);
-icon("icoKey",x=>{x.drawImage(FIX,2,0);x.drawImage(KEY,0,11);x.fillStyle="#ff6b8b";[[1,12],[11,10],[6,17],[13,15]].forEach(([a,b])=>x.fillRect(a,b,1,1))},14,18,2.4);
+icon("icoKey",x=>{x.drawImage(PKG,2,0);x.drawImage(PKG,2,11);x.fillStyle="#ff6b6b";[[0,12],[13,11],[1,19],[13,18],[3,12]].forEach(([a,b])=>x.fillRect(a,b,1,1))},14,20,2.2);
 
 /* =============== player + database =============== */
 const API_URL="https://juemnyijhvqlpxrvsibg.supabase.co", API_KEY="sb_publishable_LDopq-erBLDteakwk08pOQ_qKnIafQI";
