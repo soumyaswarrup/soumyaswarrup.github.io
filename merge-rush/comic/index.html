@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Checkmate #1 — your CodeAnt comic is unlocked</title>
+<meta name="theme-color" content="#121018">
+<meta property="og:title" content="Checkmate #1: The Eleven-Year Shortcut — CodeAnt Comics">
+<meta property="og:description" content="He doesn't break in. He gets merged. A CodeAnt comic, unlocked by scoring 10 in Merge Rush.">
+<meta property="og:image" content="https://soumyaswarrup.github.io/merge-rush/comic/pages/page-01.jpg">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bangers&family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:#121018;color:#f4f1ff;font-family:Inter,system-ui,sans-serif;min-height:100vh;
+  background-image:radial-gradient(rgba(255,255,255,.05) 1px,transparent 1.4px);background-size:10px 10px}
+.wrap{max-width:760px;margin:0 auto;padding:max(18px,env(safe-area-inset-top)) 16px 40px}
+.bang{font-family:Bangers,Impact,sans-serif;letter-spacing:.04em;font-weight:400}
+
+/* hero */
+.hero{position:relative;text-align:center;padding:26px 16px 22px;border:4px solid #000;background:#5b4bd6;box-shadow:8px 8px 0 #000;overflow:hidden;margin-top:6px}
+.hero::before{content:"";position:absolute;inset:-50%;background:repeating-conic-gradient(from 0deg,rgba(255,255,255,.09) 0 9deg,transparent 9deg 18deg);animation:spin 40s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.hero>*{position:relative}
+.kicker{display:inline-block;background:#ffd84d;color:#111;border:3px solid #000;padding:4px 12px;font-size:16px;box-shadow:3px 3px 0 #000;transform:rotate(-2deg)}
+.big{font-size:clamp(46px,13vw,84px);line-height:.92;margin:14px 0 8px;color:#fff;-webkit-text-stroke:3px #000;paint-order:stroke fill;text-shadow:5px 5px 0 #000}
+.big em{font-style:normal;color:#5ff5d0}
+.thanks{font-size:17px;line-height:1.5;max-width:520px;margin:0 auto;color:#fff;font-weight:500}
+.thanks b{color:#ffd84d}
+.score{display:inline-flex;gap:10px;margin-top:16px;flex-wrap:wrap;justify-content:center}
+.score span{background:#fff;color:#111;border:3px solid #000;padding:6px 12px;box-shadow:3px 3px 0 #000;font-size:18px}
+.score span b{font-weight:400;color:#6b2fa8}
+.confetti{position:absolute;width:10px;height:14px;top:-20px;animation:fall linear forwards;z-index:0}
+@keyframes fall{to{transform:translateY(560px) rotate(720deg);opacity:0}}
+
+/* actions */
+.actions{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:22px 0}
+.btn{display:flex;align-items:center;justify-content:center;height:54px;border:3px solid #000;box-shadow:4px 4px 0 #000;font-family:Bangers,sans-serif;font-size:22px;letter-spacing:.05em;text-decoration:none;color:#111;background:#ffd84d;cursor:pointer;transition:transform .06s}
+.btn:active{transform:translate(3px,3px);box-shadow:1px 1px 0 #000}
+.btn.teal{background:#5ff5d0}.btn.full{grid-column:1/-1;background:#ff6b6b;color:#fff;-webkit-text-stroke:.6px #000;font-size:26px}
+.btn.li{grid-column:1/-1;background:#0a66c2;color:#fff;cursor:pointer;width:100%}
+.btn:focus-visible{outline:3px solid #fff;outline-offset:3px}
+
+.voucher{background:#fff;color:#111;border:4px solid #000;box-shadow:6px 6px 0 #000;padding:14px 16px;margin-bottom:26px;display:none}
+.voucher.on{display:block}
+.voucher .t{font-size:20px;color:#c4600f}
+.voucher .c{font-family:ui-monospace,Menlo,monospace;font-weight:700;font-size:28px;letter-spacing:.06em;margin:4px 0}
+.voucher small{font-size:14px;color:#555;line-height:1.4;display:block}
+
+/* reader */
+.readerhead{display:flex;justify-content:space-between;align-items:baseline;margin:8px 0 12px}
+.readerhead h2{font-size:30px;color:#ffd84d}
+.readerhead span{font-size:14px;color:#a9a3c7}
+.pg{position:relative;margin-bottom:18px;border:3px solid #000;box-shadow:6px 6px 0 #000;background:#1d1a2a;aspect-ratio:900/1391}
+.pg img{display:block;width:100%;height:100%;object-fit:cover}
+.pg i{position:absolute;right:8px;top:8px;font-style:normal;font-family:Bangers,sans-serif;background:#000;color:#fff;font-size:14px;padding:2px 8px;letter-spacing:.06em}
+.prog{position:fixed;left:0;top:0;height:5px;background:#5ff5d0;width:0;z-index:9;box-shadow:0 0 8px #5ff5d0}
+.chip{position:fixed;right:14px;bottom:max(14px,env(safe-area-inset-bottom));z-index:9;background:#ffd84d;color:#111;border:3px solid #000;box-shadow:3px 3px 0 #000;font-family:Bangers,sans-serif;font-size:18px;letter-spacing:.05em;padding:6px 12px;display:none}
+.chip.on{display:block}
+
+.end{text-align:center;margin-top:30px;padding:22px 16px;border:4px solid #000;background:#ffd84d;color:#111;box-shadow:8px 8px 0 #000}
+.end h3{font-size:36px}
+.end p{font-size:16px;line-height:1.5;margin:6px auto 16px;max-width:480px}
+.foot{margin-top:28px;text-align:center;font-size:12.5px;color:#8d87a3;line-height:1.5}
+
+/* locked */
+.locked{display:none;text-align:center;padding:40px 18px;border:4px solid #000;background:#1d1a2a;box-shadow:8px 8px 0 #000;margin-top:20px}
+.locked h1{font-size:44px;color:#ff6b6b;-webkit-text-stroke:2px #000;paint-order:stroke fill}
+.locked p{font-size:17px;line-height:1.5;margin:10px auto 22px;max-width:420px;color:#ddd}
+.preview{width:60%;max-width:260px;margin:0 auto 20px;border:3px solid #000;filter:blur(6px) brightness(.6)}
+body.is-locked .unlocked{display:none}
+body.is-locked .locked{display:block}
+@media (prefers-reduced-motion:reduce){.hero::before,.confetti{animation:none}}
+</style>
+</head>
+<body>
+<div class="prog" id="prog"></div>
+<div class="wrap">
+
+  <div class="locked">
+    <img class="preview" src="pages/page-01.jpg" alt="">
+    <h1 class="bang">LOCKED</h1>
+    <p>This comic is a reward. Score <b>10 or more</b> in Merge Rush and it opens up for you.</p>
+    <a class="btn full" href="../">Play Merge Rush</a>
+  </div>
+
+  <div class="unlocked">
+    <section class="hero" id="hero">
+      <span class="kicker bang">COMIC UNLOCKED</span>
+      <h1 class="big bang">YOU CROSSED <em>10!</em></h1>
+      <p class="thanks">Thanks for playing<span id="who"></span>. Your pull request made it far enough to earn it, so here's <b>Checkmate #1: The Eleven-Year Shortcut</b>. He doesn't break in. He gets merged.</p>
+      <div class="score bang" id="scoreRow"></div>
+    </section>
+
+    <div class="actions">
+      <a class="btn full" href="#read">Start reading</a>
+      <a class="btn teal" href="Checkmate-CodeAnt-Comics-1.pdf" download>Download PDF</a>
+      <a class="btn" href="../">Play again</a>
+      <button class="btn li" id="shareLi" type="button">Share on LinkedIn</button>
+    </div>
+
+    <div class="voucher" id="voucher">
+      <div class="t bang">WANT THE PRINTED COPY?</div>
+      <small style="font-size:16px;color:#222">Ask at the <b>booth</b>. We'll hand you one, while stocks last.</small>
+    </div>
+
+    <div class="readerhead" id="read"><h2 class="bang">CHECKMATE #1</h2><span>46 pages, scroll to read</span></div>
+    <div id="pages"></div>
+
+    <section class="end">
+      <h3 class="bang">THE END... FOR NOW.</h3>
+      <p>Every team has a Checkmate. Not every team has an Ant. Beat your score, then share your score card and tag a friend.</p>
+      <a class="btn full" href="../">Play again</a>
+    </section>
+    <p class="foot">Checkmate is a story about the small shortcuts that slip through code review.<br>Story &amp; concept: Soumya Swarup Sahoo. An independent fan comic inspired by CodeAnt AI. Not an official CodeAnt AI publication. All characters and companies are fictional.</p>
+  </div>
+</div>
+<div class="chip" id="chip">1 / 46</div>
+
+<script>
+(function(){
+  const get=k=>{try{const v=localStorage.getItem("ca1_"+k);return v==null?null:JSON.parse(v)}catch(e){return null}};
+  const UNLOCK=10;
+  const qs=new URLSearchParams(location.search);
+  const s=parseInt(qs.get("s")||"0",10)||0;
+  const best=Math.max(get("best")||0,s);
+  const nick=(get("nick")||get("defNick")||"").toString().replace(/[<>&"]/g,"").slice(0,14);
+  if(best<UNLOCK){document.body.classList.add("is-locked");return}
+
+  if(nick) document.getElementById("who").textContent=", "+nick;
+  const rank=v=>v>=30?"Merge Master":v>=18?"Staff Engineer":v>=10?"Senior Dev":v>=5?"Junior Dev":"Intern";
+  const shown=s||best;
+  document.getElementById("scoreRow").innerHTML=`<span>SCORE <b>${shown}</b></span><span>RANK <b>${rank(shown)}</b></span>`;
+  document.getElementById("voucher").classList.add("on");
+
+  // share on LinkedIn: card image from the game run if we have it
+  document.getElementById("shareLi").onclick=async()=>{
+    log("share_card","linkedin comic score "+shown);
+    const link="https://soumyaswarrup.github.io/merge-rush/";
+    let text=null;try{text=sessionStorage.getItem("ca_caption")}catch(e){}
+    if(!text)text=`I scored ${shown} in Merge Rush and made rank ${rank(shown)}, then read Checkmate #1. Can you ship cleaner? ${link} #CodeAnt #AICodeReview`;
+    try{await navigator.clipboard.writeText(text)}catch(e){}
+    let blob=null;try{const d=sessionStorage.getItem("ca_card");if(d)blob=await (await fetch(d)).blob()}catch(e){}
+    const file=blob?new File([blob],"merge-rush-score.jpg",{type:"image/jpeg"}):null;
+    if(file&&navigator.canShare&&navigator.canShare({files:[file]})){
+      try{await navigator.share({files:[file],text});return}catch(e){if(e&&e.name==="AbortError")return}}
+    if(blob){try{const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="merge-rush-score.jpg";document.body.appendChild(a);a.click();a.remove()}catch(e){}}
+    window.open("https://www.linkedin.com/feed/?shareActive=true&text="+encodeURIComponent(text),"_blank","noopener");
+  };
+
+  // pages
+  const host=document.getElementById("pages"),N=46;
+  for(let i=1;i<=N;i++){const d=document.createElement("div");d.className="pg";d.dataset.n=i;
+    const im=new Image();im.alt="Comic page "+i;im.loading=i<=2?"eager":"lazy";im.decoding="async";im.src=`pages/page-${String(i).padStart(2,"0")}.jpg`;
+    const tag=document.createElement("i");tag.textContent=i+" / "+N;d.append(im,tag);host.append(d)}
+
+  // progress + page chip
+  const chip=document.getElementById("chip"),prog=document.getElementById("prog"),pgs=[...document.querySelectorAll(".pg")];
+  const io=new IntersectionObserver(es=>{es.forEach(e=>{if(e.isIntersecting){chip.textContent=e.target.dataset.n+" / "+N}})},{rootMargin:"-45% 0px -45% 0px"});
+  pgs.forEach(p=>io.observe(p));
+  addEventListener("scroll",()=>{const h=document.documentElement;prog.style.width=(h.scrollTop/(h.scrollHeight-h.clientHeight)*100)+"%";
+    const r=host.getBoundingClientRect();chip.classList.toggle("on",r.top<innerHeight*.5&&r.bottom>innerHeight*.5)},{passive:true});
+
+  // reading analytics (anonymous device id shared with the game)
+  const DEV=get("device");
+  const log=(kind,detail)=>{if(!DEV)return;fetch("https://juemnyijhvqlpxrvsibg.supabase.co/rest/v1/rpc/ca_log_event",{method:"POST",keepalive:true,
+    headers:{"Content-Type":"application/json",apikey:"sb_publishable_LDopq-erBLDteakwk08pOQ_qKnIafQI"},body:JSON.stringify({p_device:DEV,p_kind:kind,p_detail:detail||null})}).catch(()=>{})};
+  log("comic_open",s?("score "+s):"");
+  let maxSeen=0,sent=0;
+  const io2=new IntersectionObserver(es=>{es.forEach(e=>{if(e.isIntersecting){const n=+e.target.dataset.n;if(n>maxSeen)maxSeen=n}})},{threshold:.5});
+  pgs.forEach(p=>io2.observe(p));
+  setInterval(()=>{if(maxSeen>sent&&(maxSeen-sent>=4||maxSeen===N)){sent=maxSeen;log("comic_page","page "+maxSeen)}},3000);
+  addEventListener("pagehide",()=>{if(maxSeen>sent){sent=maxSeen;log("comic_page","page "+maxSeen)}});
+  document.querySelectorAll('a[download]').forEach(a=>a.addEventListener("click",()=>log("pdf_download","")));
+
+  // confetti
+  if(!matchMedia("(prefers-reduced-motion: reduce)").matches){const hero=document.getElementById("hero"),cols=["#ffd84d","#5ff5d0","#ff6b6b","#fff","#d6a8ff"];
+    for(let i=0;i<46;i++){const c=document.createElement("b");c.className="confetti";c.style.left=Math.random()*100+"%";c.style.background=cols[i%cols.length];
+      c.style.animationDuration=(1.8+Math.random()*2.2)+"s";c.style.animationDelay=(Math.random()*.9)+"s";hero.append(c)}}
+})();
+</script>
+</body>
+</html>

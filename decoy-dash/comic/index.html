@@ -120,9 +120,7 @@ body.is-locked .locked{display:block}
 
 <script>
 (function(){
-  const CA=new URLSearchParams(location.search).get("g")==="ca";
-  if(CA)document.querySelectorAll('a[href="../"]').forEach(el=>{el.href="../../merge-rush/";if(/Decoy Dash/.test(el.textContent))el.textContent="Play Merge Rush"});
-  const get=k=>{try{const v=localStorage.getItem((CA?"ca1_":"dd2_")+k);return v==null?null:JSON.parse(v)}catch(e){return null}};
+  const get=k=>{try{const v=localStorage.getItem("dd2_"+k);return v==null?null:JSON.parse(v)}catch(e){return null}};
   const UNLOCK=10;
   const qs=new URLSearchParams(location.search);
   const s=parseInt(qs.get("s")||"0",10)||0;
@@ -131,8 +129,7 @@ body.is-locked .locked{display:block}
   if(best<UNLOCK){document.body.classList.add("is-locked");return}
 
   if(nick) document.getElementById("who").textContent=", "+nick;
-  if(CA){const t=document.querySelector(".thanks");if(t)t.innerHTML=t.innerHTML.replace("You slipped past the decoys long enough to earn it","Your pull request made it far enough to earn it")}
-  const rank=CA?(v=>v>=30?"Merge Master":v>=18?"Staff Engineer":v>=10?"Senior Dev":v>=5?"Junior Dev":"Intern"):v=>v>=30?"Process Ghost":v>=18?"PLC Whisperer":v>=10?"Lateral Mover":v>=5?"Port Scanner":"Script Kiddie";
+  const rank=v=>v>=30?"Process Ghost":v>=18?"PLC Whisperer":v>=10?"Lateral Mover":v>=5?"Port Scanner":"Script Kiddie";
   const shown=s||best;
   document.getElementById("scoreRow").innerHTML=`<span>SCORE <b>${shown}</b></span><span>RANK <b>${rank(shown)}</b></span>`;
   document.getElementById("voucher").classList.add("on");
@@ -140,11 +137,11 @@ body.is-locked .locked{display:block}
   // share on LinkedIn: card image from the game run if we have it
   document.getElementById("shareLi").onclick=async()=>{
     log("share_card","linkedin comic score "+shown);
-    const link=CA?"https://soumyaswarrup.github.io/merge-rush/":"https://soumyaswarrup.github.io/decoy-dash/";
-    let text=null;try{text=sessionStorage.getItem(CA?"ca_caption":"dd_caption")}catch(e){}
-    if(!text)text=CA?`I scored ${shown} in Merge Rush and made rank ${rank(shown)}. Can you ship cleaner? ${link} #CodeAnt #AICodeReview`:`I scored ${shown} in Decoy Dash and made rank ${rank(shown)}, slipping past the decoys inside an OT plant. Think you can beat me? ${link} #AISS2026 #OTSecurity #Deception @WhizHack`;
+    const link="https://soumyaswarrup.github.io/decoy-dash/";
+    let text=null;try{text=sessionStorage.getItem("dd_caption")}catch(e){}
+    if(!text)text=`I scored ${shown} in Decoy Dash and made rank ${rank(shown)}, slipping past the decoys inside an OT plant. Think you can beat me? ${link} #AISS2026 #OTSecurity #Deception @WhizHack`;
     try{await navigator.clipboard.writeText(text)}catch(e){}
-    let blob=null;try{const d=sessionStorage.getItem(CA?"ca_card":"dd_card");if(d)blob=await (await fetch(d)).blob()}catch(e){}
+    let blob=null;try{const d=sessionStorage.getItem("dd_card");if(d)blob=await (await fetch(d)).blob()}catch(e){}
     const file=blob?new File([blob],"decoy-dash-score.jpg",{type:"image/jpeg"}):null;
     if(file&&navigator.canShare&&navigator.canShare({files:[file]})){
       try{await navigator.share({files:[file],text});return}catch(e){if(e&&e.name==="AbortError")return}}
@@ -167,7 +164,7 @@ body.is-locked .locked{display:block}
 
   // reading analytics (anonymous device id shared with the game)
   const DEV=get("device");
-  const log=(kind,detail)=>{if(!DEV)return;fetch("https://juemnyijhvqlpxrvsibg.supabase.co/rest/v1/rpc/"+(CA?"ca_log_event":"log_event"),{method:"POST",keepalive:true,
+  const log=(kind,detail)=>{if(!DEV)return;fetch("https://juemnyijhvqlpxrvsibg.supabase.co/rest/v1/rpc/log_event",{method:"POST",keepalive:true,
     headers:{"Content-Type":"application/json",apikey:"sb_publishable_LDopq-erBLDteakwk08pOQ_qKnIafQI"},body:JSON.stringify({p_device:DEV,p_kind:kind,p_detail:detail||null})}).catch(()=>{})};
   log("comic_open",s?("score "+s):"");
   let maxSeen=0,sent=0;
