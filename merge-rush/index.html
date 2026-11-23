@@ -99,7 +99,7 @@ input::placeholder{color:#5f5a92}
 .ann i.lit{background:var(--flag);color:#3a0f14;box-shadow:0 0 12px rgba(255,93,108,.75);animation:blink .5s steps(1) 4}
 @keyframes blink{50%{background:#a8323e}}
 #mute{pointer-events:auto;width:38px;height:32px;padding:0;font-size:14px;background:var(--slate2);color:var(--lilac);border:2px solid var(--edge);box-shadow:inset 0 0 0 1px var(--line),0 3px 0 var(--edge);cursor:pointer}
-#score{position:absolute;left:0;right:0;top:calc(var(--sat) + 64px);text-align:center;font-size:64px;font-weight:700;line-height:1;pointer-events:none;opacity:0;color:#fff;
+#score{position:absolute;left:0;right:0;top:calc(var(--sat) + 64px);text-align:center;font-size:clamp(30px,8vw,40px);font-weight:700;line-height:1;pointer-events:none;opacity:0;color:#fff;
   text-shadow:3px 0 0 var(--edge),-3px 0 0 var(--edge),0 3px 0 var(--edge),0 -3px 0 var(--edge),3px 3px 0 var(--edge),-3px 3px 0 var(--edge),3px -3px 0 var(--edge),-3px -3px 0 var(--edge),5px 6px 0 var(--violet),6px 8px 0 var(--edge)}
 #score.on{opacity:1}
 #score.bump{animation:bump .16s steps(2)}
@@ -697,6 +697,7 @@ function finish(){
   $("pTitle").textContent=C[0];$("pDecoyRow").hidden=deathReason!=="decoy";$("pDecoy").textContent=deathLabel;$("pLesson").textContent=C[1];$("pLevel").textContent=L.id+" "+L.name;
   $("pScore").textContent=score;$("pRank").textContent=rankOf(score);$("pBestV").textContent=best;$("pBest").hidden=!(isBest&&score>0);
   renderStub();show("over");
+  ovs.over.style.pointerEvents="none";setTimeout(()=>{ovs.over.style.pointerEvents=""},1000);
   if(score>=UNLOCK)resultsCountdown(score);
 }
 const ON_PAGES=/github\.io$/.test(location.hostname);
@@ -729,6 +730,7 @@ function resultsCountdown(sc){
   const box=document.createElement("div");box.className="cd";box.id="cdBox";
   box.innerHTML=`<div class="unl-bar"><i></i></div><span>Opening <b>Ship It Safe</b> in 10s</span><div class="cd-b"><a class="btn" href="${url}">Read it now</a><button class="btn grey" type="button">Stay here</button></div>`;
   $("stub").append(box);const fill=box.querySelector("i"),txt=box.querySelector("span");
+  box.style.pointerEvents="none";box.style.opacity=".6";setTimeout(()=>{box.style.pointerEvents="";box.style.opacity=""},1500);
   box.querySelector("button").onclick=e=>{e.stopPropagation();cdStop()};
   box.querySelector("a").onclick=()=>{clearInterval(cdTick)};
   if(!ON_PAGES){box.querySelector("a").target="_blank"}
