@@ -206,6 +206,25 @@ input::placeholder{color:#5f5a92}
 .panel.back .checks,.panel.back .field,.panel.back .consent,.panel.back #btnPlay{display:none}
 .notyou{display:block;width:100%;margin-top:10px;background:none;border:0;color:var(--lilac);font-family:var(--read);font-size:14px;text-decoration:underline;text-underline-offset:3px;cursor:pointer;padding:6px}
 .notyou:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
+
+/* TV board on portrait screens (phones, vertical monitors) */
+#tv .lr .nm{min-width:0}
+@media (max-aspect-ratio:1/1){
+  #tv{padding:calc(var(--sat) + 6vw) 5vw calc(var(--sab) + 6vw);gap:6vw;overflow-y:auto}
+  #tv .tvtop{flex-direction:column;align-items:center;text-align:center;gap:5vw}
+  #tv .tvtop>div:last-child{order:-1;width:100%}
+  #tv .title{font-size:15vw}
+  #tv .tvtop .logo{height:auto;width:72vw;max-width:420px;margin:0 auto}
+  #tv .tvsub{font-size:4.2vw;margin-top:3vw;line-height:1.4}
+  #tv .tvqr{padding:2.4vw;gap:1.6vw;border-width:3px}
+  #tv .tvqr canvas{width:38vw;height:38vw;max-width:240px;max-height:240px}
+  #tv .tvqr span{font-size:3.8vw}
+  #tv .paper{flex:none;font-size:4vw;padding:4.5vw 5vw;margin:0}
+  #tv .ph{font-size:3.6vw}#tv .ph b{font-size:4.6vw}
+  #tv .lr{font-size:5.4vw;grid-template-columns:6vw 1fr auto auto;gap:3vw;padding:3vw 0}
+  #tv .lr .lv{font-size:3.4vw}
+  #tv .empty{font-size:4vw}
+}
 @media (prefers-reduced-motion:reduce){*{animation:none!important}}
 </style>
 </head>
