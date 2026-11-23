@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>The Trap Door: how cyber deception catches attackers</title>
+<meta name="description" content="A 16-page animated field guide to cyber deception, from WhizHack.">
+<meta property="og:title" content="The Trap Door: how cyber deception catches attackers">
+<meta property="og:description" content="A 16-page animated field guide to cyber deception, unlocked in Decoy Dash.">
+<meta property="og:image" content="https://soumyaswarrup.github.io/decoy-dash/book/img/p01.jpg">
+<meta name="theme-color" content="#0b1724">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@500;700&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+:root{--navy:#0b1724;--ink:#06101a;--teal:#2ec4b6;--amber:#f4a259;--red:#e63946;--paper:#f2ead9;--paper2:#e6dcc6;--txt:#14202b}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:var(--navy);color:var(--paper);font-family:"Atkinson Hyperlegible",system-ui,sans-serif;overflow:hidden;-webkit-tap-highlight-color:transparent}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+.px{font-family:"Pixelify Sans",monospace}
+
+/* top bar */
+#top{position:fixed;inset:0 0 auto 0;z-index:20;padding:calc(env(safe-area-inset-top) + 10px) 14px 8px;display:flex;align-items:center;gap:12px;background:linear-gradient(var(--navy) 55%,transparent)}
+#segs{flex:1;display:flex;gap:3px}
+#segs i{flex:1;height:4px;background:#ffffff26;border-radius:1px;overflow:hidden;position:relative}
+#segs i.on::after{content:"";position:absolute;inset:0;background:var(--teal)}
+#count{font-size:13px;color:#ffffffb0;min-width:44px;text-align:right}
+#close{font-size:13px;color:#ffffffb0;padding:6px 2px}
+
+/* pages */
+#book{position:fixed;inset:0;perspective:1600px}
+.pg{position:absolute;inset:0;display:grid;grid-template-rows:minmax(0,58%) auto;padding:calc(env(safe-area-inset-top) + 34px) 14px calc(env(safe-area-inset-bottom) + 64px);
+  visibility:hidden;transform-origin:left center;transition:transform .55s cubic-bezier(.2,.8,.2,1),opacity .45s}
+.pg.cur{visibility:visible}
+.pg.out-l{visibility:visible;transform:translateX(-30%) rotateY(18deg);opacity:0}
+.pg.out-r{visibility:visible;transform:translateX(30%) rotateY(-18deg);opacity:0}
+.pg.in-l{transform:translateX(30%) rotateY(-18deg);opacity:0}
+.pg.in-r{transform:translateX(-30%) rotateY(18deg);opacity:0}
+
+.art{position:relative;overflow:hidden;border:3px solid var(--ink);box-shadow:5px 5px 0 var(--ink),0 0 0 1px #ffffff14;background:#000;min-height:0}
+.art img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transform-origin:50% 60%}
+.cur .art img{animation:kb 16s ease-out forwards}
+@keyframes kb{from{transform:scale(1.02)}to{transform:scale(1.13) translateY(-1.5%)}}
+.art::after{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(#00000038 1px,transparent 1.4px) 0 0/5px 5px;mix-blend-mode:multiply;opacity:.55}
+
+/* caption panel */
+.cap{position:relative;margin-top:14px;background:var(--paper);color:var(--txt);border:3px solid var(--ink);box-shadow:5px 5px 0 var(--ink);padding:14px 16px 16px;transform:rotate(-.4deg);
+  overflow:auto;max-height:100%}
+.cap .no{display:inline-block;background:var(--amber);color:var(--ink);border:2px solid var(--ink);font-size:12px;padding:1px 7px;transform:rotate(-2deg)}
+.cap h2{font-family:"Pixelify Sans",monospace;font-weight:700;font-size:clamp(21px,5.6vw,30px);line-height:1.08;color:var(--ink);margin:4px 0 8px}
+.cap p{font-size:clamp(15px,3.9vw,17px);line-height:1.5}
+.cap p+p{margin-top:8px}
+.key{display:inline-block;margin-top:12px;background:var(--ink);color:var(--paper);padding:6px 10px 6px;font-size:14.5px;line-height:1.35;box-shadow:3px 3px 0 var(--teal);transform:rotate(-1deg) scale(.6);opacity:0}
+.key b{color:var(--teal)}
+.cur .key{animation:stamp .5s cubic-bezier(.2,1.6,.4,1) .9s forwards}
+@keyframes stamp{to{transform:rotate(-1deg) scale(1);opacity:1}}
+.cur .cap h2,.cur .cap p,.cur .cap ol,.cur .cap .quiz{animation:rise .5s ease-out both}
+.cur .cap p{animation-delay:.12s}.cur .cap p+p{animation-delay:.22s}
+@keyframes rise{from{opacity:0;transform:translateY(8px)}}
+
+/* comic sound-effect bursts */
+.sfx{position:absolute;z-index:3;font-family:"Pixelify Sans",monospace;font-weight:700;color:var(--paper);font-size:clamp(26px,8vw,44px);line-height:1;padding:16px 22px;
+  background:var(--red);clip-path:polygon(50% 0,61% 22%,85% 8%,78% 34%,100% 42%,80% 58%,94% 84%,66% 74%,54% 100%,42% 76%,14% 92%,22% 64%,0 52%,20% 38%,8% 12%,36% 24%);
+  text-shadow:2px 2px 0 var(--ink);transform:scale(0) rotate(-12deg)}
+.sfx.teal{background:var(--teal);color:var(--ink);text-shadow:2px 2px 0 #ffffff80}
+.sfx.amber{background:var(--amber);color:var(--ink);text-shadow:2px 2px 0 #ffffff80}
+.cur .sfx{animation:pop .6s cubic-bezier(.2,1.7,.4,1) 1.3s forwards,wob 2.4s ease-in-out 2s infinite}
+@keyframes pop{to{transform:scale(1) rotate(-8deg)}}
+@keyframes wob{0%,100%{transform:scale(1) rotate(-8deg)}50%{transform:scale(1.06) rotate(-5deg)}}
+
+/* overlays */
+.scan{position:absolute;inset:0;pointer-events:none;background:linear-gradient(transparent 0 46%,#2ec4b633 49%,#2ec4b6aa 50%,transparent 52%);background-size:100% 220%;animation:scan 3.6s linear infinite}
+@keyframes scan{from{background-position:0 120%}to{background-position:0 -120%}}
+.pulse{position:absolute;inset:0;pointer-events:none;box-shadow:inset 0 0 0 0 #e6394600;animation:pulse 1.1s ease-in-out infinite}
+@keyframes pulse{50%{box-shadow:inset 0 0 70px 12px #e63946aa}}
+.flick{position:absolute;inset:0;pointer-events:none;background:linear-gradient(115deg,transparent 48%,#ff3b4ad0 49.4%,transparent 50.8%),linear-gradient(62deg,transparent 54%,#ff3b4ab0 55.2%,transparent 56.4%);mix-blend-mode:screen;animation:flick 2.2s steps(1) infinite}
+@keyframes flick{0%,40%,100%{opacity:1}42%,46%{opacity:.15}48%{opacity:1}70%{opacity:.4}72%{opacity:1}}
+canvas.fx{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.chip{position:absolute;z-index:3;left:12px;bottom:12px;background:var(--ink);border:2px solid var(--amber);color:var(--amber);font-family:"Pixelify Sans",monospace;font-size:15px;padding:6px 10px}
+.chip b{font-size:22px;color:#fff;display:block}
+
+/* cover */
+.cover .art{grid-row:1/3}
+.cover .cap{display:none}
+.title{position:absolute;z-index:3;inset:7% 7% auto 7%;text-align:left}
+.title small{display:inline-block;font-family:"Pixelify Sans",monospace;font-size:13px;color:var(--ink);background:var(--teal);padding:3px 8px;transform:rotate(-2deg)}
+.title h1{font-family:"Pixelify Sans",monospace;font-weight:700;font-size:clamp(48px,14vw,84px);line-height:.92;color:var(--paper);margin-top:12px;text-shadow:4px 4px 0 var(--ink),-1px -1px 0 var(--ink)}
+.title p{margin-top:12px;font-size:clamp(16px,4.4vw,20px);max-width:22ch;color:#fff;text-shadow:2px 2px 0 var(--ink);line-height:1.35}
+.cover .go{position:absolute;z-index:3;left:7%;bottom:7%;background:var(--amber);color:var(--ink);border:3px solid var(--ink);box-shadow:4px 4px 0 var(--ink);font-family:"Pixelify Sans",monospace;font-weight:700;font-size:19px;padding:12px 18px}
+.cover .go:active{transform:translate(2px,2px);box-shadow:2px 2px 0 var(--ink)}
+.cur .title>*{animation:rise .6s ease-out both}.cur .title h1{animation-delay:.15s}.cur .title p{animation-delay:.35s}
+
+/* steps */
+.cap ol{list-style:none;counter-reset:s;margin-top:4px}
+.cap li{counter-increment:s;position:relative;padding:5px 0 5px 34px;font-size:clamp(14.5px,3.8vw,16.5px);line-height:1.4;opacity:0;transform:translateX(-8px)}
+.cap li::before{content:counter(s);position:absolute;left:0;top:4px;width:24px;height:24px;display:grid;place-items:center;background:var(--ink);color:var(--teal);font-family:"Pixelify Sans",monospace;font-size:14px}
+.cap li.hot::before{background:var(--red);color:#fff}
+.cur .cap li{animation:li .4s ease-out forwards}
+.cur .cap li:nth-child(1){animation-delay:.3s}.cur .cap li:nth-child(2){animation-delay:.8s}.cur .cap li:nth-child(3){animation-delay:1.3s}.cur .cap li:nth-child(4){animation-delay:1.8s}.cur .cap li:nth-child(5){animation-delay:2.3s}
+@keyframes li{to{opacity:1;transform:none}}
+
+/* quiz */
+.quiz{display:flex;gap:8px;margin-top:10px}
+.quiz button{flex:1;border:3px solid var(--ink);background:#fff;padding:10px 0;font-family:"Pixelify Sans",monospace;font-size:17px;box-shadow:3px 3px 0 var(--ink);color:var(--ink)}
+.quiz button:active{transform:translate(2px,2px);box-shadow:1px 1px 0 var(--ink)}
+.qa{display:none;margin-top:10px;background:var(--ink);color:var(--paper);padding:10px 12px;font-size:15px;line-height:1.45}
+.qa.on{display:block;animation:rise .4s ease-out}
+.myth{margin-top:10px;font-size:14.5px;line-height:1.45}
+.myth b{background:var(--red);color:#fff;padding:0 5px;margin-right:4px;font-family:"Pixelify Sans",monospace;font-weight:500}
+
+/* glossary */
+dl.gl{display:grid;grid-template-columns:auto 1fr;gap:6px 10px;margin-top:4px;font-size:clamp(14px,3.7vw,16px);line-height:1.38}
+dl.gl dt{font-family:"Pixelify Sans",monospace;font-weight:700;background:var(--ink);color:var(--teal);padding:1px 6px;align-self:start}
+.rule{margin-top:12px;border:3px dashed var(--ink);padding:8px 10px;font-family:"Pixelify Sans",monospace;font-size:18px;text-align:center}
+
+/* back page */
+.back .cap{text-align:left}
+.btns{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
+.btns a,.btns button{display:block;text-align:center;text-decoration:none;border:3px solid var(--ink);box-shadow:3px 3px 0 var(--ink);padding:10px 6px;font-family:"Pixelify Sans",monospace;font-weight:700;font-size:16px;color:var(--ink);background:#fff}
+.btns .li{grid-column:1/-1;background:#0a66c2;color:#fff}
+.btns .pdf{background:var(--amber)}
+.brand{display:inline-block;font-family:"Pixelify Sans",monospace;font-weight:700;font-size:15px;background:var(--teal);color:var(--ink);padding:2px 8px;margin-left:6px;transform:rotate(1.5deg)}
+.pg.tight{grid-template-rows:minmax(0,40%) auto}
+
+/* nav */
+#nav{position:fixed;z-index:20;inset:auto 0 0 0;padding:8px 14px calc(env(safe-area-inset-bottom) + 12px);display:flex;justify-content:space-between;align-items:center;background:linear-gradient(transparent,var(--navy) 45%)}
+#nav button{font-family:"Pixelify Sans",monospace;font-size:16px;padding:9px 14px;border:2px solid #ffffff40;color:#fff}
+#nav #next{background:var(--teal);color:var(--ink);border-color:var(--teal);font-weight:700}
+#nav button:disabled{opacity:.25}
+#hint{font-size:12px;color:#ffffff80}
+
+/* lock */
+#lock{display:none;position:fixed;inset:0;z-index:50;background:var(--navy);place-items:center;text-align:center;padding:24px}
+.is-locked #lock{display:grid}
+#lock h1{font-family:"Pixelify Sans",monospace;font-size:34px;margin-bottom:10px}
+#lock p{max-width:30ch;margin:0 auto 18px;line-height:1.5;color:#ffffffc0}
+#lock a{display:inline-block;background:var(--amber);color:var(--ink);border:3px solid var(--ink);box-shadow:4px 4px 0 #000;padding:12px 18px;font-family:"Pixelify Sans",monospace;font-weight:700;font-size:18px;text-decoration:none}
+
+#toast{position:fixed;z-index:60;left:50%;bottom:90px;transform:translateX(-50%);background:var(--ink);border:2px solid var(--teal);padding:10px 14px;font-size:14px;opacity:0;transition:opacity .3s;pointer-events:none}
+#toast.on{opacity:1}
+
+/* wide screens: art left, text right */
+@media (min-width:860px) and (min-aspect-ratio:4/3){
+  .pg{grid-template-rows:1fr;grid-template-columns:minmax(0,auto) minmax(340px,440px);justify-content:center;gap:34px;padding:70px 40px 90px}
+  .art{aspect-ratio:3/4;height:100%;width:auto}
+  .cap{margin-top:0;align-self:center;max-height:100%}
+  .cover{grid-template-columns:minmax(0,auto)}
+  .cover .art{grid-row:auto}
+  .pg.tight{grid-template-rows:1fr}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}.key,.sfx,.cap li{opacity:1!important;transform:none!important}}
+:focus-visible{outline:3px solid var(--amber);outline-offset:2px}
+</style>
+</head>
+<body>
+<div id="lock"><div><h1>Locked</h1><p>This field guide unlocks when you score 10 or more in Decoy Dash.</p><a href="../">Play Decoy Dash</a></div></div>
+
+<div id="top"><div id="segs" aria-hidden="true"></div><span id="count" class="px">1 / 16</span></div>
+<main id="book" aria-live="polite"></main>
+<nav id="nav"><button id="prev" aria-label="Previous page">Back</button><span id="hint">Swipe or tap the arrows</span><button id="next" aria-label="Next page">Next</button></nav>
+<div id="toast"></div>
+
+<script>
+(function(){
+const get=k=>{try{const v=localStorage.getItem("dd2_"+k);return v==null?null:JSON.parse(v)}catch(e){return null}};
+const UNLOCK=10,qs=new URLSearchParams(location.search),s=parseInt(qs.get("s")||"0",10)||0,best=Math.max(get("best")||0,s);
+if(best<UNLOCK&&!qs.has("preview")){document.body.classList.add("is-locked");return}
+const rank=v=>v>=30?"Process Ghost":v>=18?"PLC Whisperer":v>=10?"Lateral Mover":v>=5?"Port Scanner":"Script Kiddie";
+const shown=s||best;
+
+const P=[
+{cover:1,fx:"dots"},
+{h:"Attackers don't break in. They blend in.",
+ p:["Most attacks today don't look like attacks. Intruders log in with stolen passwords, use the same tools your IT team uses, and move slowly and quietly.",
+    "Often they're inside for weeks before anyone notices."],
+ k:"You can't block what <b>looks normal</b>.",fx:"scan"},
+{h:"Too many alarms. Not enough answers.",
+ p:["Security teams get a flood of alerts every single day, and most of them are harmless.",
+    "The one that matters hides in the pile. By the time someone finds it, the damage is done."],
+ k:"More alerts doesn't mean <b>more security</b>.",fx:"counter"},
+{h:"So flip the game.",
+ p:["Stop hunting for the attacker in a haystack. Make the attacker come to you.",
+    "Plant tempting things inside your network: things an intruder wants, and things no honest employee would ever touch."],
+ k:"Deception turns an attacker's curiosity into <b>your early warning</b>.",sfx:["BAIT!","amber",58,12]},
+{h:"Think of a bait car.",
+ p:["Police sometimes leave a car that looks easy to steal, with a bag on the seat and a hidden camera inside.",
+    "Everyone else walks past. Only a thief opens the door, and the moment they do, they're on camera. Cyber deception works exactly the same way."],
+ k:"Bait + tripwire = <b>proof</b>.",sfx:["SNAP!","teal",8,60]},
+{h:"Decoys: fake machines that look real.",
+ p:["Decoys are fake servers, laptops, databases, even factory controllers, placed among your real ones.",
+    "To an attacker they look like valuable targets. Your staff never use them, because there's nothing real on them."],
+ k:"Anyone touching a decoy is <b>up to no good</b>.",fx:"scan"},
+{h:"Honeytokens: keys to nowhere.",
+ p:["A honeytoken is a fake password, access key, document or database record, left exactly where attackers go looking.",
+    "It opens nothing real. The instant someone tries it, an alarm fires and shows where it was stolen from."],
+ k:"Stolen bait tells you <b>how they got in</b>.",fx:"flick"},
+{h:"Breadcrumbs: a trail they can't resist.",
+ p:["Attackers explore by following clues: saved logins, shortcuts, shared drives, admin notes.",
+    "Breadcrumbs are fake clues planted on real computers. They quietly lead intruders away from your crown jewels and straight into the traps."],
+ k:"Don't just chase attackers. <b>Steer them.</b>",fx:"dots"},
+{h:"Why every decoy alert matters.",
+ p:["Your employees never use decoys or fake passwords, so they never set them off.",
+    "That makes a deception alert almost never a false alarm. One alert, one clear answer: someone is where they shouldn't be."],
+ k:"A quiet network with <b>one loud signal</b>.",fx:"pulse",sfx:["BEEP BEEP!","",52,8]},
+{h:"Anatomy of a catch.",
+ steps:["An attacker gets in with a password stolen in a phishing email.","They look around for something valuable.","They find a saved login. It's a breadcrumb.","They try it on a server. It's a decoy.","Alarm. The team sees who, where and how, live."],
+ k:"Caught mid-move, <b>not months later</b>.",sfx:["GOTCHA!","",54,64]},
+{h:"Learn from every intruder.",
+ p:["While the attacker pokes at a decoy, it records everything: the tools, the commands, what they were after.",
+    "Defenders get a live view of the attack, then use it to shut the same tricks out of the real network."],
+ k:"Every catch makes you <b>stronger</b>.",fx:"scan"},
+{h:"A maze that keeps moving.",
+ p:["Clever attackers map your network as they go. So good deception keeps changing.",
+    "Decoys appear, move and refresh, so yesterday's map is useless today. The attacker can never be sure what's real."],
+ k:"Doubt <b>slows attackers down</b>.",fx:"dots"},
+{h:"It works everywhere.",
+ p:["Offices, cloud apps, remote laptops, and factories or power plants, where old machines often can't run security software.",
+    "Decoys sit alongside real systems without touching or slowing them."],
+ k:"Protection <b>without disruption</b>.",fx:"scan"},
+{h:"Spot the decoy.",quiz:1},
+{h:"Your cheat sheet.",gloss:1},
+{back:1}
+];
+
+const book=document.getElementById("book"),segs=document.getElementById("segs");
+const el=(t,c,h)=>{const e=document.createElement(t);if(c)e.className=c;if(h!=null)e.innerHTML=h;return e};
+P.forEach((d,i)=>{
+  segs.append(el("i"));
+  const pg=el("section","pg"+(d.cover?" cover":"")+(d.back?" back":"")+(d.quiz||d.gloss||d.back||d.steps?" tight":""));pg.setAttribute("aria-label","Page "+(i+1));
+  const art=el("div","art"),img=new Image();img.alt="";img.decoding="async";img.dataset.src="img/p"+String(i+1).padStart(2,"0")+".jpg";art.append(img);
+  if(d.fx==="scan")art.append(el("div","scan"));
+  if(d.fx==="pulse")art.append(el("div","pulse"));
+  if(d.fx==="flick")art.append(el("div","flick"));
+  if(d.fx==="dots"){const c=el("canvas","fx");art.append(c)}
+  if(d.fx==="counter")art.append(el("div","chip","Alerts in the queue<b class='ctr'>0</b>"));
+  if(d.sfx){const b=el("div","sfx "+d.sfx[1],d.sfx[0]);b.style.left=d.sfx[2]+"%";b.style.top=d.sfx[3]+"%";art.append(b)}
+  pg.append(art);
+  if(d.cover){
+    art.append(el("div","title",`<small>A WhizHack field guide</small><h1>The Trap Door</h1><p>How cyber deception catches attackers, explained simply.</p>`));
+    const go=el("button","go","Start reading");go.onclick=()=>goTo(1);art.append(go);
+  }else{
+    const cap=el("div","cap");cap.append(el("span","no px","Page "+(i+1)));
+    if(!d.back)cap.append(el("h2","",d.h));
+    (d.p||[]).forEach(t=>cap.append(el("p","",t)));
+    if(d.steps){const ol=el("ol");d.steps.forEach((t,j)=>ol.append(el("li",j===4?"hot":"",t)));cap.append(ol)}
+    if(d.quiz){
+      cap.append(el("p","","Three servers. Two are real, one is a decoy. Tap the fake one."));
+      const q=el("div","quiz");["A","B","C"].forEach(x=>{const b=el("button","",x);b.onclick=()=>{qa.classList.add("on");log("book_quiz",x)};q.append(b)});cap.append(q);
+      const qa=el("div","qa","<b>Can't tell? Neither can an attacker.</b> That's the whole point: a good decoy is impossible to tell apart from the real thing, until someone touches it.");cap.append(qa);
+      cap.append(el("p","myth","<b>MYTH</b> Deception is only for big companies. Modern decoys are light, automated and quick to set up."));
+      cap.append(el("p","myth","<b>MYTH</b> It replaces your firewall. It's an extra layer that catches whatever slips past the others."));
+    }
+    if(d.gloss){
+      cap.append(el("dl","gl",`<dt>Decoy</dt><dd>A fake machine that looks like a real target.</dd><dt>Honeytoken</dt><dd>A fake password, key or file that raises an alarm when used.</dd><dt>Breadcrumb</dt><dd>A planted clue that leads intruders to the traps.</dd><dt>Lure</dt><dd>A decoy service or file made to look too good to skip.</dd><dt>Shifting</dt><dd>Decoys that move and change so attackers can't map them.</dd>`));
+      cap.append(el("div","rule","The golden rule: nobody honest touches a trap."));
+    }
+    if(d.back){
+      cap.append(el("span","brand","WhizHack"));
+      cap.append(el("h2","","Every network needs a trap door."));
+      cap.append(el("p","","WhizHack ZeroHack uses deception to spot intruders early in IT and OT networks, with alerts your team can trust."));
+      cap.append(el("p","","Want a printed copy? Ask at the WhizHack booth."));
+      const bt=el("div","btns",`<button class="li" id="shareLi">Share on LinkedIn</button><a class="pdf" id="pdf" href="The-Trap-Door.pdf" download>Download PDF</a><a href="../">Play again</a>`);cap.append(bt);
+    }
+    if(d.k)cap.append(el("div","key","Key idea: "+d.k));
+    pg.append(cap);
+  }
+  book.append(pg);
+});
+
+const pgs=[...book.children],N=pgs.length,cnt=document.getElementById("count"),prev=document.getElementById("prev"),next=document.getElementById("next");
+let cur=-1,dotsRAF=0,ctrT=0;
+function load(i){const im=pgs[i]&&pgs[i].querySelector("img");if(im&&!im.src)im.src=im.dataset.src}
+function goTo(i,instant){
+  if(i<0||i>=N||i===cur)return;const dir=i>cur?1:-1,old=pgs[cur];
+  if(old){old.classList.remove("cur");old.classList.add(dir>0?"out-l":"out-r");setTimeout(()=>old.classList.remove("out-l","out-r"),560)}
+  const p=pgs[i];p.classList.add(dir>0?"in-l":"in-r");void p.offsetWidth;p.classList.add("cur");requestAnimationFrame(()=>p.classList.remove("in-l","in-r"));
+  // restart animations on the page
+  p.querySelectorAll(".art img,.key,.sfx,.cap li,.cap h2,.cap p").forEach(e=>{e.style.animation="none";void e.offsetWidth;e.style.animation=""});
+  cur=i;[i,i+1,i+2].forEach(load);
+  [...segs.children].forEach((s,j)=>s.classList.toggle("on",j<=i));
+  cnt.textContent=(i+1)+" / "+N;prev.disabled=i===0;next.textContent=i===N-1?"Done":"Next";
+  const cap=p.querySelector(".cap");if(cap)cap.scrollTop=0;
+  fx(p);if(i+1>seen){seen=i+1}
+  try{history.replaceState(null,"","#p"+(i+1))}catch(e){}
+}
+function fx(p){
+  cancelAnimationFrame(dotsRAF);clearInterval(ctrT);
+  const c=p.querySelector("canvas.fx");if(c&&!matchMedia("(prefers-reduced-motion: reduce)").matches){
+    const r=c.getBoundingClientRect(),dpr=Math.min(2,devicePixelRatio||1);c.width=r.width*dpr;c.height=r.height*dpr;const x=c.getContext("2d");
+    const D=[...Array(46)].map(()=>({x:Math.random(),y:Math.random(),v:.0006+Math.random()*.0016,s:1+Math.random()*2.4,c:Math.random()<.18?"#e63946":Math.random()<.5?"#2ec4b6":"#f4a259",t:Math.random()*6}));
+    const loop=()=>{x.clearRect(0,0,c.width,c.height);D.forEach(d=>{d.y-=d.v;d.t+=.04;if(d.y<-.02){d.y=1.02;d.x=Math.random()}x.globalAlpha=.45+.45*Math.sin(d.t);x.fillStyle=d.c;const z=d.s*dpr*1.6;x.fillRect(Math.round(d.x*c.width),Math.round(d.y*c.height),z,z)});dotsRAF=requestAnimationFrame(loop)};loop()}
+  const k=p.querySelector(".ctr");if(k){let n=0;k.textContent="0";ctrT=setInterval(()=>{n+=Math.ceil(Math.random()*97);k.textContent=n.toLocaleString("en-IN");if(n>9000)clearInterval(ctrT)},60)}
+}
+prev.onclick=()=>goTo(cur-1);
+next.onclick=()=>{if(cur===N-1){location.href="../"}else goTo(cur+1)};
+addEventListener("keydown",e=>{if(e.key==="ArrowRight")goTo(cur+1);if(e.key==="ArrowLeft")goTo(cur-1)});
+let sx=null,sy=0;
+book.addEventListener("touchstart",e=>{sx=e.touches[0].clientX;sy=e.touches[0].clientY},{passive:true});
+book.addEventListener("touchend",e=>{if(sx==null)return;const dx=e.changedTouches[0].clientX-sx,dy=e.changedTouches[0].clientY-sy;sx=null;if(Math.abs(dx)>50&&Math.abs(dx)>Math.abs(dy)*1.3)goTo(cur+(dx<0?1:-1))},{passive:true});
+
+// analytics (anonymous device id shared with the game)
+const DEV=get("device");
+const log=(kind,detail)=>{if(!DEV)return;fetch("https://juemnyijhvqlpxrvsibg.supabase.co/rest/v1/rpc/log_event",{method:"POST",keepalive:true,
+  headers:{"Content-Type":"application/json",apikey:"sb_publishable_LDopq-erBLDteakwk08pOQ_qKnIafQI"},body:JSON.stringify({p_device:DEV,p_kind:kind,p_detail:detail||null})}).catch(()=>{})};
+let seen=0,sent=0;
+log("comic_open","book "+(s?("score "+s):""));
+setInterval(()=>{if(seen>sent&&(seen-sent>=4||seen===N)){sent=seen;log("comic_page","book page "+seen)}},3000);
+addEventListener("pagehide",()=>{if(seen>sent){sent=seen;log("comic_page","book page "+seen)}});
+
+const toast=t=>{const e=document.getElementById("toast");e.textContent=t;e.classList.add("on");setTimeout(()=>e.classList.remove("on"),2600)};
+document.getElementById("pdf").addEventListener("click",()=>log("pdf_download","book"));
+document.getElementById("shareLi").onclick=async()=>{
+  log("share_card","linkedin book score "+shown);
+  const link="https://soumyaswarrup.github.io/decoy-dash/";
+  let text=null;try{text=sessionStorage.getItem("dd_caption")}catch(e){}
+  if(!text)text=`I scored ${shown} in Decoy Dash (rank: ${rank(shown)}) and unlocked "The Trap Door", a quick guide to how cyber deception catches attackers. Can you beat my score? ${link} #AISS2026 #CyberSecurity #Deception @WhizHack`;
+  try{await navigator.clipboard.writeText(text)}catch(e){}
+  let blob=null;try{const d=sessionStorage.getItem("dd_card");if(d)blob=await (await fetch(d)).blob()}catch(e){}
+  const touch=matchMedia("(pointer:coarse)").matches;
+  const file=blob?new File([blob],"decoy-dash-score.jpg",{type:"image/jpeg"}):null;
+  if(touch&&file&&navigator.canShare&&navigator.canShare({files:[file]})){try{await navigator.share({files:[file],text});return}catch(e){if(e&&e.name==="AbortError")return}}
+  if(blob){const u=URL.createObjectURL(blob),a=document.createElement("a");a.href=u;a.download="decoy-dash-score.jpg";document.body.append(a);a.click();setTimeout(()=>{a.remove();URL.revokeObjectURL(u)},4000);toast("Card downloaded. Attach it to your post")}
+  window.open("https://www.linkedin.com/feed/?shareActive=true&text="+encodeURIComponent(text),"_blank","noopener");
+};
+
+const start=Math.min(N,Math.max(1,parseInt((location.hash.match(/p(\d+)/)||[])[1]||"1",10)))-1;
+goTo(start);
+})();
+</script>
+</body>
+</html>
