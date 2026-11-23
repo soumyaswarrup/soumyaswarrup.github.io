@@ -131,10 +131,6 @@ body{background:#0e0c1f radial-gradient(circle at 1px 1px,rgba(255,255,255,.06) 
       <button class="btn li" id="shareLi" type="button">Share on LinkedIn</button>
     </div>
 
-    <div class="voucher" id="voucher">
-      <div class="t bang">WANT THE PRINTED COPY?</div>
-      <small style="font-size:16px;color:#222">Ask at the <b>booth</b>. We'll hand you one, while stocks last.</small>
-    </div>
 
     <div class="readerhead" id="read"><h2 class="bang">CHECKMATE #1</h2><span>46 pages, scroll to read</span></div>
     <div id="pages"></div>
@@ -166,7 +162,7 @@ body{background:#0e0c1f radial-gradient(circle at 1px 1px,rgba(255,255,255,.06) 
   const rank=v=>v>=30?"Merge Master":v>=18?"Staff Engineer":v>=10?"Senior Dev":v>=5?"Junior Dev":"Intern";
   const shown=s||best;
   document.getElementById("scoreRow").innerHTML=`<span>SCORE <b>${shown}</b></span><span>RANK <b>${rank(shown)}</b></span>`;
-  document.getElementById("voucher").classList.add("on");
+  
 
   // share on LinkedIn: card image from the game run if we have it
   document.getElementById("shareLi").onclick=async()=>{

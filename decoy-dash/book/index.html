@@ -339,7 +339,7 @@ P.forEach((d,i)=>{
       cap.append(el("div","sumbox",`<img src="img/trace-logo.png" alt="ZeroHack TRACE"><span>Decoys, lures and shifting sensors, built in India by WhizHack.</span>`));
       const tr=el("a","trace","Explore ZeroHack TRACE");tr.href="https://whizhack.com/cyber-security-products/zero-hack/trace";tr.target="_blank";tr.rel="noopener";tr.onclick=()=>log("trace_click","book");cap.append(tr);
       cap.append(el("div","btns",`<button class="li" id="shareLi">Share on LinkedIn</button><a class="pdf" id="pdf" href="The-Trap-Door.pdf" download>Download PDF</a><a href="../">Play again</a>`));
-      cap.append(el("p","","Want a printed copy? Ask at the WhizHack booth."));
+      cap.append(el("p","","Want a printed copy? Ask at the WhizHack booth at AISS 2026."));
       cap.append(el("div","endlogo",`<img src="img/whizhack-logo.png" alt="WhizHack Technologies">`));
     }
     if(i+1===3){const b=el("button","act","Clear one alert"),m=el("p","msg","");let c=0;b.onclick=()=>{c++;const k=pg.querySelector(".ctr");const more=20+Math.floor(Math.random()*60);if(k){const v=parseInt(k.textContent.replace(/\D/g,""))||0;k.textContent=(v-1+more).toLocaleString("en-IN")}m.textContent=`You cleared ${c}. ${more} more just arrived.`;buzz()};cap.append(b,m)}

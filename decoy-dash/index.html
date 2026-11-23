@@ -335,7 +335,7 @@ input::placeholder{color:#56786c}
       <p><b>Micro-segmentation.</b> Each zone is split into small cells, so one foothold doesn't open the next.</p>
       <p><b>Inline IPS.</b> Malicious traffic is dropped before it reaches the process.</p>
       <p><b>Self-healing sensors.</b> If an intruder knocks a sensor out, it brings itself back.</p>
-      <p>Come and see it running at the WhizHack booth.</p>
+      <p>Come and see it running at the WhizHack booth at AISS 2026.</p>
       <button class="btn" data-close style="margin-top:6px">Back</button>
     </div>
   </div>
@@ -725,7 +725,7 @@ function resultsCountdown(sc){
 function renderStub(){
   const el=$("stub");let c=store.get("code",null);
   if(best>=UNLOCK){
-    el.innerHTML=`<div>Field guide unlocked</div><div class="code" style="font-size:24px">The Trap Door</div><small><a href="${COMIC_URL}" style="font-weight:600">Read it online</a>, or ask at the WhizHack booth for a printed copy.</small>`}
+    el.innerHTML=`<div>Field guide unlocked</div><div class="code" style="font-size:24px">The Trap Door</div><small><a href="${COMIC_URL}" style="font-weight:600">Read it online</a>, or ask at the WhizHack booth at AISS 2026 for a printed copy.</small>`}
   else{let m="";for(let i=0;i<UNLOCK;i++)m+=`<i class="${i<best?"on":""}"></i>`;
     el.innerHTML=`<div>Field guide unlock: ${best} of ${UNLOCK}</div><div class="meter">${m}</div><small>Score ${UNLOCK} in one run to unlock the field guide.</small>`}
 }
@@ -995,7 +995,7 @@ async function makeCard(){
   if(SHARE_URL&&typeof qrcode==="function"){try{const q=qrcode(0,"M");q.addData(SHARE_URL);q.make();const n=q.getModuleCount(),sz=Math.floor(150/n);R_("#ffffff",60,1150,n*sz+24,n*sz+24);
     for(let r=0;r<n;r++)for(let k=0;k<n;k++)if(q.isDark(r,k))R_("#0d1714",72+k*sz,1162+r*sz,sz,sz);tx2=72+n*sz+36}catch(e){}}
   c.fillStyle="#ffffff";font(700,50);c.fillText("Think you can get deeper?",tx2,1222);
-  font(400,29);c.fillStyle="#8fb0a5";c.fillText(SHARE_URL?"Scan to play. Score 10 to unlock the":"Play Decoy Dash at the WhizHack booth.",tx2,1270);
+  font(400,29);c.fillStyle="#8fb0a5";c.fillText(SHARE_URL?"Scan to play. Score 10 to unlock the":"Play Decoy Dash at WhizHack, AISS 2026.",tx2,1270);
   c.fillText(SHARE_URL?"deception field guide.":"Score 10 for the field guide.",tx2,1308);
   return cv2;
 }
