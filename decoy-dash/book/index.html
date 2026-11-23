@@ -14,7 +14,7 @@
 <style>
 :root{--navy:#0b1724;--ink:#06101a;--teal:#2ec4b6;--amber:#f4a259;--red:#e63946;--paper:#f2ead9;--paper2:#e6dcc6;--txt:#14202b}
 *{box-sizing:border-box;margin:0;padding:0}
-html,body{height:100%;background:var(--navy);color:var(--paper);font-family:"Atkinson Hyperlegible",system-ui,sans-serif;overflow:hidden;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;height:100dvh;background:var(--navy);color:var(--paper);font-family:"Atkinson Hyperlegible",system-ui,sans-serif;overflow:hidden;-webkit-tap-highlight-color:transparent}
 button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 .px{font-family:"Pixelify Sans",monospace}
 
@@ -147,6 +147,48 @@ dl.gl dt{font-family:"Pixelify Sans",monospace;font-weight:700;background:var(--
   .cover .art{grid-row:auto}
   .pg.tight{grid-template-rows:1fr}
 }
+
+/* interactive layer */
+.tapme{position:absolute;z-index:4;right:10px;bottom:10px;background:var(--amber);color:var(--ink);border:2px solid var(--ink);font-family:"Pixelify Sans",monospace;font-weight:700;font-size:14px;padding:6px 10px 6px 30px;box-shadow:3px 3px 0 var(--ink)}
+.tapme::before{content:"";position:absolute;left:9px;top:50%;width:12px;height:12px;margin-top:-6px;border-radius:50%;background:var(--ink);box-shadow:0 0 0 0 #06101a80;animation:ring 1.4s infinite}
+@keyframes ring{70%{box-shadow:0 0 0 9px #06101a00}}
+.done .tapme{display:none}
+.art.ia{cursor:pointer}
+.lbl{position:absolute;z-index:3;transform:translate(-50%,-50%) scale(0);font-family:"Pixelify Sans",monospace;font-weight:700;font-size:13px;padding:3px 7px;border:2px solid var(--ink);background:#fff;color:var(--ink);box-shadow:2px 2px 0 var(--ink);white-space:nowrap;transition:transform .35s cubic-bezier(.2,1.7,.4,1)}
+.lbl.bad{background:var(--red);color:#fff}.lbl.ok{background:var(--teal)}
+.lbl.on{transform:translate(-50%,-50%) scale(1)}
+.flash{position:absolute;inset:0;z-index:2;background:#fff;opacity:0;pointer-events:none}
+.flash.go{animation:fl .5s ease-out}
+@keyframes fl{0%{opacity:.95}100%{opacity:0}}
+.redwash{position:absolute;inset:0;z-index:2;pointer-events:none;background:#e6394600}
+.redwash.go{animation:rw 1.6s ease-in-out 2}
+@keyframes rw{50%{background:#e6394670}}
+.term{position:absolute;z-index:3;left:8px;right:8px;bottom:8px;background:#04090ee8;border:2px solid var(--teal);color:#7ff5d8;font:13px/1.45 ui-monospace,Menlo,Consolas,monospace;padding:8px 10px;min-height:88px;display:none;white-space:pre-wrap}
+.term.on{display:block}
+.term b{color:var(--red);font-weight:700}
+.noise{position:absolute;inset:0;z-index:2;pointer-events:none;display:none}
+.noise i{position:absolute;width:0;height:0;border-left:7px solid transparent;border-right:7px solid transparent;border-bottom:12px solid var(--amber);animation:blink .7s steps(1) infinite}
+.noise.on{display:block}
+@keyframes blink{50%{opacity:.15}}
+.tog{display:flex;margin-top:10px;border:3px solid var(--ink);box-shadow:3px 3px 0 var(--ink)}
+.tog button{flex:1;padding:9px 4px;font-family:"Pixelify Sans",monospace;font-weight:700;font-size:15px;color:var(--ink);background:#fff}
+.tog button.on{background:var(--ink);color:var(--teal)}
+.act{margin-top:10px;width:100%;border:3px solid var(--ink);background:var(--teal);color:var(--ink);box-shadow:3px 3px 0 var(--ink);padding:10px;font-family:"Pixelify Sans",monospace;font-weight:700;font-size:16px}
+.act:active,.tapme:active{transform:translate(2px,2px);box-shadow:1px 1px 0 var(--ink)}
+.msg{margin-top:8px;font-weight:700;color:var(--red);min-height:1.2em;font-size:15px}
+.art img.spin{transition:transform .9s cubic-bezier(.6,-0.3,.3,1.3)}
+.shake{animation:shk .35s}
+@keyframes shk{25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+.cap li.lit{background:#2ec4b62e;outline:2px solid var(--teal)}
+.sfx.tap{animation:none!important;transform:scale(0) rotate(-12deg)}
+.sfx.tap.go{animation:pop .5s cubic-bezier(.2,1.7,.4,1) forwards!important}
+.sumbox{display:flex;gap:10px;align-items:center;margin-top:12px;background:#fff;border:3px solid var(--ink);box-shadow:3px 3px 0 var(--ink);padding:10px}
+.sumbox img{height:38px;width:auto}
+.trace{display:block;margin-top:12px;text-align:center;text-decoration:none;background:var(--red);color:#fff;border:3px solid var(--ink);box-shadow:3px 3px 0 var(--ink);padding:11px 8px;font-family:"Pixelify Sans",monospace;font-weight:700;font-size:17px}
+.endlogo{display:block;margin:16px auto 4px;background:#fff;border:3px solid var(--ink);padding:10px 18px;width:max-content;box-shadow:3px 3px 0 var(--ink)}
+.endlogo img{display:block;height:74px;width:auto}
+@media (max-height:700px){.pg{grid-template-rows:minmax(0,40%) auto}.pg.tight{grid-template-rows:minmax(0,30%) auto}.pg.back{grid-template-rows:minmax(0,18%) auto}.cap{padding:10px 12px 12px}.cap h2{font-size:20px;margin:2px 0 6px}.cap p{font-size:14.5px;line-height:1.42}}
+.pg.back{grid-template-rows:minmax(0,26%) auto}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}.key,.sfx,.cap li{opacity:1!important;transform:none!important}}
 :focus-visible{outline:3px solid var(--amber);outline-offset:2px}
 </style>
@@ -221,6 +263,34 @@ const P=[
 {back:1}
 ];
 
+
+// ---------- interactive bits, keyed by page number ----------
+const mk=(p,t,c,h)=>{const e=el(t,c,h);p.append(e);return e};
+const tapHint=(art,txt)=>{art.classList.add("ia");mk(art,"button","tapme",txt||"Tap the picture")};
+const burst=(art,txt,cls,x,y)=>{const b=mk(art,"div","sfx tap "+(cls||""),txt);b.style.left=x+"%";b.style.top=y+"%";return()=>{b.classList.remove("go");void b.offsetWidth;b.classList.add("go")}};
+const IA={
+ 2:(art,pg)=>{tapHint(art,"Find the intruder");const pop=burst(art,"FOUND IT!","teal",44,30);const m=mk(art,"div","lbl bad","Intruder");m.style.left="63%";m.style.top="56%";
+   art.addEventListener("click",e=>{const r=art.getBoundingClientRect(),x=(e.clientX-r.left)/r.width*100,y=(e.clientY-r.top)/r.height*100;
+     if(Math.hypot(x-63,(y-61)*.75)<11||pg.classList.contains("done")){pg.classList.add("done");m.classList.add("on");pop();log("book_tap","p2 found")}else{art.classList.remove("shake");void art.offsetWidth;art.classList.add("shake")}})},
+ 3:(art,pg,cap)=>{},
+ 4:(art,pg)=>{tapHint(art,"Cast the bait");const pop=burst(art,"BITE!","",14,58);art.addEventListener("click",()=>{pg.classList.add("done");pop();buzz()})},
+ 5:(art,pg)=>{tapHint(art,"Open the door");const f=mk(art,"div","flash");const pop=burst(art,"CAUGHT ON CAMERA!","",50,20);art.addEventListener("click",()=>{pg.classList.add("done");f.classList.remove("go");void f.offsetWidth;f.classList.add("go");pop();buzz()})},
+ 6:(art,pg)=>{tapHint(art,"Scan for decoys");[[15,40,"DECOY","bad"],[26,64,"REAL","ok"],[42,40,"DECOY","bad"],[54,66,"REAL","ok"],[70,70,"REAL","ok"],[89,44,"REAL","ok"]].forEach(([x,y,t,c],k)=>{const l=mk(art,"div","lbl "+c,t);l.style.left=x+"%";l.style.top=y+"%";l.style.transitionDelay=(k*.12)+"s"});
+   art.addEventListener("click",()=>{pg.classList.add("done");art.querySelectorAll(".lbl").forEach(l=>l.classList.add("on"));log("book_tap","p6 scan")})},
+ 7:(art,pg)=>{tapHint(art,"Grab the keys");const w=mk(art,"div","redwash");const t=mk(art,"div","term");const pop=burst(art,"TRIPPED!","",60,14);
+   art.addEventListener("click",()=>{pg.classList.add("done");w.classList.remove("go");void w.offsetWidth;w.classList.add("go");pop();buzz([60,40,60]);type(t,["<b>ALERT</b> honeytoken used: svc-backup-key","source: laptop-07 (finance)","planted in: C:\\Users\\shared\\creds.txt","action: isolate host, reset sessions"])})},
+ 8:(art,pg)=>{tapHint(art,"Follow the trail");const pop=burst(art,"THIS WAY!","amber",54,14);art.addEventListener("click",()=>{pg.classList.add("done");const im=art.querySelector("img");im.animate([{filter:"brightness(1)"},{filter:"brightness(1.7) saturate(1.4)"},{filter:"brightness(1)"}],{duration:1400});pop()})},
+ 9:(art,pg)=>{const n=mk(art,"div","noise");for(let k=0;k<40;k++){const i=mk(n,"i");i.style.left=Math.random()*94+"%";i.style.top=Math.random()*94+"%";i.style.animationDelay=(Math.random()*.7)+"s"}},
+ 11:(art,pg)=>{tapHint(art,"See what they did");const t=mk(art,"div","term");art.addEventListener("click",()=>{pg.classList.add("done");type(t,["> whoami","  corp\\svc-print","> net view \\\\files-02","  <b>decoy share opened</b>","> copy payroll.xlsx .","  <b>recorded: tools, path, intent</b>"])})},
+ 12:(art,pg)=>{tapHint(art,"Shift the maze");const pop=burst(art,"SHIFT!","teal",8,10);let r=0;art.addEventListener("click",()=>{pg.classList.add("done");const im=art.querySelector("img");im.classList.add("spin");r+=90;im.style.animation="none";im.style.transform=`rotate(${r}deg) scale(1.55)`;pop()})},
+ 13:(art,pg)=>{tapHint(art,"Tap each place");[[25,22,"Office IT"],[75,22,"Cloud"],[25,72,"Factory OT"],[75,72,"Remote work"]].forEach(([x,y,t])=>{const l=mk(art,"div","lbl ok",t);l.style.left=x+"%";l.style.top=y+"%"});
+   art.addEventListener("click",e=>{pg.classList.add("done");const r=art.getBoundingClientRect(),x=(e.clientX-r.left)/r.width,y=(e.clientY-r.top)/r.height;const k=(y>.5?2:0)+(x>.5?1:0);art.querySelectorAll(".lbl")[k].classList.add("on")})}
+};
+function type(t,lines){t.classList.add("on");t.innerHTML="";let li=0,ci=0,buf="";clearInterval(t._i);
+  t._i=setInterval(()=>{if(li>=lines.length){clearInterval(t._i);return}const L=lines[li];
+    if(L.startsWith("<b>")||L.includes("<b>")){buf+=L+"\n";li++;t.innerHTML=buf;return}
+    ci++;t.innerHTML=buf+L.slice(0,ci)+"▌";if(ci>=L.length){buf+=L+"\n";li++;ci=0}},28)}
+function buzz(p){try{navigator.vibrate&&navigator.vibrate(p||30)}catch(e){}}
 const book=document.getElementById("book"),segs=document.getElementById("segs");
 const el=(t,c,h)=>{const e=document.createElement(t);if(c)e.className=c;if(h!=null)e.innerHTML=h;return e};
 P.forEach((d,i)=>{
@@ -233,6 +303,7 @@ P.forEach((d,i)=>{
   if(d.fx==="dots"){const c=el("canvas","fx");art.append(c)}
   if(d.fx==="counter")art.append(el("div","chip","Alerts in the queue<b class='ctr'>0</b>"));
   if(d.sfx){const b=el("div","sfx "+d.sfx[1],d.sfx[0]);b.style.left=d.sfx[2]+"%";b.style.top=d.sfx[3]+"%";art.append(b)}
+  if(IA[i+1])IA[i+1](art,pg);
   pg.append(art);
   if(d.cover){
     art.append(el("div","title",`<small>A WhizHack field guide</small><h1>The Trap Door</h1><p>How cyber deception catches attackers, explained simply.</p>`));
@@ -254,12 +325,17 @@ P.forEach((d,i)=>{
       cap.append(el("div","rule","The golden rule: nobody honest touches a trap."));
     }
     if(d.back){
-      cap.append(el("span","brand","WhizHack"));
       cap.append(el("h2","","Every network needs a trap door."));
-      cap.append(el("p","","WhizHack ZeroHack uses deception to spot intruders early in IT and OT networks, with alerts your team can trust."));
+      cap.append(el("p","","<b>ZeroHack TRACE</b> (Threat Reconnaissance and Classification Engine) is WhizHack's deception-based security solution. It places realistic decoys across IT and OT networks that lure attackers away from real systems and expose them early."));
+      cap.append(el("div","sumbox",`<img src="img/trace-logo.png" alt="ZeroHack TRACE"><span>Decoys, lures and shifting sensors, built in India by WhizHack.</span>`));
+      const tr=el("a","trace","Explore ZeroHack TRACE");tr.href="https://whizhack.com/cyber-security-products/zero-hack/trace";tr.target="_blank";tr.rel="noopener";tr.onclick=()=>log("trace_click","book");cap.append(tr);
+      cap.append(el("div","btns",`<button class="li" id="shareLi">Share on LinkedIn</button><a class="pdf" id="pdf" href="The-Trap-Door.pdf" download>Download PDF</a><a href="../">Play again</a>`));
       cap.append(el("p","","Want a printed copy? Ask at the WhizHack booth."));
-      const bt=el("div","btns",`<button class="li" id="shareLi">Share on LinkedIn</button><a class="pdf" id="pdf" href="The-Trap-Door.pdf" download>Download PDF</a><a href="../">Play again</a>`);cap.append(bt);
+      cap.append(el("div","endlogo",`<img src="img/whizhack-logo.png" alt="WhizHack Technologies">`));
     }
+    if(i+1===3){const b=el("button","act","Clear one alert"),m=el("p","msg","");let c=0;b.onclick=()=>{c++;const k=pg.querySelector(".ctr");const more=20+Math.floor(Math.random()*60);if(k){const v=parseInt(k.textContent.replace(/\D/g,""))||0;k.textContent=(v-1+more).toLocaleString("en-IN")}m.textContent=`You cleared ${c}. ${more} more just arrived.`;buzz()};cap.append(b,m)}
+    if(i+1===9){const tg=el("div","tog",`<button data-v="0">Without deception</button><button data-v="1" class="on">With deception</button>`);tg.onclick=e=>{const v=e.target.dataset.v;if(v==null)return;tg.querySelectorAll("button").forEach(x=>x.classList.toggle("on",x===e.target));pg.querySelector(".noise").classList.toggle("on",v==="0");const pl=pg.querySelector(".pulse"),sf=pg.querySelector(".sfx");if(pl)pl.style.display=v==="0"?"none":"";if(sf)sf.style.visibility=v==="0"?"hidden":"";m.textContent=v==="0"?"Hundreds of alerts. Which one is real?":"One alert. It's real."};const m=el("p","msg","One alert. It's real.");cap.append(tg,m)}
+    if(i+1===10){const b=el("button","act","Play the attack");b.onclick=()=>{const L=[...cap.querySelectorAll("li")];L.forEach(x=>x.classList.remove("lit"));L.forEach((x,k)=>setTimeout(()=>{L.forEach(y=>y.classList.remove("lit"));x.classList.add("lit");if(k===L.length-1){const s=pg.querySelector(".sfx");if(s){s.style.animation="none";void s.offsetWidth;s.style.animation=""}buzz([60,40,60])}},k*900));log("book_tap","p10 play")};cap.append(b)}
     if(d.k)cap.append(el("div","key","Key idea: "+d.k));
     pg.append(cap);
   }

@@ -178,6 +178,10 @@ input::placeholder{color:#56786c}
 .unl-p{font-family:var(--read);font-size:16px;line-height:1.45;margin-bottom:10px;color:#fff}
 .unl-p b{color:var(--amber)}
 .unl-c{font-family:var(--read);font-size:14.5px;color:#d8f5ec;margin-bottom:14px}
+.unl-bar{height:8px;border:2px solid var(--edge);background:#0006;margin:2px 0 8px;overflow:hidden}
+.unl-bar i{display:block;height:100%;width:0;background:#f2c230}
+.unl .btn{width:100%}
+@media (max-height:720px),(max-width:360px){.unl{padding:16px 14px 14px}.unl-t{font-size:34px;margin:10px 0 6px}.unl-p{font-size:14.5px;margin-bottom:6px}.unl-c{margin-bottom:8px;font-size:13.5px}.unl .btn{padding-top:10px;padding-bottom:10px}#unlLinkedIn,#unlStay{margin-top:8px!important}}
 #toast{position:absolute;left:50%;bottom:calc(var(--sab) + 22px);transform:translateX(-50%);background:var(--slate2);color:#fff;border:2px solid var(--edge);box-shadow:inset 0 0 0 1px var(--line),4px 4px 0 rgba(0,0,0,.45);padding:7px 14px 8px;font-size:16px;display:none;z-index:9;white-space:nowrap}
 #toast.on{display:block}
 
@@ -357,12 +361,13 @@ input::placeholder{color:#56786c}
   <div class="ov" id="ovUnlock">
     <div class="unl">
       <div class="unl-k">FIELD GUIDE UNLOCKED</div>
-      <div class="unl-t">You crossed <span>10!</span></div>
-      <p class="unl-p">Thanks for playing! You scored <b id="unlScore">10</b>, so <b>The Trap Door</b>, our 16-page deception field guide, is yours to read.</p>
-      <p class="unl-c" id="unlCount">Your field guide is ready whenever you are.</p>
-      <a class="btn" id="unlGo" href="#">Read The Trap Door</a>
+      <div class="unl-t">You scored <span id="unlBig">10</span>!</div>
+      <p class="unl-p">Thanks for playing! You crossed <b id="unlScore">10</b>, so <b>The Trap Door</b>, our 16-page deception field guide, is yours to read.</p>
+      <div class="unl-bar"><i id="unlFill"></i></div>
+      <p class="unl-c" id="unlCount">Opening your field guide in 8s</p>
+      <a class="btn" id="unlGo" href="#">Read The Trap Door now</a>
       <button class="btn li" id="unlLinkedIn" style="margin-top:12px">Share on LinkedIn</button>
-      <button class="btn grey" id="unlStay" style="margin-top:12px">Back to my results</button>
+      <button class="btn grey" id="unlStay" style="margin-top:12px">Stay here</button>
     </div>
   </div>
 
@@ -675,11 +680,19 @@ function finish(){
 const ON_PAGES=/github\.io$/.test(location.hostname);
 const COMIC_URL=ON_PAGES?"book/":"https://soumyaswarrup.github.io/decoy-dash/book/";
 let unlTimer=null;
+let unlTick=null;
+function unlStop(msg){clearInterval(unlTick);unlTick=null;$("unlFill").style.width="0";$("unlCount").textContent=msg||"Your field guide is ready whenever you are."}
 function comicUnlock(sc){
-  const url=COMIC_URL+"?s="+sc;$("unlScore").textContent=sc;const go=$("unlGo");go.href=url;
+  const url=COMIC_URL+"?s="+sc;$("unlScore").textContent=10;$("unlBig").textContent=sc;const go=$("unlGo");go.href=url;
   if(!ON_PAGES){go.target="_blank";go.rel="noopener"}
-  $("unlCount").textContent="Your field guide is ready whenever you are.";
   show("unlock");sfx.level();buzz([40,30,40]);
+  // stay on the score for a moment, then open the guide unless the player chooses to stay
+  const T=8000,t0=performance.now();clearInterval(unlTick);
+  unlTick=setInterval(()=>{const left=T-(performance.now()-t0);
+    if(!ovs.unlock.classList.contains("on")){unlStop();return}
+    $("unlFill").style.width=Math.min(100,(1-left/T)*100)+"%";
+    $("unlCount").textContent="Opening your field guide in "+Math.max(1,Math.ceil(left/1000))+"s";
+    if(left<=0){unlStop("Opening...");if(ON_PAGES)location.href=url;else window.open(url,"_blank","noopener")}},100);
 }
 
 /* =============== vouchers =============== */
@@ -1090,8 +1103,8 @@ document.querySelectorAll("[data-close]").forEach(b=>b.onclick=()=>{if(ovs.staff
 $("mute").onclick=e=>{e.stopPropagation();ac();muted=!muted;store.set("mute",muted);setMuteUI();if(muted)music.stop();else if(state==="over")music.calm();else if(state==="play"||state==="ready")music.game()};
 $("btnShare").onclick=openCard;
 $("btnLinkedIn").onclick=shareLinkedIn;
-$("unlStay").onclick=()=>{clearInterval(unlTimer);show("over")};
-$("unlLinkedIn").onclick=()=>shareLinkedIn();
+$("unlStay").onclick=()=>{unlStop();show("over")};
+$("unlLinkedIn").onclick=()=>{unlStop();shareLinkedIn()};
 $("btnCardBack").onclick=()=>show("over");
 $("btnDlCard").onclick=downloadCard;
 if(!TOUCH)$("cardHint").textContent="Download the image, then attach it to your LinkedIn post.";
