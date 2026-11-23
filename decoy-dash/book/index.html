@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover">
 <title>The Trap Door: how cyber deception catches attackers</title>
 <meta name="description" content="A 16-page animated field guide to cyber deception, from WhizHack.">
 <meta property="og:title" content="The Trap Door: how cyber deception catches attackers">
@@ -189,6 +189,15 @@ dl.gl dt{font-family:"Pixelify Sans",monospace;font-weight:700;background:var(--
 .endlogo img{display:block;height:74px;width:auto}
 @media (max-height:700px){.pg{grid-template-rows:minmax(0,40%) auto}.pg.tight{grid-template-rows:minmax(0,30%) auto}.pg.back{grid-template-rows:minmax(0,18%) auto}.cap{padding:10px 12px 12px}.cap h2{font-size:20px;margin:2px 0 6px}.cap p{font-size:14.5px;line-height:1.42}}
 .pg.back{grid-template-rows:minmax(0,26%) auto}
+
+/* phones: the text card always fits, the picture takes whatever space is left */
+html,body,button,a,.art,.cap{touch-action:manipulation}
+button,a{-webkit-user-select:none;user-select:none}
+@media (max-width:859px),(max-aspect-ratio:4/3){
+  .pg,.pg.tight,.pg.back{grid-template-rows:minmax(96px,1fr) auto}
+  .cap{max-height:calc(100dvh - 96px - 108px - env(safe-area-inset-top) - env(safe-area-inset-bottom));margin-top:10px}
+  .cover .art{grid-row:1/3}
+}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}.key,.sfx,.cap li{opacity:1!important;transform:none!important}}
 :focus-visible{outline:3px solid var(--amber);outline-offset:2px}
 </style>
@@ -398,6 +407,13 @@ document.getElementById("shareLi").onclick=async()=>{
   window.open("https://www.linkedin.com/feed/?shareActive=true&text="+encodeURIComponent(text),"_blank","noopener");
 };
 
+
+// after any tap, keep the newest feedback in view
+document.addEventListener("click",()=>setTimeout(()=>{const c=document.querySelector(".pg.cur .cap");if(!c)return;
+  const t=[...c.querySelectorAll(".msg,.qa.on,.merge,pre.code .hit,.cap li.lit")].filter(e=>e.offsetParent&&e.textContent.trim()).pop();
+  if(t){const r=t.getBoundingClientRect(),cr=c.getBoundingClientRect();if(r.bottom>cr.bottom-4)c.scrollBy({top:r.bottom-cr.bottom+16,behavior:"smooth"});else if(r.top<cr.top)c.scrollBy({top:r.top-cr.top-12,behavior:"smooth"})}},90));
+// no pinch zoom (double-tap zoom is off via touch-action)
+document.addEventListener("gesturestart",e=>e.preventDefault());
 const start=Math.min(N,Math.max(1,parseInt((location.hash.match(/p(\d+)/)||[])[1]||"1",10)))-1;
 goTo(start);
 })();

@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover">
 <title>Ship It Safe: how AI code review stops bad code before it merges</title>
 <meta name="description" content="A 16-page animated guide to AI code review, unlocked in Merge Rush.">
 <meta property="og:title" content="Ship It Safe: how AI code review stops bad code before it merges">
@@ -202,6 +202,15 @@ pre.code .k{color:#ffc84a}
 .unlockc{display:block;margin-top:12px;text-align:center;text-decoration:none;background:var(--violet);color:#fff;border:3px solid var(--ink);box-shadow:3px 3px 0 var(--ink);padding:12px 8px;font-family:"Pixelify Sans",monospace;font-weight:700;font-size:18px}
 .endlogo.ca{display:flex;align-items:center;gap:10px;font-family:"Pixelify Sans",monospace;font-weight:700;font-size:24px;color:var(--ink)}
 .endlogo.ca img{height:46px}
+
+/* phones: the text card always fits, the picture takes whatever space is left */
+html,body,button,a,.art,.cap{touch-action:manipulation}
+button,a{-webkit-user-select:none;user-select:none}
+@media (max-width:859px),(max-aspect-ratio:4/3){
+  .pg,.pg.tight,.pg.back{grid-template-rows:minmax(96px,1fr) auto}
+  .cap{max-height:calc(100dvh - 96px - 108px - env(safe-area-inset-top) - env(safe-area-inset-bottom));margin-top:10px}
+  .cover .art{grid-row:1/3}
+}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}.key,.sfx,.cap li{opacity:1!important;transform:none!important}}
 :focus-visible{outline:3px solid var(--amber);outline-offset:2px}
 </style>
@@ -412,6 +421,13 @@ document.getElementById("shareLi").onclick=async()=>{
   window.open("https://www.linkedin.com/feed/?shareActive=true&text="+encodeURIComponent(text),"_blank","noopener");
 };
 
+
+// after any tap, keep the newest feedback in view
+document.addEventListener("click",()=>setTimeout(()=>{const c=document.querySelector(".pg.cur .cap");if(!c)return;
+  const t=[...c.querySelectorAll(".msg,.qa.on,.merge,pre.code .hit,.cap li.lit")].filter(e=>e.offsetParent&&e.textContent.trim()).pop();
+  if(t){const r=t.getBoundingClientRect(),cr=c.getBoundingClientRect();if(r.bottom>cr.bottom-4)c.scrollBy({top:r.bottom-cr.bottom+16,behavior:"smooth"});else if(r.top<cr.top)c.scrollBy({top:r.top-cr.top-12,behavior:"smooth"})}},90));
+// no pinch zoom (double-tap zoom is off via touch-action)
+document.addEventListener("gesturestart",e=>e.preventDefault());
 const start=Math.min(N,Math.max(1,parseInt((location.hash.match(/p(\d+)/)||[])[1]||"1",10)))-1;
 goTo(start);
 })();
