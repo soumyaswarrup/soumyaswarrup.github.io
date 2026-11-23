@@ -195,13 +195,24 @@ input::placeholder{color:#56786c}
   .panel{padding:14px 13px 13px}.btn{height:50px;font-size:20px}.btn.grey{height:42px}input{height:44px}
   .paper{font-size:15px}.paper h2{font-size:22px}.stub .code{font-size:26px}
 }
+
+.tvtop{display:flex;align-items:center;gap:4vh}
+.tvqr{flex:0 0 auto;display:flex;flex-direction:column;align-items:center;gap:1vh;background:#fff;padding:1.4vh;border:4px solid var(--edge);box-shadow:6px 6px 0 rgba(0,0,0,.5)}
+.tvqr canvas{position:static;width:22vh;height:22vh;image-rendering:pixelated}
+.tvqr span{font-size:2.6vh;font-weight:700;color:#111}
+/* returning player */
+.quick{display:none;margin:0 0 4px}
+.panel.back .quick{display:block}
+.panel.back .checks,.panel.back .field,.panel.back .consent,.panel.back #btnPlay{display:none}
+.notyou{display:block;width:100%;margin-top:10px;background:none;border:0;color:var(--lilac);font-family:var(--read);font-size:14px;text-decoration:underline;text-underline-offset:3px;cursor:pointer;padding:6px}
+.notyou:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
 @media (prefers-reduced-motion:reduce){*{animation:none!important}}
 .logo{display:block;width:92%;max-width:330px;margin:12px auto 0;filter:drop-shadow(4px 5px 0 rgba(0,0,0,.5))}
 .brand{text-align:center;margin:8px 0 0}
 .pill.armed{background:#1f5c4b;color:var(--violet-hi);box-shadow:0 2px 0 #0f3227}
 .pill.armed::before{background:var(--lamp);box-shadow:0 0 6px var(--lamp)}
 .panel{box-shadow:inset 0 0 0 2px var(--line),inset 0 4px 0 2px var(--amber),6px 6px 0 rgba(0,0,0,.55)}
-#tv .logo{width:auto;height:14vh;max-width:none;margin:0}
+#tv .logo{width:auto;height:20vh;max-width:none;margin:0}
 @media (max-height:730px){.logo{max-width:260px}}
 </style>
 </head>
@@ -244,6 +255,7 @@ input::placeholder{color:#56786c}
           <div class="rule"><div class="well"><canvas id="icoIps"></canvas></div><div><b>Survive each level</b>Every 5 pipes a new trap arms: moving decoys, striped walls, then red IPS beams.</div><i class="st"></i></div>
         </div>
       </div>
+      <div class="quick"><button class="btn" id="btnQuick">Play again</button><button class="notyou" id="btnNotYou" type="button">Not you? Change details</button></div>
       <div class="field"><label for="nick">Your name</label><input id="nick" maxlength="40" placeholder="e.g. Priya Sharma" autocomplete="name"></div>
       <div class="field"><label for="email">Work email</label><input id="email" type="email" maxlength="120" placeholder="you@yourcompany.com" autocomplete="email" inputmode="email"></div>
       <label class="consent"><input type="checkbox" id="consent"><span>WhizHack can store my name and email to run the game and its leaderboard, and may contact me about it.</span></label>
@@ -339,7 +351,7 @@ input::placeholder{color:#56786c}
 </div>
 
 <div id="tv">
-  <div><img class="logo" src="art/logo.png" alt="Decoy Dash"><div class="tvsub">Today's top 5. Scan the QR, score 10, unlock the comic at the WhizHack booth.</div></div>
+  <div class="tvtop"><div class="tvqr"><canvas id="tvQr"></canvas><span>Scan to play</span></div><div><img class="logo" src="art/logo.png" alt="Decoy Dash"><div class="tvsub">Today's top 5. Scan the QR, score 10, unlock the comic at the WhizHack booth.</div></div></div>
   <div class="paper"><div class="ph"><b>Shift log</b><span>Today's top 5</span></div><div class="lb" id="tvList"></div></div>
 </div>
 
@@ -496,7 +508,7 @@ function ac(){if(!AC){try{if(navigator.audioSession)navigator.audioSession.type=
   try{unlockEl=new Audio("data:audio/wav;base64,UklGRkQDAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YSADAACAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgA==");unlockEl.loop=true;unlockEl.setAttribute("playsinline","");unlockEl.play().catch(()=>{})}catch(e){}}if(AC&&AC.state==="suspended")AC.resume().catch(()=>{});return AC}
 function tone(f,d,type="square",vol=.05,slide=0,delay=0){if(muted||!AC)return;const t=AC.currentTime+delay,o=AC.createOscillator(),g=AC.createGain();o.type=type;o.frequency.setValueAtTime(f,t);if(slide)o.frequency.exponentialRampToValueAtTime(Math.max(40,f+slide),t+d);g.gain.setValueAtTime(vol,t);g.gain.exponentialRampToValueAtTime(.0001,t+d);o.connect(g).connect(AC.destination);o.start(t);o.stop(t+d+.02)}
 function noise(d,vol=.14){if(muted||!AC)return;const n=AC.sampleRate*d|0,b=AC.createBuffer(1,n,AC.sampleRate),c=b.getChannelData(0);for(let i=0;i<n;i++)c[i]=(R()*2-1)*(1-i/n);const s=AC.createBufferSource(),g=AC.createGain();g.gain.value=vol;s.buffer=b;s.connect(g).connect(AC.destination);s.start()}
-const sfx={flap:()=>tone(440,.07,"square",.03,240),point:()=>{tone(988,.06,"square",.035);tone(1319,.08,"square",.03,0,.06)},
+const sfx={close:()=>{tone(1319,.04,"square",.03);tone(1760,.05,"square",.03,0,.04);tone(2093,.07,"square",.025,0,.08)},flap:()=>tone(440,.07,"square",.03,240),point:()=>{tone(988,.06,"square",.035);tone(1319,.08,"square",.03,0,.06)},
  key:()=>{tone(1047,.05,"square",.04);tone(1319,.05,"square",.04,0,.05);tone(1568,.09,"square",.035,0,.1)},
  honey:()=>{tone(220,.18,"sawtooth",.05,-80);tone(196,.22,"sawtooth",.04,-60,.1)},
  crash:()=>{noise(.3);tone(140,.25,"square",.05,-90)},
@@ -710,11 +722,12 @@ function collide(){
   for(const c of cols){
     for(const g of c.gaps)if(g.decoy&&bx+r>c.x+4&&bx-r<c.x+c.w&&by>g.y&&by<g.y+g.h){g.sprung=true;deathShift=!!c.shift;return die("decoy",g.label.join(" "))}
     const rg=c.gaps.find(g=>!g.decoy);
+    if(!c.passed&&bx+r>c.x-3&&bx-r<c.x+c.w+3){let clr=Math.min(by-r-rg.y,rg.y+rg.h-(by+r));if(c.seg)clr=Math.min(clr,Math.abs(by-(segY(c,rg)+2))-r-2);c.minClr=Math.min(c.minClr==null?99:c.minClr,clr)}
     if(c.seg&&hit(bx,by,r-1,c.x,segY(c,rg),c.w,5))return die("seg");
     if(c.ips&&ipsOn(c)&&hit(bx,by,r-1,c.x+c.w/2-2,rg.y,4,rg.h))return die("ips");
     for(const s of solidSegs(c))if(hit(bx,by,r-1,c.x,s[0],c.w,s[1]-s[0]))return die("pipe");
     for(const g of c.gaps)if(hit(bx,by,r-1,c.x-3,g.y-8,c.w+6,8)||hit(bx,by,r-1,c.x-3,g.y+g.h,c.w+6,8))return die("pipe");
-    if(!c.passed&&c.x+c.w<bx-r){c.passed=true;pipes++;score++;sfx.point();bump();
+    if(!c.passed&&c.x+c.w<bx-r){c.passed=true;pipes++;score++;sfx.point();bump();if(c.minClr!=null&&c.minClr<2.5){sfx.close();flash=.14;flashCol="#63d6b4";pop(bx,by-14,"CLOSE CALL","#63d6b4");burst(bx,by,8,["#63d6b4","#ffffff"],50,.4);buzz(25)}
       const z=lvOf(pipes);if(z!==lv){lv=z;runLvMax=Math.max(runLvMax,z);setLvUI(z);enterLevel(z,stageOf(pipes))}}
     for(const k of c.keys){if(k.got)continue;const kx=c.x+k.dx,ky=k.y+Math.sin(t*3+k.ph)*2;
       if((kx-bx)**2+(ky-by)**2<(r+7)**2){k.got=true;
@@ -1046,7 +1059,11 @@ $("tGlobal").onclick=()=>{lbTab="global";renderLb()};$("tLocal").onclick=()=>{lb
 
 /* =============== buttons =============== */
 let backTo="start";
-$("btnPlay").onclick=async()=>{if(await checkPlayer())startRun()};$("btnAgain").onclick=startRun;
+$("btnPlay").onclick=async()=>{if(await checkPlayer())startRun()};
+{const pn=$("btnPlay").closest(".panel"),nm=store.get("name",""),em=store.get("email","");
+ if(nm&&em&&store.get("consent",false)){pn.classList.add("back");$("btnQuick").textContent="Play again as "+clean(nm).split(" ")[0].slice(0,14)}
+ $("btnQuick").onclick=async()=>{if(await checkPlayer())startRun();else pn.classList.remove("back")};
+ $("btnNotYou").onclick=()=>{pn.classList.remove("back");nickEl.focus()}}$("btnAgain").onclick=startRun;
 const openLb=f=>{backTo=f;lbTab="global";gState=gRows?"ok":"loading";renderLb();show("lb");loadBoard()};
 $("btnLb1").onclick=()=>openLb("start");$("btnLb2").onclick=()=>openLb("over");
 $("btnInfo").onclick=()=>{backTo="start";show("info")};
@@ -1068,7 +1085,8 @@ $("vBtn").onclick=()=>{const s=verify($("vIn").value),o=$("vOut");o.style.displa
 $("vIn").addEventListener("keydown",e=>{if(e.key==="Enter")$("vBtn").click()});
 
 /* =============== hash views =============== */
-function route(){const h=location.hash;$("tv").classList.toggle("on",h==="#board");clearInterval(lbTimer);if(h==="#board"){renderLb();loadBoard();lbTimer=setInterval(loadBoard,10000)}
+let tvQrDone=false;function drawTvQr(){if(tvQrDone||typeof qrcode!=="function")return;try{const q=qrcode(0,"M");q.addData(SHARE_URL||location.href.split("#")[0]);q.make();const n=q.getModuleCount(),m=2,c=$("tvQr");c.width=c.height=n+m*2;const x=c.getContext("2d");x.fillStyle="#fff";x.fillRect(0,0,c.width,c.height);x.fillStyle="#000";for(let r=0;r<n;r++)for(let k=0;k<n;k++)if(q.isDark(r,k))x.fillRect(k+m,r+m,1,1);tvQrDone=true}catch(e){}}
+function route(){const h=location.hash;$("tv").classList.toggle("on",h==="#board");if(h==="#board")drawTvQr();clearInterval(lbTimer);if(h==="#board"){renderLb();loadBoard();lbTimer=setInterval(loadBoard,10000)}
   if(h==="#staff"){show("staff");state="menu";$("hud").classList.remove("on");$("score").classList.remove("on");$("hint").classList.remove("on")}}
 addEventListener("hashchange",route);route();
 })();

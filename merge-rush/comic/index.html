@@ -4,12 +4,12 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Checkmate #1 — your CodeAnt comic is unlocked</title>
-<meta name="theme-color" content="#121018">
+<meta name="theme-color" content="#0e0c1f">
 <meta property="og:title" content="Checkmate #1: The Eleven-Year Shortcut — CodeAnt Comics">
 <meta property="og:description" content="He doesn't break in. He gets merged. A CodeAnt comic, unlocked by scoring 10 in Merge Rush.">
 <meta property="og:image" content="https://soumyaswarrup.github.io/merge-rush/comic/pages/page-01.jpg">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Bangers&family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Pixelify+Sans:wght@500;600;700&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth}
@@ -71,6 +71,37 @@ body{background:#121018;color:#f4f1ff;font-family:Inter,system-ui,sans-serif;min
 .preview{width:60%;max-width:260px;margin:0 auto 20px;border:3px solid #000;filter:blur(6px) brightness(.6)}
 body.is-locked .unlocked{display:none}
 body.is-locked .locked{display:block}
+
+/* ---- restyle to match the game ---- */
+body{background:#0e0c1f radial-gradient(circle at 1px 1px,rgba(255,255,255,.06) 1px,transparent 1.5px) 0 0/10px 10px;font-family:"Atkinson Hyperlegible",system-ui,sans-serif;color:#eef}
+.bang{font-family:"Pixelify Sans",monospace;letter-spacing:.01em;font-weight:700}
+.hero{background:#6f5cff;border-color:#05040c;box-shadow:inset 0 4px 0 #9c8fff,8px 8px 0 #05040c}
+.kicker{background:#ffc84a;border-color:#05040c;font-size:15px;box-shadow:3px 3px 0 #05040c}
+.big{-webkit-text-stroke:0;text-shadow:3px 0 0 #000,-3px 0 0 #000,0 3px 0 #000,0 -3px 0 #000,6px 6px 0 #3d32a8}
+.big em{color:#ffc84a}
+.thanks{font-weight:400}.thanks b{color:#ffc84a}
+.score span{background:#1a1833;color:#fff;border-color:#05040c;box-shadow:inset 0 0 0 2px #38346a,3px 3px 0 #05040c;font-size:17px}
+.score span b{color:#c4bcff;font-weight:700}
+.btn{font-family:"Pixelify Sans",monospace;font-weight:600;font-size:20px;letter-spacing:.02em;border-color:#05040c;background:#1a1833;color:#c4bcff;box-shadow:inset 0 0 0 2px #38346a,0 5px 0 #05040c}
+.btn:active{transform:translateY(4px);box-shadow:inset 0 0 0 2px #38346a,0 1px 0 #05040c}
+.btn.teal{background:#1a1833;color:#c4bcff}
+.btn.full{background:#2fbf71;color:#fff;-webkit-text-stroke:0;font-size:22px;text-shadow:0 2px 0 #17713f;box-shadow:inset 0 3px 0 #6fe3a2,inset 0 -5px 0 #17713f,0 5px 0 #05040c}
+.btn.li{background:#0a66c2;color:#fff;box-shadow:inset 0 3px 0 #3d8be0,inset 0 -5px 0 #074a8c,0 5px 0 #05040c}
+.btn:focus-visible{outline-color:#ffc84a}
+.voucher{background:#1a1833;color:#eef;border-color:#05040c;box-shadow:inset 0 0 0 2px #38346a,6px 6px 0 #05040c}
+.voucher .t{color:#ffc84a}.voucher small{color:#a39dd4!important}.voucher small b{color:#fff}
+.readerhead h2{color:#fff;font-size:26px}.readerhead span{color:#a39dd4}
+.pg{border-color:#05040c;box-shadow:6px 6px 0 #05040c;background:#1a1833}
+.pg i{font-family:"Pixelify Sans",monospace;background:#05040c;color:#c4bcff}
+.prog{background:#9c8fff;box-shadow:0 0 8px #9c8fff}
+.chip{font-family:"Pixelify Sans",monospace;background:#1a1833;color:#fff;border-color:#05040c;box-shadow:inset 0 0 0 2px #38346a,3px 3px 0 #05040c;font-size:16px}
+.end{background:#1a1833;color:#eef;border-color:#05040c;box-shadow:inset 0 0 0 2px #38346a,8px 8px 0 #05040c}
+.end h3{color:#fff;font-size:30px}.end p{color:#a39dd4}
+.foot{color:#a39dd4;opacity:.85}
+.readerhead{gap:14px}.readerhead span{white-space:nowrap}@media (max-width:420px){.readerhead h2{font-size:21px}}
+.locked{background:#1a1833;border-color:#05040c;box-shadow:inset 0 0 0 2px #38346a,8px 8px 0 #05040c}
+.locked h1{color:#ff5d6c;-webkit-text-stroke:0;text-shadow:4px 4px 0 #05040c}
+.locked p{color:#a39dd4}.locked p b{color:#fff}
 @media (prefers-reduced-motion:reduce){.hero::before,.confetti{animation:none}}
 </style>
 </head>
