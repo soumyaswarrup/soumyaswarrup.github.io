@@ -8,7 +8,7 @@
 <meta name="description" content="Fly your pull request to production without getting flagged. A game about CodeAnt AI code review, SAST, secret scanning and quality gates.">
 <meta property="og:type" content="website">
 <meta property="og:title" content="Merge Rush: can your PR make it to production?">
-<meta property="og:description" content="Dodge bugs, leaked secrets and failing gates. Score 10 to unlock the comic.">
+<meta property="og:description" content="Dodge bugs, leaked secrets and failing gates. Score 10 to unlock the guide and the comic.">
 <meta property="og:url" content="https://soumyaswarrup.github.io/merge-rush/">
 <meta property="og:image" content="https://soumyaswarrup.github.io/merge-rush/art/og.jpg">
 <meta property="og:image:width" content="1200"><meta property="og:image:height" content="627">
@@ -178,6 +178,10 @@ input::placeholder{color:#5f5a92}
 .unl-p{font-family:var(--read);font-size:16px;line-height:1.45;margin-bottom:10px;color:#fff}
 .unl-p b{color:var(--amber)}
 .unl-c{font-family:var(--read);font-size:14.5px;color:#e5e1ff;margin-bottom:14px}
+.unl-bar{height:8px;border:2px solid var(--edge);background:#0006;margin:2px 0 8px;overflow:hidden}
+.unl-bar i{display:block;height:100%;width:0;background:var(--amber)}
+.unl .btn{width:100%}
+@media (max-height:720px),(max-width:360px){.unl{padding:16px 14px 14px}.unl-t{font-size:34px;margin:10px 0 6px}.unl-p{font-size:14.5px;margin-bottom:6px}.unl-c{margin-bottom:8px;font-size:13.5px}.unl .btn{padding-top:10px;padding-bottom:10px}#unlLinkedIn,#unlStay{margin-top:8px!important}}
 #toast{position:absolute;left:50%;bottom:calc(var(--sab) + 22px);transform:translateX(-50%);background:var(--slate2);color:#fff;border:2px solid var(--edge);box-shadow:inset 0 0 0 1px var(--line),4px 4px 0 rgba(0,0,0,.45);padding:7px 14px 8px;font-size:16px;display:none;z-index:9;white-space:nowrap}
 #toast.on{display:block}
 
@@ -274,7 +278,7 @@ input::placeholder{color:#5f5a92}
       <div class="ferr" id="ferr"></div>
       <button class="btn" id="btnPlay">Start</button>
       <div class="pair"><button class="btn grey" id="btnLb1">Leaderboard</button><button class="btn grey" id="btnInfo">What CodeAnt checks</button></div>
-      <div class="note">Score <b id="unlockN">10</b> to unlock a free comic.</div>
+      <div class="note">Score <b id="unlockN">10</b> to unlock <i>Ship It Safe</i>, then the Checkmate comic.</div>
     </div>
   </div>
 
@@ -350,13 +354,14 @@ input::placeholder{color:#5f5a92}
 
   <div class="ov" id="ovUnlock">
     <div class="unl">
-      <div class="unl-k">COMIC UNLOCKED</div>
-      <div class="unl-t">You crossed <span>10!</span></div>
-      <p class="unl-p">Thanks for playing! You scored <b id="unlScore">10</b>, so <b>Checkmate #1</b> is yours to read.</p>
-      <p class="unl-c" id="unlCount">Your comic is ready whenever you are.</p>
-      <a class="btn" id="unlGo" href="#">Read the comic</a>
+      <div class="unl-k">GUIDE UNLOCKED</div>
+      <div class="unl-t">You scored <span id="unlBig">10</span>!</div>
+      <p class="unl-p">You crossed <b id="unlScore">10</b>. Next: <b>Ship It Safe</b>, a quick 16-page guide to AI code review. Finish it to unlock <b>Checkmate #1</b>.</p>
+      <div class="unl-bar"><i id="unlFill"></i></div>
+      <p class="unl-c" id="unlCount">Opening your guide in 8s</p>
+      <a class="btn" id="unlGo" href="#">Open the guide now</a>
       <button class="btn li" id="unlLinkedIn" style="margin-top:12px">Share on LinkedIn</button>
-      <button class="btn grey" id="unlStay" style="margin-top:12px">Back to my results</button>
+      <button class="btn grey" id="unlStay" style="margin-top:12px">Stay here</button>
     </div>
   </div>
 
@@ -691,12 +696,20 @@ function finish(){
 }
 const ON_PAGES=/github\.io$/.test(location.hostname);
 const COMIC_URL=ON_PAGES?"comic/":"https://soumyaswarrup.github.io/merge-rush/comic/";
+const GUIDE_URL=ON_PAGES?"guide/":"https://soumyaswarrup.github.io/merge-rush/guide/";
 let unlTimer=null;
+let unlTick=null;
+function unlStop(msg){clearInterval(unlTick);unlTick=null;$("unlFill").style.width="0";$("unlCount").textContent=msg||"Your guide is ready whenever you are."}
 function comicUnlock(sc){
-  const url=COMIC_URL+"?s="+sc;$("unlScore").textContent=sc;const go=$("unlGo");go.href=url;
+  const url=GUIDE_URL+"?s="+sc;$("unlScore").textContent=10;$("unlBig").textContent=sc;const go=$("unlGo");go.href=url;
   if(!ON_PAGES){go.target="_blank";go.rel="noopener"}
-  $("unlCount").textContent="Your comic is ready whenever you are.";
   show("unlock");sfx.level();buzz([40,30,40]);
+  const T=8000,t0=performance.now();clearInterval(unlTick);
+  unlTick=setInterval(()=>{const left=T-(performance.now()-t0);
+    if(!ovs.unlock.classList.contains("on")){unlStop();return}
+    $("unlFill").style.width=Math.min(100,(1-left/T)*100)+"%";
+    $("unlCount").textContent="Opening your guide in "+Math.max(1,Math.ceil(left/1000))+"s";
+    if(left<=0){unlStop("Opening...");if(ON_PAGES)location.href=url;else window.open(url,"_blank","noopener")}},100);
 }
 
 /* =============== vouchers =============== */
@@ -707,9 +720,9 @@ function verify(code){const m=/^CA-(\d{1,4})-([A-Z0-9]{4})-([A-Z0-9]{2})$/.exec(
 function renderStub(){
   const el=$("stub");let c=store.get("code",null);
   if(best>=UNLOCK){
-    el.innerHTML=`<div>Comic unlocked</div><div class="code" style="font-size:24px">Checkmate #1</div><small><a href="${COMIC_URL}?s=${best}" style="font-weight:600">Read it online</a>, or ask at the booth for a printed copy.</small>`}
+    el.innerHTML=`<div>Guide unlocked</div><div class="code" style="font-size:24px">Ship It Safe</div><small><a href="${GUIDE_URL}?s=${best}" style="font-weight:600">Read the guide</a>, then Checkmate #1 unlocks. Ask at the booth for a printed copy.</small>`}
   else{let m="";for(let i=0;i<UNLOCK;i++)m+=`<i class="${i<best?"on":""}"></i>`;
-    el.innerHTML=`<div>Comic unlock: ${best} of ${UNLOCK}</div><div class="meter">${m}</div><small>Score ${UNLOCK} in one run to unlock the comic.</small>`}
+    el.innerHTML=`<div>Guide unlock: ${best} of ${UNLOCK}</div><div class="meter">${m}</div><small>Score ${UNLOCK} in one run to unlock the guide and comic.</small>`}
 }
 
 /* =============== HUD bits =============== */
@@ -1115,8 +1128,8 @@ document.querySelectorAll("[data-close]").forEach(b=>b.onclick=()=>{if(ovs.staff
 $("mute").onclick=e=>{e.stopPropagation();ac();muted=!muted;store.set("mute",muted);setMuteUI();if(muted)music.stop();else if(state==="over")music.calm();else if(state==="play"||state==="ready")music.game()};
 $("btnShare").onclick=openCard;
 $("btnLinkedIn").onclick=shareLinkedIn;
-$("unlStay").onclick=()=>{clearInterval(unlTimer);show("over")};
-$("unlLinkedIn").onclick=()=>shareLinkedIn();
+$("unlStay").onclick=()=>{unlStop();show("over")};
+$("unlLinkedIn").onclick=()=>{unlStop();shareLinkedIn()};
 $("btnCardBack").onclick=()=>show("over");
 $("btnDlCard").onclick=downloadCard;
 if(!TOUCH)$("cardHint").textContent="Download the image, then attach it to your LinkedIn post.";

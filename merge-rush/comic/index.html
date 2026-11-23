@@ -112,8 +112,8 @@ body{background:#0e0c1f radial-gradient(circle at 1px 1px,rgba(255,255,255,.06) 
   <div class="locked">
     <img class="preview" src="pages/page-01.jpg" alt="">
     <h1 class="bang">LOCKED</h1>
-    <p>This comic is a reward. Score <b>10 or more</b> in Merge Rush and it opens up for you.</p>
-    <a class="btn full" href="../">Play Merge Rush</a>
+    <p id="lockMsg">This comic is a reward. Score <b>10 or more</b> in Merge Rush and it opens up for you.</p>
+    <a class="btn full" id="lockBtn" href="../">Play Merge Rush</a>
   </div>
 
   <div class="unlocked">
@@ -158,6 +158,9 @@ body{background:#0e0c1f radial-gradient(circle at 1px 1px,rgba(255,255,255,.06) 
   const best=Math.max(get("best")||0,s);
   const nick=(get("nick")||get("defNick")||"").toString().replace(/[<>&"]/g,"").slice(0,14);
   if(best<UNLOCK){document.body.classList.add("is-locked");return}
+  if(!get("guide_done")){document.body.classList.add("is-locked");
+    document.getElementById("lockMsg").innerHTML="Nice score! One step left: read <b>Ship It Safe</b>, the quick 16-page guide to AI code review. Finish it and Checkmate #1 opens up.";
+    const b=document.getElementById("lockBtn");b.textContent="Read the guide";b.href="../guide/"+location.search;return}
 
   if(nick) document.getElementById("who").textContent=", "+nick;
   const rank=v=>v>=30?"Merge Master":v>=18?"Staff Engineer":v>=10?"Senior Dev":v>=5?"Junior Dev":"Intern";

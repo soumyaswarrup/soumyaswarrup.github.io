@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Ship It Safe: how AI code review stops bad code before it merges</title>
+<meta name="description" content="A 16-page animated guide to AI code review, unlocked in Merge Rush.">
+<meta property="og:title" content="Ship It Safe: how AI code review stops bad code before it merges">
+<meta property="og:description" content="A 16-page animated guide to AI code review, unlocked in Merge Rush.">
+<meta property="og:image" content="https://soumyaswarrup.github.io/merge-rush/guide/img/p01.jpg">
+<meta name="theme-color" content="#0e0c1f">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@500;700&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+:root{--navy:#0e0c1f;--ink:#05040c;--teal:#2fbf71;--amber:#ffc84a;--red:#ff5d6c;--violet:#6f5cff;--paper:#efecff;--paper2:#dcd7ff;--txt:#17142e}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;height:100dvh;background:var(--navy);color:var(--paper);font-family:"Atkinson Hyperlegible",system-ui,sans-serif;overflow:hidden;-webkit-tap-highlight-color:transparent}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+.px{font-family:"Pixelify Sans",monospace}
+
+/* top bar */
+#top{position:fixed;inset:0 0 auto 0;z-index:20;padding:calc(env(safe-area-inset-top) + 10px) 14px 8px;display:flex;align-items:center;gap:12px;background:linear-gradient(var(--navy) 55%,transparent)}
+#segs{flex:1;display:flex;gap:3px}
+#segs i{flex:1;height:4px;background:#ffffff26;border-radius:1px;overflow:hidden;position:relative}
+#segs i.on::after{content:"";position:absolute;inset:0;background:var(--teal)}
+#count{font-size:13px;color:#ffffffb0;min-width:44px;text-align:right}
+#close{font-size:13px;color:#ffffffb0;padding:6px 2px}
+
+/* pages */
+#book{position:fixed;inset:0;perspective:1600px}
+.pg{position:absolute;inset:0;display:grid;grid-template-rows:minmax(0,58%) auto;padding:calc(env(safe-area-inset-top) + 34px) 14px calc(env(safe-area-inset-bottom) + 64px);
+  visibility:hidden;transform-origin:left center;transition:transform .55s cubic-bezier(.2,.8,.2,1),opacity .45s}
+.pg.cur{visibility:visible}
+.pg.out-l{visibility:visible;transform:translateX(-30%) rotateY(18deg);opacity:0}
+.pg.out-r{visibility:visible;transform:translateX(30%) rotateY(-18deg);opacity:0}
+.pg.in-l{transform:translateX(30%) rotateY(-18deg);opacity:0}
+.pg.in-r{transform:translateX(-30%) rotateY(18deg);opacity:0}
+
+.art{position:relative;overflow:hidden;border:3px solid var(--ink);box-shadow:5px 5px 0 var(--ink),0 0 0 1px #ffffff14;background:#000;min-height:0}
+.art img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transform-origin:50% 60%}
+.cur .art img{animation:kb 16s ease-out forwards}
+@keyframes kb{from{transform:scale(1.02)}to{transform:scale(1.13) translateY(-1.5%)}}
+.art::after{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(#00000038 1px,transparent 1.4px) 0 0/5px 5px;mix-blend-mode:multiply;opacity:.55}
+
+/* caption panel */
+.cap{position:relative;margin-top:14px;background:var(--paper);color:var(--txt);border:3px solid var(--ink);box-shadow:5px 5px 0 var(--ink);padding:14px 16px 16px;transform:rotate(-.4deg);
+  overflow:auto;max-height:100%}
+.cap .no{display:inline-block;background:var(--amber);color:var(--ink);border:2px solid var(--ink);font-size:12px;padding:1px 7px;transform:rotate(-2deg)}
+.cap h2{font-family:"Pixelify Sans",monospace;font-weight:700;font-size:clamp(21px,5.6vw,30px);line-height:1.08;color:var(--ink);margin:4px 0 8px}
+.cap p{font-size:clamp(15px,3.9vw,17px);line-height:1.5}
+.cap p+p{margin-top:8px}
+.key{display:inline-block;margin-top:12px;background:var(--ink);color:var(--paper);padding:6px 10px 6px;font-size:14.5px;line-height:1.35;box-shadow:3px 3px 0 var(--teal);transform:rotate(-1deg) scale(.6);opacity:0}
+.key b{color:var(--teal)}
+.cur .key{animation:stamp .5s cubic-bezier(.2,1.6,.4,1) .9s forwards}
+@keyframes stamp{to{transform:rotate(-1deg) scale(1);opacity:1}}
+.cur .cap h2,.cur .cap p,.cur .cap ol,.cur .cap .quiz{animation:rise .5s ease-out both}
+.cur .cap p{animation-delay:.12s}.cur .cap p+p{animation-delay:.22s}
+@keyframes rise{from{opacity:0;transform:translateY(8px)}}
+
+/* comic sound-effect bursts */
+.sfx{position:absolute;z-index:3;font-family:"Pixelify Sans",monospace;font-weight:700;color:var(--paper);font-size:clamp(26px,8vw,44px);line-height:1;padding:16px 22px;
+  background:var(--red);clip-path:polygon(50% 0,61% 22%,85% 8%,78% 34%,100% 42%,80% 58%,94% 84%,66% 74%,54% 100%,42% 76%,14% 92%,22% 64%,0 52%,20% 38%,8% 12%,36% 24%);
+  text-shadow:2px 2px 0 var(--ink);transform:scale(0) rotate(-12deg)}
+.sfx.teal{background:var(--teal);color:var(--ink);text-shadow:2px 2px 0 #ffffff80}
+.sfx.amber{background:var(--amber);color:var(--ink);text-shadow:2px 2px 0 #ffffff80}
+.cur .sfx{animation:pop .6s cubic-bezier(.2,1.7,.4,1) 1.3s forwards,wob 2.4s ease-in-out 2s infinite}
+@keyframes pop{to{transform:scale(1) rotate(-8deg)}}
+@keyframes wob{0%,100%{transform:scale(1) rotate(-8deg)}50%{transform:scale(1.06) rotate(-5deg)}}
+
+/* overlays */
+.scan{position:absolute;inset:0;pointer-events:none;background:linear-gradient(transparent 0 46%,#2ec4b633 49%,#2ec4b6aa 50%,transparent 52%);background-size:100% 220%;animation:scan 3.6s linear infinite}
+@keyframes scan{from{background-position:0 120%}to{background-position:0 -120%}}
+.pulse{position:absolute;inset:0;pointer-events:none;box-shadow:inset 0 0 0 0 #e6394600;animation:pulse 1.1s ease-in-out infinite}
+@keyframes pulse{50%{box-shadow:inset 0 0 70px 12px #e63946aa}}
+.flick{position:absolute;inset:0;pointer-events:none;background:linear-gradient(115deg,transparent 48%,#ff3b4ad0 49.4%,transparent 50.8%),linear-gradient(62deg,transparent 54%,#ff3b4ab0 55.2%,transparent 56.4%);mix-blend-mode:screen;animation:flick 2.2s steps(1) infinite}
+@keyframes flick{0%,40%,100%{opacity:1}42%,46%{opacity:.15}48%{opacity:1}70%{opacity:.4}72%{opacity:1}}
+canvas.fx{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.chip{position:absolute;z-index:3;left:12px;bottom:12px;background:var(--ink);border:2px solid var(--amber);color:var(--amber);font-family:"Pixelify Sans",monospace;font-size:15px;padding:6px 10px}
+.chip b{font-size:22px;color:#fff;display:block}
+
+/* cover */
+.cover .art{grid-row:1/3}
+.cover .cap{display:none}
+.title{position:absolute;z-index:3;inset:7% 7% auto 7%;text-align:left}
+.title small{display:inline-block;font-family:"Pixelify Sans",monospace;font-size:13px;color:var(--ink);background:var(--teal);padding:3px 8px;transform:rotate(-2deg)}
+.title h1{font-family:"Pixelify Sans",monospace;font-weight:700;font-size:clamp(48px,14vw,84px);line-height:.92;color:var(--paper);margin-top:12px;text-shadow:4px 4px 0 var(--ink),-1px -1px 0 var(--ink)}
+.title p{margin-top:12px;font-size:clamp(16px,4.4vw,20px);max-width:22ch;color:#fff;text-shadow:2px 2px 0 var(--ink);line-height:1.35}
+.cover .go{position:absolute;z-index:3;left:7%;bottom:7%;background:var(--amber);color:var(--ink);border:3px solid var(--ink);box-shadow:4px 4px 0 var(--ink);font-family:"Pixelify Sans",monospace;font-weight:700;font-size:19px;padding:12px 18px}
+.cover .go:active{transform:translate(2px,2px);box-shadow:2px 2px 0 var(--ink)}
+.cur .title>*{animation:rise .6s ease-out both}.cur .title h1{animation-delay:.15s}.cur .title p{animation-delay:.35s}
+
+/* steps */
+.cap ol{list-style:none;counter-reset:s;margin-top:4px}
+.cap li{counter-increment:s;position:relative;padding:5px 0 5px 34px;font-size:clamp(14.5px,3.8vw,16.5px);line-height:1.4;opacity:0;transform:translateX(-8px)}
+.cap li::before{content:counter(s);position:absolute;left:0;top:4px;width:24px;height:24px;display:grid;place-items:center;background:var(--ink);color:var(--teal);font-family:"Pixelify Sans",monospace;font-size:14px}
+.cap li.hot::before{background:var(--red);color:#fff}
+.cur .cap li{animation:li .4s ease-out forwards}
+.cur .cap li:nth-child(1){animation-delay:.3s}.cur .cap li:nth-child(2){animation-delay:.8s}.cur .cap li:nth-child(3){animation-delay:1.3s}.cur .cap li:nth-child(4){animation-delay:1.8s}.cur .cap li:nth-child(5){animation-delay:2.3s}
+@keyframes li{to{opacity:1;transform:none}}
+
+/* quiz */
+.quiz{display:flex;gap:8px;margin-top:10px}
+.quiz button{flex:1;border:3px solid var(--ink);background:#fff;padding:10px 0;font-family:"Pixelify Sans",monospace;font-size:17px;box-shadow:3px 3px 0 var(--ink);color:var(--ink)}
+.quiz button:active{transform:translate(2px,2px);box-shadow:1px 1px 0 var(--ink)}
+.qa{display:none;margin-top:10px;background:var(--ink);color:var(--paper);padding:10px 12px;font-size:15px;line-height:1.45}
+.qa.on{display:block;animation:rise .4s ease-out}
+.myth{margin-top:10px;font-size:14.5px;line-height:1.45}
+.myth b{background:var(--red);color:#fff;padding:0 5px;margin-right:4px;font-family:"Pixelify Sans",monospace;font-weight:500}
+
+/* glossary */
+dl.gl{display:grid;grid-template-columns:auto 1fr;gap:6px 10px;margin-top:4px;font-size:clamp(14px,3.7vw,16px);line-height:1.38}
+dl.gl dt{font-family:"Pixelify Sans",monospace;font-weight:700;background:var(--ink);color:var(--teal);padding:1px 6px;align-self:start}
+.rule{margin-top:12px;border:3px dashed var(--ink);padding:8px 10px;font-family:"Pixelify Sans",monospace;font-size:18px;text-align:center}
+
+/* back page */
+.back .cap{text-align:left}
+.btns{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
+.btns a,.btns button{display:block;text-align:center;text-decoration:none;border:3px solid var(--ink);box-shadow:3px 3px 0 var(--ink);padding:10px 6px;font-family:"Pixelify Sans",monospace;font-weight:700;font-size:16px;color:var(--ink);background:#fff}
+.btns .li{grid-column:1/-1;background:#0a66c2;color:#fff}
+.btns .pdf{background:var(--amber)}
+.brand{display:inline-block;font-family:"Pixelify Sans",monospace;font-weight:700;font-size:15px;background:var(--teal);color:var(--ink);padding:2px 8px;margin-left:6px;transform:rotate(1.5deg)}
+.pg.tight{grid-template-rows:minmax(0,40%) auto}
+
+/* nav */
+#nav{position:fixed;z-index:20;inset:auto 0 0 0;padding:8px 14px calc(env(safe-area-inset-bottom) + 12px);display:flex;justify-content:space-between;align-items:center;background:linear-gradient(transparent,var(--navy) 45%)}
+#nav button{font-family:"Pixelify Sans",monospace;font-size:16px;padding:9px 14px;border:2px solid #ffffff40;color:#fff}
+#nav #next{background:var(--teal);color:var(--ink);border-color:var(--teal);font-weight:700}
+#nav button:disabled{opacity:.25}
+#hint{font-size:12px;color:#ffffff80}
+
+/* lock */
+#lock{display:none;position:fixed;inset:0;z-index:50;background:var(--navy);place-items:center;text-align:center;padding:24px}
+.is-locked #lock{display:grid}
+#lock h1{font-family:"Pixelify Sans",monospace;font-size:34px;margin-bottom:10px}
+#lock p{max-width:30ch;margin:0 auto 18px;line-height:1.5;color:#ffffffc0}
+#lock a{display:inline-block;background:var(--amber);color:var(--ink);border:3px solid var(--ink);box-shadow:4px 4px 0 #000;padding:12px 18px;font-family:"Pixelify Sans",monospace;font-weight:700;font-size:18px;text-decoration:none}
+
+#toast{position:fixed;z-index:60;left:50%;bottom:90px;transform:translateX(-50%);background:var(--ink);border:2px solid var(--teal);padding:10px 14px;font-size:14px;opacity:0;transition:opacity .3s;pointer-events:none}
+#toast.on{opacity:1}
+
+/* wide screens: art left, text right */
+@media (min-width:860px) and (min-aspect-ratio:4/3){
+  .pg{grid-template-rows:1fr;grid-template-columns:minmax(0,auto) minmax(340px,440px);justify-content:center;gap:34px;padding:70px 40px 90px}
+  .art{aspect-ratio:3/4;height:100%;width:auto}
+  .cap{margin-top:0;align-self:center;max-height:100%}
+  .cover{grid-template-columns:minmax(0,auto)}
+  .cover .art{grid-row:auto}
+  .pg.tight{grid-template-rows:1fr}
+}
+
+/* interactive layer */
+.tapme{position:absolute;z-index:4;right:10px;bottom:10px;background:var(--amber);color:var(--ink);border:2px solid var(--ink);font-family:"Pixelify Sans",monospace;font-weight:700;font-size:14px;padding:6px 10px 6px 30px;box-shadow:3px 3px 0 var(--ink)}
+.tapme::before{content:"";position:absolute;left:9px;top:50%;width:12px;height:12px;margin-top:-6px;border-radius:50%;background:var(--ink);box-shadow:0 0 0 0 #06101a80;animation:ring 1.4s infinite}
+@keyframes ring{70%{box-shadow:0 0 0 9px #06101a00}}
+.done .tapme{display:none}
+.art.ia{cursor:pointer}
+.lbl{position:absolute;z-index:3;transform:translate(-50%,-50%) scale(0);font-family:"Pixelify Sans",monospace;font-weight:700;font-size:13px;padding:3px 7px;border:2px solid var(--ink);background:#fff;color:var(--ink);box-shadow:2px 2px 0 var(--ink);white-space:nowrap;transition:transform .35s cubic-bezier(.2,1.7,.4,1)}
+.lbl.bad{background:var(--red);color:#fff}.lbl.ok{background:var(--teal)}
+.lbl.on{transform:translate(-50%,-50%) scale(1)}
+.flash{position:absolute;inset:0;z-index:2;background:#fff;opacity:0;pointer-events:none}
+.flash.go{animation:fl .5s ease-out}
+@keyframes fl{0%{opacity:.95}100%{opacity:0}}
+.redwash{position:absolute;inset:0;z-index:2;pointer-events:none;background:#e6394600}
+.redwash.go{animation:rw 1.6s ease-in-out 2}
+@keyframes rw{50%{background:#e6394670}}
+.term{position:absolute;z-index:3;left:8px;right:8px;bottom:8px;background:#04090ee8;border:2px solid var(--teal);color:#7ff5d8;font:13px/1.45 ui-monospace,Menlo,Consolas,monospace;padding:8px 10px;min-height:88px;display:none;white-space:pre-wrap}
+.term.on{display:block}
+.term b{color:var(--red);font-weight:700}
+.noise{position:absolute;inset:0;z-index:2;pointer-events:none;display:none}
+.noise i{position:absolute;width:0;height:0;border-left:7px solid transparent;border-right:7px solid transparent;border-bottom:12px solid var(--amber);animation:blink .7s steps(1) infinite}
+.noise.on{display:block}
+@keyframes blink{50%{opacity:.15}}
+.tog{display:flex;margin-top:10px;border:3px solid var(--ink);box-shadow:3px 3px 0 var(--ink)}
+.tog button{flex:1;padding:9px 4px;font-family:"Pixelify Sans",monospace;font-weight:700;font-size:15px;color:var(--ink);background:#fff}
+.tog button.on{background:var(--ink);color:var(--teal)}
+.act{margin-top:10px;width:100%;border:3px solid var(--ink);background:var(--teal);color:var(--ink);box-shadow:3px 3px 0 var(--ink);padding:10px;font-family:"Pixelify Sans",monospace;font-weight:700;font-size:16px}
+.act:active,.tapme:active{transform:translate(2px,2px);box-shadow:1px 1px 0 var(--ink)}
+.msg{margin-top:8px;font-weight:700;color:var(--red);min-height:1.2em;font-size:15px}
+.art img.spin{transition:transform .9s cubic-bezier(.6,-0.3,.3,1.3)}
+.shake{animation:shk .35s}
+@keyframes shk{25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+.cap li.lit{background:#2ec4b62e;outline:2px solid var(--teal)}
+.sfx.tap{animation:none!important;transform:scale(0) rotate(-12deg)}
+.sfx.tap.go{animation:pop .5s cubic-bezier(.2,1.7,.4,1) forwards!important}
+.sumbox{display:flex;gap:10px;align-items:center;margin-top:12px;background:#fff;border:3px solid var(--ink);box-shadow:3px 3px 0 var(--ink);padding:10px}
+.sumbox img{height:38px;width:auto}
+.trace{display:block;margin-top:12px;text-align:center;text-decoration:none;background:var(--red);color:#fff;border:3px solid var(--ink);box-shadow:3px 3px 0 var(--ink);padding:11px 8px;font-family:"Pixelify Sans",monospace;font-weight:700;font-size:17px}
+.endlogo{display:block;margin:16px auto 4px;background:#fff;border:3px solid var(--ink);padding:10px 18px;width:max-content;box-shadow:3px 3px 0 var(--ink)}
+.endlogo img{display:block;height:74px;width:auto}
+@media (max-height:700px){.pg{grid-template-rows:minmax(0,40%) auto}.pg.tight{grid-template-rows:minmax(0,30%) auto}.pg.back{grid-template-rows:minmax(0,18%) auto}.cap{padding:10px 12px 12px}.cap h2{font-size:20px;margin:2px 0 6px}.cap p{font-size:14.5px;line-height:1.42}}
+.pg.back{grid-template-rows:minmax(0,26%) auto}
+pre.code{margin-top:10px;background:#0b0a18;border:3px solid var(--ink);box-shadow:3px 3px 0 var(--violet);padding:8px 0;overflow-x:auto;font:12.5px/1.6 ui-monospace,Menlo,Consolas,monospace;color:#d9d4ff}
+pre.code span{display:block;padding:1px 10px 1px 14px;white-space:pre-wrap;word-break:break-all;text-indent:-4px;cursor:pointer;border-left:4px solid transparent}
+pre.code span.no-tap{cursor:default}
+pre.code span.hit{background:#ff5d6c33;border-left-color:var(--red);color:#fff}
+pre.code span.miss{animation:shk .3s}
+pre.code span.add{background:#2fbf7126;border-left-color:var(--teal)}
+pre.code span.del{background:#ff5d6c26;border-left-color:var(--red);text-decoration:line-through;opacity:.8}
+pre.code .k{color:#ffc84a}
+.merge{margin-top:10px;width:100%;border:3px solid var(--ink);box-shadow:3px 3px 0 var(--ink);padding:11px;font-family:"Pixelify Sans",monospace;font-weight:700;font-size:16px;color:#fff;background:var(--red)}
+.merge.ok{background:var(--teal);color:var(--ink)}
+.unlockc{display:block;margin-top:12px;text-align:center;text-decoration:none;background:var(--violet);color:#fff;border:3px solid var(--ink);box-shadow:3px 3px 0 var(--ink);padding:12px 8px;font-family:"Pixelify Sans",monospace;font-weight:700;font-size:18px}
+.endlogo.ca{display:flex;align-items:center;gap:10px;font-family:"Pixelify Sans",monospace;font-weight:700;font-size:24px;color:var(--ink)}
+.endlogo.ca img{height:46px}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}.key,.sfx,.cap li{opacity:1!important;transform:none!important}}
+:focus-visible{outline:3px solid var(--amber);outline-offset:2px}
+</style>
+</head>
+<body>
+<div id="lock"><div><h1>Locked</h1><p>This guide unlocks when you score 10 or more in Merge Rush.</p><a href="../">Play Merge Rush</a></div></div>
+
+<div id="top"><div id="segs" aria-hidden="true"></div><span id="count" class="px">1 / 16</span></div>
+<main id="book" aria-live="polite"></main>
+<nav id="nav"><button id="prev" aria-label="Previous page">Back</button><span id="hint">Swipe or tap the arrows</span><button id="next" aria-label="Next page">Next</button></nav>
+<div id="toast"></div>
+
+<script>
+(function(){
+const get=k=>{try{const v=localStorage.getItem("ca1_"+k);return v==null?null:JSON.parse(v)}catch(e){return null}};
+const UNLOCK=10,qs=new URLSearchParams(location.search),s=parseInt(qs.get("s")||"0",10)||0,best=Math.max(get("best")||0,s);
+if(best<UNLOCK&&!qs.has("preview")){document.body.classList.add("is-locked");return}
+const rank=v=>v>=30?"Merge Master":v>=18?"Staff Engineer":v>=10?"Senior Dev":v>=5?"Junior Dev":"Intern";
+const setL=(k,v)=>{try{localStorage.setItem("ca1_"+k,JSON.stringify(v))}catch(e){}};
+const shown=s||best;
+
+const P=[
+{cover:1,fx:"dots"},
+{h:"Code ships faster than ever.",
+ p:["Teams push changes many times a day, and AI assistants now write a big share of new code.",
+    "More code, shipped more often, means more chances for a mistake to slip into production."],
+ k:"Speed without checks is <b>a gamble</b>.",fx:"counter"},
+{h:"Review is the new bottleneck.",
+ p:["Every change waits for a human reviewer. Reviewers are busy, pull requests pile up, and tired eyes start to skim instead of read.",
+    "Small problems get waved through."],
+ k:"Rushed reviews let <b>risky code merge</b>."},
+{h:"Meet the AI reviewer.",
+ p:["AI code review checks every pull request the moment it opens. It reads the change, flags bugs and security problems, and explains them in plain words.",
+    "All before a human even looks."],
+ k:"A second pair of eyes on <b>every change</b>.",fx:"scan"},
+{h:"Leaked secrets.",
+ p:["Passwords, API keys and tokens often get pasted into code \"just for now\". Once pushed, anyone who can see the code can use them."],
+ snip:{q:"Tap the line that leaks a secret.",hit:1,ok:"Found it. That key should live in a secrets vault, not in the code.",lines:['const db = connect(process.env.DB_URL);','const pay = new PayClient("sk_live_EXAMPLE_9f2c71");','logger.info("checkout ready");','export default app;']},
+ k:"Secrets belong in a vault, <b>not in code</b>."},
+{h:"Vulnerable code.",
+ p:["Some bugs are open doors. In SQL injection, user input goes straight into a database query, so an attacker can run their own commands."],
+ snip:{q:"Tap the dangerous line.",hit:2,ok:"Right. Raw user input inside a query. The fix is a parameterised query.",lines:['app.get("/user", async (req, res) => {','  const id = req.query.id;','  const rows = await db.query("SELECT * FROM users WHERE id=" + id);','  res.json(rows);','});']},
+ k:"One bad line can <b>open the whole database</b>.",fx:"flick"},
+{h:"Risky dependencies.",
+ p:["Modern apps are built mostly from open-source packages, and those packages pull in more packages.",
+    "A known flaw three levels deep is still your flaw. Software composition analysis (SCA) finds it and names the version that fixes it."],
+ snip:{q:"Tap the vulnerable package.",hit:3,ok:"That one has a known vulnerability. Upgrading to 1.4.2 fixes it.",lines:['your-app','  ├─ web-router 4.2.0','  ├─ http-client 2.1.3','  │   └─ url-parse-lite 1.3.0','  └─ date-tools 3.0.1']},
+ k:"You ship <b>everything you import</b>."},
+{h:"Cloud setup mistakes.",
+ p:["Infrastructure is written as code too. One wrong setting, like a storage bucket left public, can expose every file in it.",
+    "Infrastructure-as-code (IaC) scanning catches it before it's deployed."],
+ bucket:1,k:"A config file can be <b>a security hole</b>.",fx:"pulse"},
+{h:"Messy code is risky code.",
+ p:["Duplicate code, dead code and huge tangled functions make bugs easy to hide and hard to fix.",
+    "AI review flags them and suggests cleaner versions, so the code stays easy to change."],
+ k:"Clean code is <b>safer code</b>."},
+{h:"Quality gates.",
+ p:["A quality gate is a rule a pull request must pass before it can merge: no critical vulnerabilities, no leaked secrets, tests passing.",
+    "If it fails, the merge button stays locked until it's fixed."],
+ gate:1,k:"Bad code <b>can't sneak in</b>."},
+{h:"Fixes, not just flags.",
+ p:["Finding a problem is half the job. Good AI review also suggests the fix, often as a one-click change the developer can accept right in the pull request."],
+ diff:1,k:"Less nagging, <b>more fixing</b>.",sfx:["PATCHED!","",50,10]},
+{h:"Catch it early, pay less.",
+ p:["A bug caught while the code is being written costs minutes to fix.",
+    "The same bug found in production can mean outages, emergency patches and breach clean-up. The earlier the check, the cheaper the fix."],
+ k:"Move checks <b>into the pull request</b>."},
+{h:"A pull request, reviewed.",
+ steps:["A developer opens a pull request.","AI review scans it for secrets, vulnerable code, risky packages and cloud misconfigurations.","It comments on the exact lines, with a suggested fix.","The developer accepts the fix and the checks run again.","Quality gate passes. Merge."],
+ k:"Every change checked, <b>every time</b>.",sfx:["MERGED!","teal",52,62]},
+{h:"Safe to merge?",quiz:1},
+{h:"Your cheat sheet.",gloss:1},
+{back:1}
+];
+
+
+// ---------- interactive bits, keyed by page number ----------
+const mk=(p,t,c,h)=>{const e=el(t,c,h);p.append(e);return e};
+const tapHint=(art,txt)=>{art.classList.add("ia");mk(art,"button","tapme",txt||"Tap the picture")};
+const burst=(art,txt,cls,x,y)=>{const b=mk(art,"div","sfx tap "+(cls||""),txt);b.style.left=x+"%";b.style.top=y+"%";return()=>{b.classList.remove("go");void b.offsetWidth;b.classList.add("go")}};
+const IA={
+ 3:(art,pg)=>{},
+ 4:(art,pg)=>{tapHint(art,"Run the scanner");const pop=burst(art,"SCANNED!","teal",50,12);[[30,64,"PASS","ok"],[52,58,"FIX","bad"],[74,64,"PASS","ok"]].forEach(([x,y,t,c],k)=>{const l=mk(art,"div","lbl "+c,t);l.style.left=x+"%";l.style.top=y+"%";l.style.transitionDelay=(k*.15)+"s"});
+   art.addEventListener("click",()=>{pg.classList.add("done");pop();art.querySelectorAll(".lbl").forEach(l=>l.classList.add("on"));buzz()})},
+ 5:(art,pg)=>{const pop=burst(art,"LEAKED!","",58,10);pg._pop=pop},
+ 6:(art,pg)=>{const pop=burst(art,"CRACK!","",10,12);pg._pop=pop},
+ 7:(art,pg)=>{const pop=burst(art,"FOUND IT!","amber",54,70);pg._pop=pop},
+ 9:(art,pg)=>{tapHint(art,"Spot the mess");[[18,26,"Duplicate"],[30,52,"Dead code"],[16,76,"Too complex"],[76,50,"Clean"]].forEach(([x,y,t],k)=>{const l=mk(art,"div","lbl "+(t==="Clean"?"ok":"bad"),t);l.style.left=x+"%";l.style.top=y+"%";l.style.transitionDelay=(k*.15)+"s"});
+   art.addEventListener("click",()=>{pg.classList.add("done");art.querySelectorAll(".lbl").forEach(l=>l.classList.add("on"))})},
+ 10:(art,pg)=>{const pop=burst(art,"BLOCKED!","",54,12);pg._pop=pop},
+ 12:(art,pg)=>{tapHint(art,"Watch it grow");const pop=burst(art,"$$$!","",50,8);art.addEventListener("click",()=>{pg.classList.add("done");const im=art.querySelector("img");im.animate([{transform:"scale(1.05)"},{transform:"scale(1.6) translateY(18%)"},{transform:"scale(1.05)"}],{duration:2600,easing:"ease-in-out"});setTimeout(pop,900)})},
+ 16:(art,pg)=>{}
+};
+function type(t,lines){t.classList.add("on");t.innerHTML="";let li=0,ci=0,buf="";clearInterval(t._i);
+  t._i=setInterval(()=>{if(li>=lines.length){clearInterval(t._i);return}const L=lines[li];
+    if(L.startsWith("<b>")||L.includes("<b>")){buf+=L+"\n";li++;t.innerHTML=buf;return}
+    ci++;t.innerHTML=buf+L.slice(0,ci)+"▌";if(ci>=L.length){buf+=L+"\n";li++;ci=0}},28)}
+function buzz(p){try{navigator.vibrate&&navigator.vibrate(p||30)}catch(e){}}
+const book=document.getElementById("book"),segs=document.getElementById("segs");
+const el=(t,c,h)=>{const e=document.createElement(t);if(c)e.className=c;if(h!=null)e.innerHTML=h;return e};
+P.forEach((d,i)=>{
+  segs.append(el("i"));
+  const pg=el("section","pg"+(d.cover?" cover":"")+(d.back?" back":"")+(d.quiz||d.gloss||d.back||d.steps?" tight":""));pg.setAttribute("aria-label","Page "+(i+1));
+  const art=el("div","art"),img=new Image();img.alt="";img.decoding="async";img.dataset.src="img/p"+String(i+1).padStart(2,"0")+".jpg";art.append(img);
+  if(d.fx==="scan")art.append(el("div","scan"));
+  if(d.fx==="pulse")art.append(el("div","pulse"));
+  if(d.fx==="flick")art.append(el("div","flick"));
+  if(d.fx==="dots"){const c=el("canvas","fx");art.append(c)}
+  if(d.fx==="counter")art.append(el("div","chip","Lines shipped today<b class='ctr'>0</b>"));
+  if(d.sfx){const b=el("div","sfx "+d.sfx[1],d.sfx[0]);b.style.left=d.sfx[2]+"%";b.style.top=d.sfx[3]+"%";art.append(b)}
+  if(IA[i+1])IA[i+1](art,pg);
+  pg.append(art);
+  if(d.cover){
+    art.append(el("div","title",`<small>A Merge Rush field guide</small><h1>Ship It Safe</h1><p>How AI code review stops bad code before it merges.</p>`));
+    const go=el("button","go","Start reading");go.onclick=()=>goTo(1);art.append(go);
+  }else{
+    const cap=el("div","cap");cap.append(el("span","no px","Page "+(i+1)));
+    if(!d.back)cap.append(el("h2","",d.h));
+    (d.p||[]).forEach(t=>cap.append(el("p","",t)));
+    if(d.steps){const ol=el("ol");d.steps.forEach((t,j)=>ol.append(el("li",j===4?"hot":"",t)));cap.append(ol)}
+    if(d.snip){const sn=d.snip;cap.append(el("p","msg2",sn.q));const pre=el("pre","code");sn.lines.forEach((t,j)=>{const sp=el("span","",t.replace(/&/g,"&amp;").replace(/</g,"&lt;"));sp.onclick=()=>{if(pg.classList.contains("done"))return;if(j===sn.hit){sp.classList.add("hit");pg.classList.add("done");m.textContent=sn.ok;m.style.color="#17713f";pg._pop&&pg._pop();buzz([40,30,40]);log("book_tap","p"+(i+1)+" found")}else{sp.classList.remove("miss");void sp.offsetWidth;sp.classList.add("miss");m.textContent="Not that one. Look again."}};pre.append(sp)});const m=el("p","msg","");cap.append(pre,m)}
+    if(d.bucket){const tg=el("div","tog",`<button data-v="0" class="on">Bucket: public</button><button data-v="1">Bucket: private</button>`);const m=el("p","msg","Anyone on the internet can read these files.");tg.onclick=e=>{const v=e.target.dataset.v;if(v==null)return;tg.querySelectorAll("button").forEach(x=>x.classList.toggle("on",x===e.target));const pl=pg.querySelector(".pulse");if(pl)pl.style.display=v==="1"?"none":"";m.textContent=v==="1"?"Locked down. IaC scanning would have flagged the public setting before deploy.":"Anyone on the internet can read these files.";m.style.color=v==="1"?"#17713f":"";if(v==="1")buzz()};cap.append(tg,m)}
+    if(d.gate){const b=el("button","merge","Merge blocked: 1 critical issue");let st=0;b.onclick=()=>{if(st===0){st=1;b.textContent="Apply suggested fix";b.style.background="var(--amber)";b.style.color="var(--ink)";pg._pop&&pg._pop()}else if(st===1){st=2;b.textContent="Checks passed. Merged!";b.className="merge ok";b.style.background="";b.style.color="";buzz([40,30,40])}};cap.append(b)}
+    if(d.diff){const pre=el("pre","code");const L=[['  const id = req.query.id;',''],['  const rows = await db.query("SELECT * FROM users WHERE id=" + id);','del'],['  const rows = await db.query("SELECT * FROM users WHERE id = ?", [id]);','add hide']];L.forEach(([t,c])=>{const sp=el("span",c+" no-tap",t.replace(/</g,"&lt;"));if(c.includes("hide"))sp.style.display="none";pre.append(sp)});pre.querySelectorAll(".del").forEach(x=>x.classList.remove("del"));
+      const b=el("button","act","Accept the suggested fix");b.onclick=()=>{const sp=pre.querySelectorAll("span");sp[1].classList.add("del");sp[2].style.display="";b.textContent="Fix applied";b.disabled=true;const s=pg.querySelector(".sfx");if(s){s.style.animation="none";void s.offsetWidth;s.style.animation=""}buzz()};cap.append(pre,b)}
+    if(d.quiz){
+      cap.append(el("p","","A new pull request is waiting. Merge it, or block it?"));
+      cap.append(el("pre","code",'<span class="no-tap">+ adds /checkout payment endpoint</span><span class="no-tap">+ adds 2 new packages</span><span class="no-tap">+ storage: <span class="k">acl = "public-read"</span></span><span class="no-tap">✓ all tests passing</span>'));
+      const q=el("div","quiz");[["Merge","m"],["Block","b"]].forEach(([x,v])=>{const b=el("button","",x);b.onclick=()=>{qa.innerHTML=v==="b"?"<b>Correct. Block it.</b> The tests pass, but the storage bucket is public. A quality gate would stop this merge and point to the exact line.":"<b>Careful!</b> The tests pass, but the storage bucket is public, so every file in it is exposed. This one should be blocked.";qa.classList.add("on");log("book_quiz",x)};q.append(b)});cap.append(q);
+      const qa=el("div","qa","");cap.append(qa);
+      cap.append(el("p","myth","<b>MYTH</b> Passing tests means it's secure. Tests check that code works, not that it's safe."));
+      cap.append(el("p","myth","<b>MYTH</b> AI review replaces human reviewers. It handles the routine checks so people can focus on design and logic."));
+    }
+    if(d.gloss){
+      cap.append(el("dl","gl",`<dt>SAST</dt><dd>Scans your own source code for security flaws like injection.</dd><dt>SCA</dt><dd>Checks the open-source packages you use for known vulnerabilities.</dd><dt>Secrets</dt><dd>Finds passwords, keys and tokens left in code.</dd><dt>IaC</dt><dd>Checks cloud setup files for risky settings.</dd><dt>Gate</dt><dd>A rule a pull request must pass before it can merge.</dd>`));
+      cap.append(el("div","rule","The golden rule: every change gets checked, every time."));
+    }
+    if(d.back){
+      cap.append(el("h2","","Ship fast. Ship safe."));
+      cap.append(el("p","","<b>CodeAnt AI</b> reviews, secures and tests code from pull request to production: AI code review with security scanning for secrets, vulnerable code, risky dependencies and cloud misconfigurations."));
+      const tr=el("a","trace","Explore CodeAnt AI");tr.href="https://www.codeant.ai/";tr.target="_blank";tr.rel="noopener";tr.onclick=()=>log("codeant_click","guide");cap.append(tr);
+      const uc=el("a","unlockc","Unlock Checkmate #1");uc.href="../comic/"+(s?"?s="+s:"");uc.onclick=()=>{setL("guide_done",1);log("guide_done","comic")};cap.append(uc);
+      cap.append(el("div","btns",`<button class="li" id="shareLi">Share on LinkedIn</button><a href="../">Play again</a>`));
+      cap.append(el("div","endlogo ca",`<img src="img/codeant-logo.png" alt="">CodeAnt AI`));
+    }
+    if(i+1===3){const b=el("button","act","Review one pull request"),m=el("p","msg","");let c=0;b.onclick=()=>{c++;const more=2+Math.floor(Math.random()*4);m.textContent=`You reviewed ${c}. ${more} more just opened.`;buzz()};cap.append(b,m)}
+    if(i+1===13){const b=el("button","act","Run the review");b.onclick=()=>{const L=[...cap.querySelectorAll("li")];L.forEach(x=>x.classList.remove("lit"));L.forEach((x,k)=>setTimeout(()=>{L.forEach(y=>y.classList.remove("lit"));x.classList.add("lit");if(k===L.length-1){const s=pg.querySelector(".sfx");if(s){s.style.animation="none";void s.offsetWidth;s.style.animation=""}buzz([60,40,60])}},k*900));log("book_tap","p13 run")};cap.append(b)}
+    if(d.k)cap.append(el("div","key","Key idea: "+d.k));
+    pg.append(cap);
+  }
+  book.append(pg);
+});
+
+const pgs=[...book.children],N=pgs.length,cnt=document.getElementById("count"),prev=document.getElementById("prev"),next=document.getElementById("next");
+let cur=-1,dotsRAF=0,ctrT=0;
+function load(i){const im=pgs[i]&&pgs[i].querySelector("img");if(im&&!im.src)im.src=im.dataset.src}
+function goTo(i,instant){
+  if(i<0||i>=N||i===cur)return;const dir=i>cur?1:-1,old=pgs[cur];
+  if(old){old.classList.remove("cur");old.classList.add(dir>0?"out-l":"out-r");setTimeout(()=>old.classList.remove("out-l","out-r"),560)}
+  const p=pgs[i];p.classList.add(dir>0?"in-l":"in-r");void p.offsetWidth;p.classList.add("cur");requestAnimationFrame(()=>p.classList.remove("in-l","in-r"));
+  // restart animations on the page
+  p.querySelectorAll(".art img,.key,.sfx,.cap li,.cap h2,.cap p").forEach(e=>{e.style.animation="none";void e.offsetWidth;e.style.animation=""});
+  cur=i;[i,i+1,i+2].forEach(load);
+  [...segs.children].forEach((s,j)=>s.classList.toggle("on",j<=i));
+  cnt.textContent=(i+1)+" / "+N;prev.disabled=i===0;next.textContent=i===N-1?"Comic":"Next";
+  const cap=p.querySelector(".cap");if(cap)cap.scrollTop=0;
+  fx(p);if(i+1>seen){seen=i+1}
+  if(i===N-1){setL("guide_done",1);log("guide_done","")}
+  try{history.replaceState(null,"","#p"+(i+1))}catch(e){}
+}
+function fx(p){
+  cancelAnimationFrame(dotsRAF);clearInterval(ctrT);
+  const c=p.querySelector("canvas.fx");if(c&&!matchMedia("(prefers-reduced-motion: reduce)").matches){
+    const r=c.getBoundingClientRect(),dpr=Math.min(2,devicePixelRatio||1);c.width=r.width*dpr;c.height=r.height*dpr;const x=c.getContext("2d");
+    const D=[...Array(46)].map(()=>({x:Math.random(),y:Math.random(),v:.0006+Math.random()*.0016,s:1+Math.random()*2.4,c:Math.random()<.18?"#e63946":Math.random()<.5?"#2ec4b6":"#f4a259",t:Math.random()*6}));
+    const loop=()=>{x.clearRect(0,0,c.width,c.height);D.forEach(d=>{d.y-=d.v;d.t+=.04;if(d.y<-.02){d.y=1.02;d.x=Math.random()}x.globalAlpha=.45+.45*Math.sin(d.t);x.fillStyle=d.c;const z=d.s*dpr*1.6;x.fillRect(Math.round(d.x*c.width),Math.round(d.y*c.height),z,z)});dotsRAF=requestAnimationFrame(loop)};loop()}
+  const k=p.querySelector(".ctr");if(k){let n=0;k.textContent="0";ctrT=setInterval(()=>{n+=Math.ceil(Math.random()*97);k.textContent=n.toLocaleString("en-IN");if(n>9000)clearInterval(ctrT)},60)}
+}
+prev.onclick=()=>goTo(cur-1);
+next.onclick=()=>{if(cur===N-1){setL("guide_done",1);location.href="../comic/"+(s?"?s="+s:"")}else goTo(cur+1)};
+addEventListener("keydown",e=>{if(e.key==="ArrowRight")goTo(cur+1);if(e.key==="ArrowLeft")goTo(cur-1)});
+let sx=null,sy=0;
+book.addEventListener("touchstart",e=>{sx=e.touches[0].clientX;sy=e.touches[0].clientY},{passive:true});
+book.addEventListener("touchend",e=>{if(sx==null)return;const dx=e.changedTouches[0].clientX-sx,dy=e.changedTouches[0].clientY-sy;sx=null;if(Math.abs(dx)>50&&Math.abs(dx)>Math.abs(dy)*1.3)goTo(cur+(dx<0?1:-1))},{passive:true});
+
+// analytics (anonymous device id shared with the game)
+const DEV=get("device");
+const log=(kind,detail)=>{if(!DEV)return;fetch("https://juemnyijhvqlpxrvsibg.supabase.co/rest/v1/rpc/log_event",{method:"POST",keepalive:true,
+  headers:{"Content-Type":"application/json",apikey:"sb_publishable_LDopq-erBLDteakwk08pOQ_qKnIafQI"},body:JSON.stringify({p_device:DEV,p_kind:kind,p_detail:detail||null})}).catch(()=>{})};
+let seen=0,sent=0;
+log("comic_open","guide "+(s?("score "+s):""));
+setInterval(()=>{if(seen>sent&&(seen-sent>=4||seen===N)){sent=seen;log("comic_page","guide page "+seen)}},3000);
+addEventListener("pagehide",()=>{if(seen>sent){sent=seen;log("comic_page","guide page "+seen)}});
+
+const toast=t=>{const e=document.getElementById("toast");e.textContent=t;e.classList.add("on");setTimeout(()=>e.classList.remove("on"),2600)};
+
+document.getElementById("shareLi").onclick=async()=>{
+  log("share_card","linkedin book score "+shown);
+  const link="https://soumyaswarrup.github.io/merge-rush/";
+  let text=null;try{text=sessionStorage.getItem("ca_caption")}catch(e){}
+  if(!text)text=`I scored ${shown} in Merge Rush (rank: ${rank(shown)}) and learned how AI code review stops bad code before it merges. Can you beat my score? ${link} #CodeReview #AppSec #CodeAntAI`;
+  try{await navigator.clipboard.writeText(text)}catch(e){}
+  let blob=null;try{const d=sessionStorage.getItem("ca_card");if(d)blob=await (await fetch(d)).blob()}catch(e){}
+  const touch=matchMedia("(pointer:coarse)").matches;
+  const file=blob?new File([blob],"merge-rush-score.jpg",{type:"image/jpeg"}):null;
+  if(touch&&file&&navigator.canShare&&navigator.canShare({files:[file]})){try{await navigator.share({files:[file],text});return}catch(e){if(e&&e.name==="AbortError")return}}
+  if(blob){const u=URL.createObjectURL(blob),a=document.createElement("a");a.href=u;a.download="merge-rush-score.jpg";document.body.append(a);a.click();setTimeout(()=>{a.remove();URL.revokeObjectURL(u)},4000);toast("Card downloaded. Attach it to your post")}
+  window.open("https://www.linkedin.com/feed/?shareActive=true&text="+encodeURIComponent(text),"_blank","noopener");
+};
+
+const start=Math.min(N,Math.max(1,parseInt((location.hash.match(/p(\d+)/)||[])[1]||"1",10)))-1;
+goTo(start);
+})();
+</script>
+</body>
+</html>
