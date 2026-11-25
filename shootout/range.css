@@ -498,3 +498,11 @@ body.tapmode #banner { left: 50vw; }
 }
 #phoneStatus { display: none; position: fixed; left: 10px; right: 152px; bottom: 12px; z-index: 16; font-size: 12.5px; color: #e8edf3; background: rgba(10,14,13,.85); border: 1px solid var(--line); border-radius: 8px; padding: 6px 8px; pointer-events: none; }
 body.tapmode #phoneStatus { display: none !important; }
+
+.checks { display: flex; gap: 4px; padding: 8px 8px 0; flex-wrap: wrap; }
+.checks span { flex: 1; text-align: center; font-size: 11px; font-weight: 700; padding: 4px 2px; border-radius: 6px; background: #1a1f24; color: #66707c; border: 1px solid #262d35; white-space: nowrap; }
+.checks span.on { background: rgba(99,214,180,.14); color: #a6f0d9; border-color: #2f6a59; }
+#laser i::after { content: ""; position: absolute; left: -12px; top: -12px; width: 34px; height: 34px; border-radius: 50%;
+  background: conic-gradient(var(--gold) calc(var(--dwell, 0) * 360deg), transparent 0);
+  -webkit-mask: radial-gradient(circle, transparent 13px, #000 14px); mask: radial-gradient(circle, transparent 13px, #000 14px); }
+@media (max-width: 760px) { .cam .checks { display: none; } }

@@ -30,6 +30,8 @@
         <video id="video" autoplay playsinline muted></video>
         <canvas id="skeleton" width="320" height="240"></canvas>
       </div>
+      <select id="camera" aria-label="Camera" hidden></select>
+      <div class="checks" id="checks"><span id="ckHand">✋ Hand</span><span id="ckGun">👉 Gun pose</span><span id="ckThumb">👍 Thumb up</span></div>
       <div id="status">Camera off. Tap or click to shoot.</div>
       <dl class="score">
         <div><dt>Accuracy</dt><dd id="s-accuracy">–</dd></div>
@@ -39,7 +41,7 @@
       <ol class="howto">
         <li>Point your index finger, thumb up</li>
         <li>The laser snaps to the nearest device</li>
-        <li>Drop your thumb to shoot</li>
+        <li>Drop your thumb to shoot, or hold the laser on a device for a moment</li>
       </ol>
       <pre id="debug" hidden></pre>
     </aside>
@@ -55,7 +57,7 @@
       <div class="panel">
         <div class="kicker"><span class="brand-dot"></span>WhizHack · AISS 2026 · OT security</div>
         <h1>WHIZHACK SHOOTOUT</h1>
-        <p class="lead">Intruders are hiding on a power plant's network. Make a finger gun, aim with your index finger, <b>drop your thumb to fire</b>.</p>
+        <p class="lead">Intruders are hiding on a power plant's network. Make a finger gun, aim with your index finger, <b>drop your thumb to fire</b>. Or just keep pointing at a device for a moment and it fires on its own.</p>
         <div class="legend">
           <div class="lg threat"><img src="art/crawler.webp" alt=""><div><b>Intruders</b> Shoot them. Red cards, plus anything a decoy exposes.</div></div>
           <div class="lg real"><img src="art/plc.webp" alt=""><div><b>Real equipment</b> Don't shoot. Hitting a PLC trips the plant: −2.</div></div>

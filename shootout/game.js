@@ -563,6 +563,13 @@ async function switchToCPU() {
   try { finder = new HandFinder(await createTracker('CPU')); detectErrors = 0; } catch {}
 }
 
+const DWELL_MS = 800;
+let dwellCard = null, dwellStart = 0;
+function checks(hand, gun, thumbUp) {
+  $('ckHand').classList.toggle('on', hand); $('ckGun').classList.toggle('on', gun); $('ckThumb').classList.toggle('on', thumbUp);
+}
+function setDwell(v) { laser.style.setProperty('--dwell', String(clamp(v, 0, 1))); }
+
 function trackHand(now) {
   if (!finder || video.readyState < 2 || video.currentTime === lastVideoTime) return;
   lastVideoTime = video.currentTime;
@@ -583,6 +590,7 @@ function trackHand(now) {
     }
     if (gone > 1200) zone.set = false;
     if (gone > 500) setStatus('idle', 'No hand seen. Hold a finger gun up where the camera box can see it.');
+    checks(false, false, false); dwellCard = null; setDwell(0);
     debug(null);
     return;
   }
@@ -602,7 +610,7 @@ function trackHand(now) {
   const y = filtY.filter(ny, now / 1000) * innerHeight;
 
   laser.classList.add('on');
-  laser.classList.toggle('aiming', trigger.isGun);
+  laser.classList.toggle('aiming', trigger.isGun || a.index > 0.78);
   const shown = aim(x, y, true);
   aimHistory.push({ t: now, ...shown });
   while (aimHistory.length > 1 && now - aimHistory[0].t > 500) aimHistory.shift();
@@ -610,9 +618,22 @@ function trackHand(now) {
   if (fired) {
     const past = aimAt(now - TUNING.aimLagMs);
     shoot(past.x, past.y, past.card);
+    dwellCard = shown.card; dwellStart = now + 700; setDwell(0);
+  } else {
+    // Hold-to-fire: pointing at the same device for a moment fires too, so the
+    // game still works if a camera or lighting makes the thumb hard to read.
+    const pointing = trigger.isGun || a.index > 0.78;
+    if (pointing && shown.card && !shown.card.classList.contains('dead')) {
+      if (dwellCard !== shown.card) { dwellCard = shown.card; dwellStart = now; }
+      const k = (now - dwellStart) / DWELL_MS;
+      setDwell(k);
+      if (k >= 1 && state === 'play') { shoot(shown.x, shown.y, shown.card); dwellStart = now + 700; setDwell(0); }
+    } else { dwellCard = null; setDwell(0); }
   }
+  checks(true, trigger.isGun || a.index > 0.78, a.thumb > TUNING.cock);
 
-  if (trigger.isGun) setStatus('aim', 'Aiming. Drop your thumb to fire.', 'live');
+  if (trigger.isGun) setStatus('aim', 'Aiming. Drop your thumb to fire, or hold on a device.', 'live');
+  else if (a.index > 0.78) setStatus('point', 'Pointing. Hold on a device to fire, or raise your thumb and drop it.', 'live');
   else setStatus('hand', 'Hand found. Point your index finger, curl the others, thumb up.', 'live');
   debug(a);
 }
@@ -644,19 +665,49 @@ function tick(now) {
 
 // ------------------------------------------------------------- camera ----
 
+const cameraEl = $('camera');
+let stream = null;
+async function openStream(deviceId) {
+  if (stream) stream.getTracks().forEach((t) => t.stop());
+  stream = await navigator.mediaDevices.getUserMedia({
+    video: { width: { ideal: 1280 }, height: { ideal: 720 }, ...(deviceId ? { deviceId: { exact: deviceId } } : { facingMode: 'user' }) },
+    audio: false,
+  });
+  video.srcObject = stream;
+  await video.play().catch(() => {});
+  if (!video.videoWidth) await new Promise((r) => video.addEventListener('loadedmetadata', r, { once: true }));
+  skel.width = Math.round(video.videoWidth / 2) || 640;
+  skel.height = Math.round(video.videoHeight / 2) || 360;
+  $('camwrap').style.aspectRatio = `${video.videoWidth || 16} / ${video.videoHeight || 9}`;
+  lastVideoTime = -1;
+  zone.set = false;
+  return stream.getVideoTracks()[0].getSettings().deviceId;
+}
+// Pick the laptop's own camera over a phone or virtual camera unless the player chose one.
+async function chooseCamera(currentId) {
+  const cams = (await navigator.mediaDevices.enumerateDevices()).filter((d) => d.kind === 'videoinput');
+  let saved = null; try { saved = localStorage.getItem('shootout.cameraId'); } catch {}
+  const builtIn = cams.find((c) => /facetime|built-?in|integrated|front/i.test(c.label));
+  const want = (saved && cams.some((c) => c.deviceId === saved) && saved) || (builtIn && builtIn.deviceId) || currentId;
+  cameraEl.replaceChildren(...cams.map((c, i) => { const o = document.createElement('option'); o.value = c.deviceId; o.textContent = c.label || `Camera ${i + 1}`; return o; }));
+  cameraEl.hidden = cams.length < 2;
+  let active = currentId;
+  if (want && want !== currentId) { try { active = await openStream(want); } catch { active = await openStream(null); } }
+  cameraEl.value = active;
+}
+cameraEl.addEventListener('change', async () => {
+  try { localStorage.setItem('shootout.cameraId', cameraEl.value); } catch {}
+  try { await openStream(cameraEl.value); } catch { setStatus('camfail' + cameraEl.value, 'That camera would not start. Pick another one.', 'error'); }
+});
+cameraEl.addEventListener('click', (e) => e.stopPropagation());
+
 async function startCamera() {
   const btn = $('bCam'); btn.disabled = true; $('camErr').textContent = '';
   try {
     btn.textContent = 'Starting camera…';
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) throw Object.assign(new Error('nocam'), { name: 'NoCam' });
-    const stream = await navigator.mediaDevices.getUserMedia({ video: { width: { ideal: 1280 }, height: { ideal: 720 }, facingMode: 'user' }, audio: false });
-    video.srcObject = stream;
-    await video.play().catch(() => {});
-    if (!video.videoWidth) await new Promise((r) => video.addEventListener('loadedmetadata', r, { once: true }));
-    skel.width = Math.round(video.videoWidth / 2) || 640;
-    skel.height = Math.round(video.videoHeight / 2) || 360;
-    $('camwrap').style.aspectRatio = `${video.videoWidth || 16} / ${video.videoHeight || 9}`;
-    lastVideoTime = -1; zone.set = false;
+    const current = await openStream(null);
+    await chooseCamera(current).catch(() => {});
     btn.textContent = 'Loading hand tracking…';
     setStatus('loading2', 'Camera on. Loading hand tracking…');
     finder = new HandFinder(await createTracker('GPU'));
@@ -677,8 +728,8 @@ async function startCamera() {
   }
 }
 function stopCamera() {
-  const s = video.srcObject;
-  if (s) s.getTracks().forEach((t) => t.stop());
+  if (stream) stream.getTracks().forEach((t) => t.stop());
+  stream = null;
   video.srcObject = null;
   finder = null;
   document.body.classList.add('tapmode');
