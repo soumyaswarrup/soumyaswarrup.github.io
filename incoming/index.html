@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<title>Incoming — WhizHack</title>
+<meta name="theme-color" content="#071210">
+<meta name="description" content="Threats are falling on a power plant, mixed with real updates and sensor data. Point a finger gun at your camera and shoot only the threats. A WhizHack game about OT security.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Incoming: can you defend the plant?">
+<meta property="og:description" content="Threats rain down on the plant, mixed with real traffic. Shoot the threats with your finger, spare the real ones. Score 20 to unlock The Decoy Files comic.">
+<meta property="og:url" content="https://soumyaswarrup.github.io/incoming/">
+<meta property="og:image" content="https://soumyaswarrup.github.io/incoming/art/og.jpg">
+<meta property="og:image:width" content="1200"><meta property="og:image:height" content="627">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Chakra+Petch:wght@500;700&family=Black+Ops+One&display=swap" rel="stylesheet">
+<style>
+:root{
+  --panel:rgba(8,20,18,.88); --line:#24463d; --line-hi:#3d7465;
+  --mint:#63d6b4; --mint-hi:#a6f0d9; --red:#ff3b3b; --red-hi:#ff8a6e; --amber:#f2c230;
+  --text:#e6f2ec; --muted:#8fb0a5;
+  --hud:"Chakra Petch",system-ui,sans-serif; --read:"Atkinson Hyperlegible",system-ui,sans-serif;
+  --sat:env(safe-area-inset-top,0px); --sab:env(safe-area-inset-bottom,0px);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;overflow:hidden;background:#000;color:var(--text);font-family:var(--read)}
+#stage{position:fixed;inset:0;overflow:hidden;touch-action:none;user-select:none;-webkit-user-select:none;background:#050b0a url(art/plant.jpg) center bottom/cover no-repeat}
+#stage::after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(180deg,rgba(0,0,0,.45),rgba(0,0,0,.05) 40%,transparent 70%,rgba(0,0,0,.25))}
+canvas#cv{position:absolute;inset:0;width:100%;height:100%;z-index:1}
+
+/* camera box: you see your own hand, like the original finger-gun game */
+#camBox{position:absolute;z-index:3;right:12px;bottom:calc(var(--sab) + 12px);width:min(34vw,240px);aspect-ratio:4/3;border-radius:12px;overflow:hidden;border:2px solid var(--line-hi);background:#000;box-shadow:0 8px 30px rgba(0,0,0,.6);display:none;pointer-events:none}
+#camBox.on{display:block}
+#camBox.gun{border-color:var(--red);box-shadow:0 0 0 2px rgba(255,59,59,.35),0 8px 30px rgba(0,0,0,.6)}
+#camBox video,#camBox canvas{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transform:scaleX(-1)}
+#camBox video{filter:saturate(.8) brightness(.9)}
+#camBox span{position:absolute;left:6px;top:5px;font:700 10px var(--hud);letter-spacing:.12em;color:#fff;text-shadow:0 1px 3px #000;transform:none}
+
+/* HUD */
+#hud{position:absolute;z-index:2;left:0;right:0;top:calc(var(--sat) + 10px);display:flex;align-items:flex-start;justify-content:space-between;padding:0 12px;pointer-events:none;opacity:0;transition:opacity .3s;font-family:var(--hud)}
+#hud.on{opacity:1}
+.chip{background:rgba(6,16,14,.74);border:1px solid var(--line);border-radius:8px;padding:6px 10px;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+#scoreBox{min-width:128px}
+#scoreBox small,#lives small{display:block;font-size:11px;letter-spacing:.14em;color:var(--muted)}
+#scoreBox b{font-size:28px;line-height:1;color:var(--red-hi)}
+#scoreBox b span{font-size:15px;color:var(--muted);font-weight:500}
+#bar{height:4px;background:#1a2f29;border-radius:2px;margin-top:6px;overflow:hidden}
+#bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--red),var(--amber));transition:width .25s}
+#lives .pips{display:flex;gap:6px;margin-top:4px}
+#lives i{width:16px;height:16px;border-radius:4px;background:var(--mint);box-shadow:0 0 10px rgba(99,214,180,.7);transition:all .3s}
+#lives i.lost{background:#2a1515;box-shadow:none;border:1px solid #5a2424}
+#status{position:absolute;z-index:2;left:50%;top:calc(var(--sat) + 74px);transform:translateX(-50%);font-family:var(--hud);font-size:14px;white-space:nowrap;pointer-events:none;opacity:0;transition:opacity .3s}
+#status.on{opacity:1}
+#status.live{border-color:var(--line-hi);color:var(--mint-hi)}
+#status.gun{border-color:#7a2a2a;color:#ffb3a3}
+#status.warn{border-color:#6a5a1a;color:var(--amber)}
+#debugBox{position:absolute;z-index:4;left:8px;bottom:8px;font:11px/1.35 ui-monospace,monospace;color:#9f9;background:rgba(0,0,0,.6);padding:4px 6px;white-space:pre;display:none;pointer-events:none}
+
+/* Overlays */
+.ov{position:absolute;z-index:5;inset:0;display:none;align-items:center;justify-content:center;padding:calc(var(--sat) + 16px) 16px calc(var(--sab) + 16px);overflow:auto;background:rgba(2,8,7,.6)}
+.ov.on{display:flex}
+.card{width:min(560px,100%);max-height:100%;overflow:auto;background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:22px 20px 18px;box-shadow:0 20px 80px rgba(0,0,0,.6);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+.tag{font-family:var(--hud);font-size:12px;letter-spacing:.18em;color:var(--muted);text-transform:uppercase;display:flex;align-items:center;gap:8px}
+.tag .dot{width:8px;height:8px;border-radius:50%;background:var(--mint);box-shadow:0 0 8px var(--mint);animation:blink 1.6s infinite}
+.tag.red .dot{background:var(--red);box-shadow:0 0 8px var(--red)}
+@keyframes blink{50%{opacity:.35}}
+.title{font-family:"Black Ops One",var(--hud);font-size:clamp(46px,13vw,78px);line-height:1;text-align:center;margin:12px 0 2px;color:#ffd6cc;letter-spacing:.04em;
+  text-shadow:0 0 6px #ff3b3b,0 0 20px #ff3b3b,0 0 44px rgba(255,59,59,.6)}
+.title small{display:block;font-family:var(--hud);font-size:14px;letter-spacing:.32em;color:var(--mint-hi);text-shadow:none;margin-top:8px}
+.lead{font-size:17px;line-height:1.45;text-align:center;margin:10px 0 14px}
+.legend{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:0 0 12px}
+.col{border-radius:12px;padding:10px;border:1px solid}
+.col.bad{background:rgba(255,59,59,.07);border-color:rgba(255,59,59,.35)}
+.col.good{background:rgba(99,214,180,.07);border-color:rgba(99,214,180,.35)}
+.col h4{margin:0 0 6px;font:700 14px var(--hud);letter-spacing:.08em}
+.col.bad h4{color:var(--red-hi)}.col.good h4{color:var(--mint-hi)}
+.icons{display:flex;gap:4px;flex-wrap:wrap}
+.icons img{width:40px;height:40px;object-fit:contain}
+.col p{margin:6px 0 0;font-size:13.5px;line-height:1.35;color:#cfe3dc}
+.trick{font-size:14px;line-height:1.4;background:rgba(242,194,48,.07);border:1px solid rgba(242,194,48,.3);border-radius:10px;padding:9px 11px;margin:0 0 12px}
+.trick b{color:var(--amber)}
+.goal{font-family:var(--hud);text-align:center;font-size:15px;color:var(--amber);margin:0 0 12px;letter-spacing:.03em}
+.btns{display:grid;gap:10px}
+.btn{appearance:none;border:0;border-radius:12px;padding:15px 16px;font-family:var(--hud);font-weight:700;font-size:17px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;text-decoration:none;text-align:center;display:block;color:#1a0505;background:linear-gradient(180deg,#ff6a52,#e8352a);box-shadow:0 6px 24px rgba(232,53,42,.35)}
+.btn:active{transform:translateY(1px)}
+.btn[disabled]{opacity:.65;cursor:progress}
+.btn.ghost{background:transparent;color:var(--mint-hi);border:1px solid var(--line-hi);box-shadow:none}
+.how{font-size:13.5px;color:var(--muted);text-align:center;line-height:1.45;margin:12px 0 0}
+.err{font-size:14px;color:var(--amber);text-align:center;margin:10px 0 0}
+.err:empty{display:none}
+.foot{font-size:11.5px;color:#5f7d73;text-align:center;margin-top:12px;line-height:1.5}
+.foot a{color:#7fa79a}
+h2{font-family:var(--hud);font-size:34px;margin:8px 0 4px;letter-spacing:.04em;text-align:center}
+h2.red{color:var(--red-hi);text-shadow:0 0 18px rgba(255,59,59,.45)}
+h2.mint{color:var(--mint-hi);text-shadow:0 0 18px rgba(99,214,180,.45)}
+.big{font-family:var(--hud);text-align:center;font-size:64px;font-weight:700;line-height:1;margin:6px 0 2px}
+.sub{text-align:center;color:var(--muted);font-size:14px;margin-bottom:12px}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:0 0 14px}
+.stats div{background:rgba(255,255,255,.03);border:1px solid #1d3832;border-radius:10px;padding:8px;text-align:center}
+.stats b{display:block;font-family:var(--hud);font-size:22px}
+.stats small{font-size:12px;color:var(--muted)}
+.lesson{background:rgba(99,214,180,.07);border:1px solid rgba(99,214,180,.25);border-radius:10px;padding:12px 14px;font-size:15px;line-height:1.45;margin:0 0 14px}
+.lesson b{color:var(--mint-hi)}
+.cd{height:5px;background:#1a2f29;border-radius:3px;overflow:hidden;margin:4px 0 12px}
+.cd i{display:block;height:100%;width:0;background:var(--mint)}
+.comicrow{display:flex;gap:12px;align-items:center;margin:0 0 14px}
+.comicrow img{width:74px;border-radius:6px;box-shadow:0 6px 20px rgba(0,0,0,.5)}
+.comicrow p{margin:0;font-size:15px;line-height:1.4}
+@media (max-height:700px){.icons img{width:32px;height:32px}.lead{font-size:15px;margin:6px 0 10px}.title{font-size:44px}}
+</style>
+</head>
+<body>
+<div id="stage">
+  <canvas id="cv"></canvas>
+  <div id="camBox"><video id="cam" playsinline muted autoplay></video><canvas id="skel"></canvas><span>YOUR HAND</span></div>
+
+  <div id="hud">
+    <div class="chip" id="scoreBox"><small>THREATS STOPPED</small><b id="score">0<span> / 20</span></b><div id="bar"><i></i></div></div>
+    <div class="chip" id="lives"><small>PLANT</small><div class="pips"><i></i><i></i><i></i></div></div>
+  </div>
+  <div id="status" class="chip"></div>
+  <div id="debugBox"></div>
+
+  <!-- Start -->
+  <div class="ov on" id="ovStart">
+    <div class="card">
+      <div class="tag"><span class="dot"></span>WhizHack · AISS 2026 · OT security</div>
+      <div class="title">INCOMING<small>DEFEND THE PLANT</small></div>
+      <p class="lead">Traffic is raining down on the plant. Some of it is real. Some of it is an attack. <b>Shoot only the threats.</b></p>
+      <div class="legend">
+        <div class="col bad"><h4>SHOOT · THREATS</h4><div class="icons"><img src="art/crawler.webp" alt=""><img src="art/ransom.webp" alt=""><img src="art/usb.webp" alt=""><img src="art/hood.webp" alt=""></div><p>Malware, ransomware, rogue USBs, attackers. +1 each.</p></div>
+        <div class="col good"><h4>SPARE · REAL</h4><div class="icons"><img src="art/update.webp" alt=""><img src="art/sensor.webp" alt=""><img src="art/hmi.webp" alt=""></div><p>Signed updates, sensor data, operator commands. Shooting one costs −2.</p></div>
+      </div>
+      <div class="trick"><b>Watch for fakes:</b> some threats are disguised as real updates. Look for the red flicker and the word UNSIGNED.</div>
+      <p class="goal">Stop 20 threats to unlock The Decoy Files comic</p>
+      <div class="btns">
+        <button class="btn" id="bCam">👉 Play with finger gun</button>
+        <button class="btn ghost" id="bTap">Play with tap</button>
+      </div>
+      <p class="err" id="camErr"></p>
+      <p class="how">Finger gun: hold your hand up so the camera box sees it. Point your index finger, curl the other fingers, thumb up. <b>Drop your thumb to fire.</b> Works best on a laptop. On a phone, prop it up first.</p>
+      <p class="foot">A WhizHack game. Your camera stays on your device. Hand tracking adapted from <a href="https://github.com/rajvishahhh/finger-gun-tabs" target="_blank" rel="noopener">finger-gun-tabs</a> (MIT) with Google MediaPipe.</p>
+    </div>
+  </div>
+
+  <!-- Game over -->
+  <div class="ov" id="ovOver">
+    <div class="card">
+      <div class="tag red"><span class="dot"></span>ZeroHack OT alert</div>
+      <h2 class="red">PLANT DOWN</h2>
+      <div class="sub" id="overWhy">Three threats got through.</div>
+      <div class="big" id="overScore">0</div>
+      <div class="sub">threats stopped · <span id="overNeed">20 unlocks the comic</span></div>
+      <div class="stats">
+        <div><b id="stBest">0</b><small>Best</small></div>
+        <div><b id="stFake">0</b><small>Fakes caught</small></div>
+        <div><b id="stOwn">0</b><small>Real ones shot</small></div>
+      </div>
+      <div class="lesson" id="lesson"></div>
+      <div class="btns">
+        <button class="btn" id="bAgain">Play again</button>
+        <button class="btn ghost" id="bSwitch">Switch to tap</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Win -->
+  <div class="ov" id="ovWin">
+    <div class="card">
+      <div class="tag"><span class="dot"></span>ZeroHack OT · all clear</div>
+      <h2 class="mint">PLANT SECURED</h2>
+      <div class="sub">You stopped <b id="winScore">20</b> threats and let the real traffic through.</div>
+      <div class="comicrow"><img src="../decoy-dash/comic/pages/page-01.jpg" alt="The Decoy Files #1 cover"><p><b>The Decoy Files #1</b> is unlocked. Opening it in <b id="cdN">5</b>s…</p></div>
+      <div class="cd"><i id="cdBar"></i></div>
+      <div class="btns">
+        <a class="btn" href="comic/">Read the comic now</a>
+        <button class="btn ghost" id="bStay">Stay and keep playing</button>
+      </div>
+    </div>
+  </div>
+</div>
+<script type="module" src="game.js"></script>
+</body>
+</html>
