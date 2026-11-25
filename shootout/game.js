@@ -563,12 +563,54 @@ async function switchToCPU() {
   try { finder = new HandFinder(await createTracker('CPU')); detectErrors = 0; } catch {}
 }
 
-const DWELL_MS = 800;
-let dwellCard = null, dwellStart = 0;
-function checks(hand, gun, thumbUp) {
-  $('ckHand').classList.toggle('on', hand); $('ckGun').classList.toggle('on', gun); $('ckThumb').classList.toggle('on', thumbUp);
+// Firing: aim with a finger gun, then either FLICK the hand sideways or TILT
+// the gun onto its side. The shot goes where you were aiming just before the move.
+const SLOW = /[?&]slowcam/.test(location.search) ? 4 : 1; // for low-fps test rigs
+const FIRE = { flickPalms: 1.0, flickMs: 220 * SLOW, tiltDeg: 45, tiltMs: 450 * SLOW, coolMs: 650, steadySpeed: 2.2 };
+const motion = []; // recent { t, x, y, roll, palm } in video pixels
+let pointingAt = -1e9, coolUntil = 0, steadyAim = null, firedFlash = 0;
+let home = null; // pose the hand fired from; the move back to it must not fire again
+const wrapDeg = (d) => ((((d + 180) % 360) + 360) % 360) - 180;
+function checks(hand, gun, fire) {
+  $('ckHand').classList.toggle('on', hand); $('ckGun').classList.toggle('on', gun); $('ckThumb').classList.toggle('on', fire);
 }
-function setDwell(v) { laser.style.setProperty('--dwell', String(clamp(v, 0, 1))); }
+function detectFireMove(lm, now) {
+  const vw = video.videoWidth || 1, vh = video.videoHeight || 1;
+  const P = (i) => ({ x: lm[i].x * vw, y: lm[i].y * vh });
+  const w = P(0), m = P(9), k5 = P(5), k17 = P(17);
+  const palm = Math.hypot(m.x - w.x, m.y - w.y) || 1;
+  const roll = (Math.atan2(k17.y - k5.y, k17.x - k5.x) * 180) / Math.PI;
+  const cur = { t: now, x: (w.x + m.x) / 2, y: (w.y + m.y) / 2, roll, palm };
+  const prev = motion[motion.length - 1];
+  motion.push(cur);
+  while (motion.length > 2 && now - motion[0].t > Math.max(FIRE.flickMs, FIRE.tiltMs)) motion.shift();
+  // speed right now, in palm-lengths per second: slow = steady aiming
+  let speed = 0, dRollNow = 0;
+  if (prev) {
+    const dt = Math.max(0.016, (now - prev.t) / 1000);
+    speed = Math.hypot(cur.x - prev.x, cur.y - prev.y) / palm / dt;
+    dRollNow = Math.abs(wrapDeg(roll - prev.roll)) / dt;
+  }
+  const steady = speed < FIRE.steadySpeed && dRollNow < 120;
+  if (home) {
+    const back = Math.hypot(cur.x - home.x, cur.y - home.y) / palm < 0.45 && Math.abs(wrapDeg(roll - home.roll)) < 20;
+    if (back || now > home.until) { home = null; motion.length = 0; motion.push(cur); }
+    return { steady, move: null };
+  }
+  if (now < coolUntil) return { steady, move: null };
+  const armed = now - pointingAt < 450; // pointing now, or a moment ago (the pose can blur mid-move)
+  if (!armed) return { steady, move: null };
+  for (const old of motion) {
+    const age = now - old.t;
+    if (age <= 0) break;
+    if (age <= FIRE.flickMs) {
+      const dx = cur.x - old.x, dy = cur.y - old.y;
+      if (Math.abs(dx) / palm > FIRE.flickPalms && Math.abs(dx) > 1.4 * Math.abs(dy)) { home = { ...old, until: now + 2000 }; return { steady, move: 'flick' }; }
+    }
+    if (age <= FIRE.tiltMs && Math.abs(wrapDeg(roll - old.roll)) > FIRE.tiltDeg) { home = { ...old, until: now + 2000 }; return { steady, move: 'tilt' }; }
+  }
+  return { steady, move: null };
+}
 
 function trackHand(now) {
   if (!finder || video.readyState < 2 || video.currentTime === lastVideoTime) return;
@@ -590,7 +632,7 @@ function trackHand(now) {
     }
     if (gone > 1200) zone.set = false;
     if (gone > 500) setStatus('idle', 'No hand seen. Hold a finger gun up where the camera box can see it.');
-    checks(false, false, false); dwellCard = null; setDwell(0);
+    checks(false, false, false); motion.length = 0;
     debug(null);
     return;
   }
@@ -615,26 +657,27 @@ function trackHand(now) {
   aimHistory.push({ t: now, ...shown });
   while (aimHistory.length > 1 && now - aimHistory[0].t > 500) aimHistory.shift();
 
-  if (fired) {
-    const past = aimAt(now - TUNING.aimLagMs);
-    shoot(past.x, past.y, past.card);
-    dwellCard = shown.card; dwellStart = now + 700; setDwell(0);
-  } else {
-    // Hold-to-fire: pointing at the same device for a moment fires too, so the
-    // game still works if a camera or lighting makes the thumb hard to read.
-    const pointing = trigger.isGun || a.index > 0.78;
-    if (pointing && shown.card && !shown.card.classList.contains('dead')) {
-      if (dwellCard !== shown.card) { dwellCard = shown.card; dwellStart = now; }
-      const k = (now - dwellStart) / DWELL_MS;
-      setDwell(k);
-      if (k >= 1 && state === 'play') { shoot(shown.x, shown.y, shown.card); dwellStart = now + 700; setDwell(0); }
-    } else { dwellCard = null; setDwell(0); }
+  const pointing = trigger.isGun || a.index > 0.78;
+  if (pointing) pointingAt = now;
+  const fm = detectFireMove(lm, now);
+  if (fm.steady && pointing) steadyAim = { t: now, ...shown };
+  const move = fm.move || (fired && now >= coolUntil ? 'thumb' : null);
+  if (move) {
+    (window.__moves ||= []).push(move + '@' + Math.round(now));
+    // shoot where the hand was steady just before the move, not where the move threw the laser
+    const at = steadyAim && now - steadyAim.t < 900 ? steadyAim : aimAt(now - 250);
+    if (at && state === 'play') {
+      let card = at.card;
+      if (card && card.classList.contains('dead')) card = null;
+      shoot(at.x, at.y, card);
+    }
+    coolUntil = now + FIRE.coolMs;
+    firedFlash = now;
   }
-  checks(true, trigger.isGun || a.index > 0.78, a.thumb > TUNING.cock);
+  checks(true, pointing, now - firedFlash < 350);
 
-  if (trigger.isGun) setStatus('aim', 'Aiming. Drop your thumb to fire, or hold on a device.', 'live');
-  else if (a.index > 0.78) setStatus('point', 'Pointing. Hold on a device to fire, or raise your thumb and drop it.', 'live');
-  else setStatus('hand', 'Hand found. Point your index finger, curl the others, thumb up.', 'live');
+  if (pointing) setStatus('aim', 'Aiming. Flick your hand sideways or tilt the gun to fire.', 'live');
+  else setStatus('hand', 'Hand found. Make a finger gun: index finger out, other fingers curled.', 'live');
   debug(a);
 }
 function debug(a) {
