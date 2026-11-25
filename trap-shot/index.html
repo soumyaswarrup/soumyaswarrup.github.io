@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<title>Trap Shot — WhizHack</title>
+<meta name="theme-color" content="#071210">
+<meta name="description" content="Point a finger gun at your camera and shoot the attackers inside a power plant. You can only hit them once your decoys unmask them. A WhizHack game about deception in OT security.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Trap Shot: can you trace 20 intruders?">
+<meta property="og:description" content="Attackers inside the plant are invisible. Your decoys unmask them. Then you take the shot with your finger. Trace 20 to unlock The Decoy Files comic.">
+<meta property="og:url" content="https://soumyaswarrup.github.io/trap-shot/">
+<meta property="og:image" content="https://soumyaswarrup.github.io/trap-shot/art/og.jpg">
+<meta property="og:image:width" content="1200"><meta property="og:image:height" content="627">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Chakra+Petch:wght@500;700&display=swap" rel="stylesheet">
+<link rel="preload" as="image" href="art/logo.webp">
+<style>
+:root{
+  --night:#071210; --panel:rgba(9,22,19,.86); --line:#24463d; --line-hi:#3d7465;
+  --mint:#63d6b4; --mint-hi:#a6f0d9; --blue:#4cc3ff; --red:#ff3b3b; --red-hi:#ff8a6e; --amber:#f2c230;
+  --text:#e6f2ec; --muted:#8fb0a5;
+  --hud:"Chakra Petch",system-ui,sans-serif; --read:"Atkinson Hyperlegible",system-ui,sans-serif;
+  --sat:env(safe-area-inset-top,0px); --sab:env(safe-area-inset-bottom,0px);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;overflow:hidden;background:#000;color:var(--text);font-family:var(--read)}
+#stage{position:fixed;inset:0;overflow:hidden;touch-action:none;user-select:none;-webkit-user-select:none;background:#06100e}
+#stage::before{content:"";position:absolute;inset:-20px;background:url(art/cardbg.jpg) center/cover no-repeat;filter:blur(6px) brightness(.45) saturate(.7)}
+video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transform:scaleX(-1);
+  filter:saturate(.55) brightness(.62) contrast(1.05);opacity:0;transition:opacity .6s}
+video.on{opacity:1}
+#tint{position:absolute;inset:0;pointer-events:none;
+  background:
+   repeating-linear-gradient(0deg,rgba(0,0,0,.18) 0 1px,transparent 1px 3px),
+   radial-gradient(ellipse at 50% 45%,rgba(20,90,75,.10),rgba(2,8,7,.72) 85%),
+   linear-gradient(180deg,rgba(40,10,10,.25),transparent 25%,transparent 70%,rgba(5,30,25,.35))}
+canvas{position:absolute;inset:0;width:100%;height:100%}
+
+/* HUD */
+#hud{position:absolute;left:0;right:0;top:calc(var(--sat) + 10px);display:flex;align-items:flex-start;justify-content:space-between;padding:0 14px;pointer-events:none;opacity:0;transition:opacity .3s;font-family:var(--hud)}
+#hud.on{opacity:1}
+.chip{background:rgba(6,16,14,.72);border:1px solid var(--line);border-radius:8px;padding:6px 10px;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+#scoreBox{min-width:128px}
+#scoreBox small{display:block;font-size:11px;letter-spacing:.14em;color:var(--muted)}
+#scoreBox b{font-size:28px;line-height:1;color:var(--red-hi)}
+#scoreBox b span{font-size:15px;color:var(--muted);font-weight:500}
+#bar{height:4px;background:#1a2f29;border-radius:2px;margin-top:6px;overflow:hidden}
+#bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--red),var(--amber));transition:width .25s}
+#lives{display:flex;gap:6px;align-items:center}
+#lives small{font-size:11px;letter-spacing:.14em;color:var(--muted);margin-right:4px}
+#lives i{width:16px;height:16px;border-radius:4px;background:var(--mint);box-shadow:0 0 10px rgba(99,214,180,.7);transition:all .3s}
+#lives i.lost{background:#2a1515;box-shadow:none;border:1px solid #5a2424}
+#status{position:absolute;left:50%;bottom:calc(var(--sab) + 14px);transform:translateX(-50%);font-family:var(--hud);font-size:14px;letter-spacing:.04em;white-space:nowrap;pointer-events:none;opacity:0;transition:opacity .3s}
+#status.on{opacity:1}
+#status.live{border-color:var(--line-hi);color:var(--mint-hi)}
+#status.gun{border-color:#7a2a2a;color:#ffb3a3}
+#status.warn{border-color:#6a5a1a;color:var(--amber)}
+
+/* Overlays */
+.ov{position:absolute;inset:0;display:none;align-items:center;justify-content:center;padding:calc(var(--sat) + 16px) 16px calc(var(--sab) + 16px);overflow:auto;background:rgba(2,8,7,.55)}
+.ov.on{display:flex}
+.card{width:min(560px,100%);max-height:100%;overflow:auto;background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:22px 20px 18px;box-shadow:0 20px 80px rgba(0,0,0,.6),0 0 0 1px rgba(99,214,180,.06) inset;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+.tag{font-family:var(--hud);font-size:12px;letter-spacing:.18em;color:var(--muted);text-transform:uppercase;display:flex;align-items:center;gap:8px}
+.tag .dot{width:8px;height:8px;border-radius:50%;background:var(--mint);box-shadow:0 0 8px var(--mint);animation:blink 1.6s infinite}
+.tag.red .dot{background:var(--red);box-shadow:0 0 8px var(--red)}
+@keyframes blink{50%{opacity:.35}}
+.logo{display:block;width:100%;max-width:440px;margin:10px auto 6px}
+.lead{font-size:17px;line-height:1.45;text-align:center;margin:4px 0 16px}
+.lead b{color:var(--blue)}
+.rules{display:grid;gap:8px;margin:0 0 14px}
+.rule{display:flex;gap:12px;align-items:center;background:rgba(255,255,255,.03);border:1px solid #1d3832;border-radius:10px;padding:8px 10px}
+.rule img{width:52px;height:52px;object-fit:contain;flex:none}
+.rule p{margin:0;font-size:15px;line-height:1.35}
+.rule .pts{font-family:var(--hud);font-weight:700;margin-left:auto;padding-left:6px;font-size:16px;white-space:nowrap}
+.goal{font-family:var(--hud);text-align:center;font-size:15px;color:var(--amber);margin:0 0 14px;letter-spacing:.03em}
+.btns{display:grid;gap:10px}
+.btn{appearance:none;border:0;border-radius:12px;padding:15px 16px;font-family:var(--hud);font-weight:700;font-size:17px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;text-decoration:none;text-align:center;display:block;color:#1a0505;background:linear-gradient(180deg,#ff6a52,#e8352a);box-shadow:0 6px 24px rgba(232,53,42,.35)}
+.btn:active{transform:translateY(1px)}
+.btn[disabled]{opacity:.65;cursor:progress}
+.btn.ghost{background:transparent;color:var(--mint-hi);border:1px solid var(--line-hi);box-shadow:none}
+.how{font-size:13.5px;color:var(--muted);text-align:center;line-height:1.45;margin:12px 0 0}
+.err{font-size:14px;color:var(--amber);text-align:center;margin:10px 0 0;min-height:0}
+.foot{font-size:11.5px;color:#5f7d73;text-align:center;margin-top:14px;line-height:1.5}
+.foot a{color:#7fa79a}
+h2{font-family:var(--hud);font-size:34px;margin:8px 0 4px;letter-spacing:.04em;text-align:center}
+h2.red{color:var(--red-hi);text-shadow:0 0 18px rgba(255,59,59,.45)}
+h2.mint{color:var(--mint-hi);text-shadow:0 0 18px rgba(99,214,180,.45)}
+.big{font-family:var(--hud);text-align:center;font-size:64px;font-weight:700;line-height:1;margin:6px 0 2px}
+.sub{text-align:center;color:var(--muted);font-size:14px;margin-bottom:12px}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:0 0 14px}
+.stats div{background:rgba(255,255,255,.03);border:1px solid #1d3832;border-radius:10px;padding:8px;text-align:center}
+.stats b{display:block;font-family:var(--hud);font-size:22px}
+.stats small{font-size:12px;color:var(--muted)}
+.lesson{background:rgba(76,195,255,.07);border:1px solid rgba(76,195,255,.25);border-radius:10px;padding:12px 14px;font-size:15px;line-height:1.45;margin:0 0 14px}
+.lesson b{color:var(--blue)}
+.cd{height:5px;background:#1a2f29;border-radius:3px;overflow:hidden;margin:4px 0 12px}
+.cd i{display:block;height:100%;width:0;background:var(--mint)}
+.comicrow{display:flex;gap:12px;align-items:center;margin:0 0 14px}
+.comicrow img{width:74px;border-radius:6px;box-shadow:0 6px 20px rgba(0,0,0,.5)}
+.comicrow p{margin:0;font-size:15px;line-height:1.4}
+@media (min-width:720px) and (min-height:600px){.card{padding:28px 28px 22px}}
+@media (max-height:640px){.rule img{width:40px;height:40px}.rule p{font-size:14px}.lead{font-size:15px;margin-bottom:10px}}
+</style>
+</head>
+<body>
+<div id="stage">
+  <video id="cam" playsinline muted autoplay></video>
+  <div id="tint"></div>
+  <canvas id="cv"></canvas>
+
+  <div id="hud">
+    <div class="chip" id="scoreBox"><small>TRACED</small><b id="score">0<span> / 20</span></b><div id="bar"><i></i></div></div>
+    <div class="chip" id="lives"><small>PLANT</small><i></i><i></i><i></i></div>
+  </div>
+  <div id="status" class="chip"></div>
+
+  <!-- Start -->
+  <div class="ov on" id="ovStart">
+    <div class="card">
+      <div class="tag"><span class="dot"></span>WhizHack · AISS 2026 · OT deception</div>
+      <img class="logo" src="art/logo.webp" alt="Trap Shot">
+      <p class="lead">Attackers inside the plant are invisible. <b>Your decoys unmask them.</b> Then you take the shot.</p>
+      <div class="rules">
+        <div class="rule"><img src="art/decoy.webp" alt=""><p><b style="color:var(--blue)">Blue decoys</b> are your traps. An attacker who touches one gets unmasked.</p></div>
+        <div class="rule"><img src="art/crawler.webp" alt=""><p>Shoot <b style="color:var(--red-hi)">unmasked attackers</b> before they reach real equipment.</p><span class="pts" style="color:var(--red-hi)">+1</span></div>
+        <div class="rule"><img src="art/plc.webp" alt=""><p>Never shoot your own <b style="color:var(--mint-hi)">green equipment</b>. That trips the plant.</p><span class="pts" style="color:var(--amber)">−3</span></div>
+      </div>
+      <p class="goal">Trace 20 attackers to unlock The Decoy Files comic</p>
+      <div class="btns">
+        <button class="btn" id="bCam">👉 Play with finger gun</button>
+        <button class="btn ghost" id="bTap">Play with tap</button>
+      </div>
+      <p class="err" id="err"></p>
+      <p class="how">Finger gun: point your index finger at the screen, curl the other fingers, thumb up. <b>Drop your thumb to fire.</b> On a phone, prop it up so your hand is free.</p>
+      <p class="foot">A WhizHack game about deception in OT security. Your camera stays on your device. Hand tracking adapted from <a href="https://github.com/rajvishahhh/finger-gun-tabs" target="_blank" rel="noopener">finger-gun-tabs</a> (MIT) with Google MediaPipe.</p>
+    </div>
+  </div>
+
+  <!-- Game over -->
+  <div class="ov" id="ovOver">
+    <div class="card">
+      <div class="tag red"><span class="dot"></span>ZeroHack OT alert</div>
+      <h2 class="red">PLANT BREACHED</h2>
+      <div class="sub" id="overWhy">An attacker reached the Boiler PLC.</div>
+      <div class="big" id="overScore">0</div>
+      <div class="sub">attackers traced · <span id="overNeed">20 unlocks the comic</span></div>
+      <div class="stats">
+        <div><b id="stBest">0</b><small>Best</small></div>
+        <div><b id="stTrip">0</b><small>Decoys tripped</small></div>
+        <div><b id="stPlant">0</b><small>Own goals</small></div>
+      </div>
+      <div class="lesson" id="lesson"></div>
+      <div class="btns">
+        <button class="btn" id="bAgain">Play again</button>
+        <button class="btn ghost" id="bSwitch">Switch to tap</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Win -->
+  <div class="ov" id="ovWin">
+    <div class="card">
+      <div class="tag"><span class="dot"></span>ZeroHack TRACE · all clear</div>
+      <h2 class="mint">PLANT SECURED</h2>
+      <div class="sub">You traced <b id="winScore">20</b> intruders. Deception made the invisible ones easy targets.</div>
+      <div class="comicrow"><img src="../decoy-dash/comic/pages/page-01.jpg" alt="The Decoy Files #1 cover"><p><b>The Decoy Files #1</b> is unlocked. Opening it in <b id="cdN">5</b>s…</p></div>
+      <div class="cd"><i id="cdBar"></i></div>
+      <div class="btns">
+        <a class="btn" id="bRead" href="comic/">Read the comic now</a>
+        <button class="btn ghost" id="bStay">Stay and keep playing</button>
+      </div>
+    </div>
+  </div>
+</div>
+<script type="module" src="game.js"></script>
+</body>
+</html>

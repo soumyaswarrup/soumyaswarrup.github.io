@@ -40,14 +40,14 @@ section{margin-top:46px}
 .shot .badge{position:absolute;left:10px;top:10px;background:#000;color:#fff;font-size:15px;padding:3px 10px}
 .game .body{padding:18px 18px 20px;display:flex;flex-direction:column;gap:10px;flex:1}
 .game h3{font-size:34px;line-height:1}
-.game.dd h3{color:#63d6b4}.game.mr h3{color:#8f8fff}
+.game.dd h3{color:#63d6b4}.game.ts h3{color:#ff6a52}.game.mr h3{color:#8f8fff}
 .game .for{font-size:13.5px;color:#a9a3c7;font-weight:600;text-transform:uppercase;letter-spacing:.06em}
 .game p{font-size:15.5px;color:#dcd8ef}
 .chips{display:flex;flex-wrap:wrap;gap:6px}
 .chips i{font-style:normal;font-size:12.5px;font-weight:600;background:#2a2740;border:2px solid #000;padding:2px 8px;color:#e9e6ff}
 .game .row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:auto;padding-top:6px}
 .game .row .btn{width:100%;padding:0 10px}
-.game.dd .play{background:#3f9a4e;color:#fff}.game.mr .play{background:#6363f1;color:#fff}
+.game.dd .play{background:#3f9a4e;color:#fff}.game.ts .play{background:#e8352a;color:#fff}.game.mr .play{background:#6363f1;color:#fff}
 .comic{display:flex;gap:12px;align-items:center;background:#0f0e18;border:3px solid #000;padding:10px;text-decoration:none}
 .comic img{width:58px;height:84px;object-fit:cover;border:2px solid #000;flex:0 0 auto}
 .comic b{display:block;font-family:Bangers,sans-serif;font-weight:400;font-size:21px;letter-spacing:.04em;color:#ffd84d;line-height:1}

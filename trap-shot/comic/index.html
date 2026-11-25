@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>The Decoy Files #1 — unlocked in Trap Shot</title>
+<meta name="theme-color" content="#071210">
+<meta property="og:title" content="The Decoy Files #1 — a WhizHack comic">
+<meta property="og:image" content="https://soumyaswarrup.github.io/decoy-dash/comic/pages/page-01.jpg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Chakra+Petch:wght@600;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#071210;color:#e6f2ec;font-family:"Atkinson Hyperlegible",system-ui,sans-serif}
+header{position:sticky;top:0;z-index:2;display:flex;align-items:center;gap:10px;justify-content:space-between;padding:calc(env(safe-area-inset-top,0px) + 10px) 14px 10px;background:rgba(7,18,16,.92);border-bottom:1px solid #24463d;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+header b{font-family:"Chakra Petch",sans-serif;font-size:17px;letter-spacing:.04em}
+header small{display:block;color:#8fb0a5;font-size:12px}
+.acts{display:flex;gap:8px;flex:none}
+a.btn{font-family:"Chakra Petch",sans-serif;font-weight:700;font-size:13px;letter-spacing:.05em;text-transform:uppercase;text-decoration:none;padding:9px 12px;border-radius:10px;color:#a6f0d9;border:1px solid #3d7465;white-space:nowrap}
+a.btn.red{color:#1a0505;background:linear-gradient(180deg,#ff6a52,#e8352a);border:0}
+main{max-width:760px;margin:0 auto;padding:14px 10px calc(env(safe-area-inset-bottom,0px) + 30px)}
+.unl{background:rgba(99,214,180,.08);border:1px solid #2f5a4e;border-radius:12px;padding:12px 14px;margin:0 0 14px;font-size:15px;line-height:1.45}
+.unl b{color:#a6f0d9}
+img{display:block;width:100%;height:auto;aspect-ratio:1208/1708;background:#0c1c18;border-radius:6px;margin:0 0 12px;box-shadow:0 8px 30px rgba(0,0,0,.45)}
+.end{text-align:center;padding:16px 0 0;display:grid;gap:10px;justify-items:center}
+.end p{color:#8fb0a5;margin:0}
+</style>
+</head>
+<body>
+<header>
+  <div><b>THE DECOY FILES #1</b><small>A WhizHack comic · unlocked in Trap Shot</small></div>
+  <div class="acts"><a class="btn" href="../../decoy-dash/comic/The-Decoy-Files-1.pdf" target="_blank" rel="noopener">PDF</a><a class="btn red" href="../">Play</a></div>
+</header>
+<main>
+  <div class="unl">You traced 20 intruders. <b>The Decoy Files #1</b> is yours to read. Want a printed copy? Show this page at the <b>WhizHack booth at AISS 2026</b>.</div>
+  <div id="pages"></div>
+  <div class="end"><p>End of issue #1.</p><a class="btn red" href="../">Play Trap Shot again</a></div>
+</main>
+<script>
+const box=document.getElementById('pages');
+for(let i=1;i<=16;i++){const im=document.createElement('img');im.loading=i<3?'eager':'lazy';im.decoding='async';
+im.src='../../decoy-dash/comic/pages/page-'+String(i).padStart(2,'0')+'.jpg';im.alt='The Decoy Files #1, page '+i;box.appendChild(im)}
+</script>
+</body>
+</html>
