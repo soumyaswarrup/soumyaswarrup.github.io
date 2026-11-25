@@ -144,6 +144,7 @@ input::placeholder{color:#56786c}
 .cd span{display:block;font-family:var(--read);font-size:14px;margin:6px 0 8px;color:#fff}
 .cd .cd-b{display:grid;grid-template-columns:1.4fr 1fr;gap:8px}
 .cd .btn{margin:0;width:100%;font-size:16px;padding-top:10px;padding-bottom:10px}
+.cd .cdc{display:block;margin-top:8px;text-align:center;text-decoration:none;background:#f2c230!important;color:#1a1408!important;text-shadow:none!important}
 .stub{margin-top:14px;padding-top:4px;position:relative;font-size:15px}
 .stub .code{font-size:30px;font-weight:700;letter-spacing:.04em;margin:2px 0;color:#fff}
 .stub small{display:block;font-family:var(--read);font-size:13px;color:var(--muted)}
@@ -685,6 +686,7 @@ function finish(){
 }
 const ON_PAGES=/github\.io$/.test(location.hostname);
 const COMIC_URL=ON_PAGES?"book/":"https://soumyaswarrup.github.io/decoy-dash/book/";
+const DECOY_PDF=(ON_PAGES?"":"https://soumyaswarrup.github.io/decoy-dash/")+"comic/The-Decoy-Files-1.pdf";
 let unlTimer=null;
 let unlTick=null;
 function unlStop(msg){clearInterval(unlTick);unlTick=null;$("unlFill").style.width="0";$("unlCount").textContent=msg||"Your field guide is ready whenever you are."}
@@ -711,11 +713,12 @@ function cdStop(){clearInterval(cdTick);cdTick=null;const c=document.getElementB
 function resultsCountdown(sc){
   cdStop();const url=COMIC_URL+"?s="+sc,T=10000,t0=performance.now();
   const box=document.createElement("div");box.className="cd";box.id="cdBox";
-  box.innerHTML=`<div class="unl-bar"><i></i></div><span>Opening <b>The Trap Door</b> in 10s</span><div class="cd-b"><a class="btn" href="${url}">Read it now</a><button class="btn grey" type="button">Stay here</button></div>`;
+  box.innerHTML=`<div class="unl-bar"><i></i></div><span>Opening <b>The Trap Door</b> in 10s</span><div class="cd-b"><a class="btn" href="${url}">Read it now</a><button class="btn grey" type="button">Stay here</button></div><a class="btn cdc" href="${DECOY_PDF}" target="_blank" rel="noopener">Read the comic: The Decoy Files #1</a>`;
   $("stub").append(box);const fill=box.querySelector("i"),txt=box.querySelector("span");
   box.style.pointerEvents="none";box.style.opacity=".6";setTimeout(()=>{box.style.pointerEvents="";box.style.opacity=""},1500);
   box.querySelector("button").onclick=e=>{e.stopPropagation();cdStop()};
   box.querySelector("a").onclick=()=>{clearInterval(cdTick)};
+  box.querySelector(".cdc").onclick=()=>{cdStop();window.__ddLog&&window.__ddLog("comic_pdf","results")};
   if(!ON_PAGES){box.querySelector("a").target="_blank"}
   cdTick=setInterval(()=>{const left=T-(performance.now()-t0);
     if(state!=="over"||!ovs.over.classList.contains("on")){cdStop();return}
@@ -725,7 +728,7 @@ function resultsCountdown(sc){
 function renderStub(){
   const el=$("stub");let c=store.get("code",null);
   if(best>=UNLOCK){
-    el.innerHTML=`<div>Field guide unlocked</div><div class="code" style="font-size:24px">The Trap Door</div><small><a href="${COMIC_URL}" style="font-weight:600">Read it online</a>, or ask at the WhizHack booth at AISS 2026 for a printed copy.</small>`}
+    el.innerHTML=`<div>Field guide unlocked</div><div class="code" style="font-size:24px">The Trap Door</div><small><a href="${COMIC_URL}" style="font-weight:600">Read it online</a>, or ask at the WhizHack booth at AISS 2026 for a printed copy. Bonus: <a href="${DECOY_PDF}" target="_blank" rel="noopener" style="font-weight:600">read the comic, The Decoy Files #1</a>.</small>`}
   else{let m="";for(let i=0;i<UNLOCK;i++)m+=`<i class="${i<best?"on":""}"></i>`;
     el.innerHTML=`<div>Field guide unlock: ${best} of ${UNLOCK}</div><div class="meter">${m}</div><small>Score ${UNLOCK} in one run to unlock the field guide.</small>`}
 }
