@@ -8,7 +8,7 @@
     <meta name="description" content="Make a finger gun at your camera and shoot the intruders hiding on a power plant's network. Spare the real PLCs, use the decoys. A WhizHack game for AISS 2026.">
     <meta property="og:type" content="website">
     <meta property="og:title" content="WhizHack Shootout: finger-gun the intruders off the plant network">
-    <meta property="og:description" content="Point a finger gun at your camera, drop your thumb to fire. Shoot the intruders, spare the real PLCs. 20 kills unlocks The Decoy Files comic.">
+    <meta property="og:description" content="Point a finger gun at your camera, flick or tilt it to fire. Shoot the intruders, spare the real PLCs. 5 kills unlocks The Decoy Files comic.">
     <meta property="og:url" content="https://soumyaswarrup.github.io/shootout/">
     <meta property="og:image" content="https://soumyaswarrup.github.io/shootout/art/og.jpg">
     <meta name="twitter:card" content="summary_large_image">
@@ -17,7 +17,7 @@
   <body>
     <header class="ui hud">
       <div class="brand"><span class="brand-dot"></span>WHIZHACK SHOOTOUT</div>
-      <div class="stats"><b id="kills">0</b>/20 intruders shot <span class="sep">·</span> wave <b id="wave">1</b> <span class="sep">·</span> <b id="timer">90</b>s</div>
+      <div class="stats"><b id="kills">0</b>/5 intruders shot <span class="sep">·</span> wave <b id="wave">1</b> <span class="sep">·</span> <b id="timer">90</b>s</div>
       <div class="actions">
         <button id="restart" type="button">Restart <kbd>R</kbd></button>
       </div>
@@ -64,7 +64,7 @@
           <div class="lg decoy"><img src="art/decoy.webp" alt=""><div><b>WhizHack decoys</b> Bulletproof. Disguised intruders that touch one get exposed.</div></div>
           <div class="lg dupe"><img src="art/plc.webp" alt=""><div><b>Look twice</b> Two PLC-07s? One is a clone. Odd IPs and 3 AM logins are intruders too: +2.</div></div>
         </div>
-        <p class="goal">Shoot 20 intruders in 90 seconds to unlock <b>The Decoy Files</b> comic</p>
+        <p class="goal">Shoot 5 intruders in 90 seconds to unlock <b>The Decoy Files</b> comic</p>
         <div class="btns">
           <button class="big" id="bCam" type="button">👉 Play with finger gun</button>
           <button class="big ghost" id="bTap" type="button">Play with tap / mouse</button>
@@ -94,7 +94,7 @@
       <div class="panel">
         <div class="kicker"><span class="brand-dot"></span>ZeroHack OT · all clear</div>
         <h1 class="mint">PLANT SECURED</h1>
-        <p class="sub">You shot <b id="winKills">20</b> intruders and spared the real equipment.</p>
+        <p class="sub">You shot <b id="winKills">5</b> intruders and spared the real equipment.</p>
         <div class="comicrow"><img src="../decoy-dash/comic/pages/page-01.jpg" alt="The Decoy Files #1 cover"><p><b>The Decoy Files #1</b> is unlocked. Opening it in <b id="cdN">5</b>s…</p></div>
         <div class="cd"><i id="cdBar"></i></div>
         <div class="btns">

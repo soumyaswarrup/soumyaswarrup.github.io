@@ -5,7 +5,7 @@
 // spare the real equipment, and let the WhizHack decoys expose the disguised ones.
 import { createTracker, analyze, GunTrigger, HandFinder, OneEuro, HAND_EDGES, TUNING } from './hand.js';
 
-const GOAL = 20;
+const GOAL = 5;
 const ROUND_SECS = 90;
 const COMIC_URL = 'comic/';
 const $ = (id) => document.getElementById(id);
