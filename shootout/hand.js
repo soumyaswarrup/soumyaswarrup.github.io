@@ -13,8 +13,8 @@ export async function createTracker(preferred = 'GPU') {
       baseOptions: { modelAssetPath: here('./models/hand_landmarker.task'), delegate },
       runningMode: 'IMAGE',
       numHands: 1,
-      minHandDetectionConfidence: 0.4,
-      minHandPresenceConfidence: 0.4,
+      minHandDetectionConfidence: 0.3,
+      minHandPresenceConfidence: 0.3,
       minTrackingConfidence: 0.4,
     });
   try {
@@ -160,9 +160,9 @@ function straightness(w, mcp) {
 
 export const TUNING = {
   indexStraight: 0.82, // index must be at least this straight to start aiming
-  indexKeep: 0.7, // ...and this straight to keep aiming
+  indexKeep: 0.6, // looser while aiming: a finger pointed down at the camera looks bent // ...and this straight to keep aiming
   curled: 0.8, // other fingers count as curled below this
-  curledKeep: 0.88,
+  curledKeep: 0.92,
   // Thumb height = distance from thumb tip to the middle finger's knuckle, in
   // palm lengths (so hand size does not matter). On sample photos: about 0.2
   // tucked down, about 1.05 raised.
@@ -170,7 +170,7 @@ export const TUNING = {
   fireDrop: 0.68, // fire when the thumb falls below this fraction of its peak
   fireFloor: 0.45,
   holdMs: 150, // gun pose must be held this long before a shot counts
-  graceMs: 300, // dropouts shorter than this do not break the pose
+  graceMs: 500, // dropouts shorter than this do not break the pose
   cooldownMs: 300,
   aimLagMs: 130, // shoot where you were aiming just before the thumb moved
 };

@@ -607,22 +607,41 @@ const zone = { set: false, cx: 0.5, cy: 0.5, hw: 0.2, hh: 0.26 };
 const reach = () => (easy ? 0.15 : 0.26); // easy aim: a small hand movement covers the whole screen
 const DWELL_MS = 850;
 let dwellCard = null, dwellStart = 0;
+// Laptop webcams cut the hand off near the bottom of the frame (desk, keyboard),
+// so the aim area must never reach down there. Its bottom edge stays above SAFE_BOTTOM.
+const SAFE_TOP = 0.06, SAFE_BOTTOM = 0.74;
+const DOWN_GAIN = 1.4; // pointing down foreshortens the finger, so downward moves count extra
+let handLow = false;
 function handToScreen(px, py) {
   if (!zone.set) {
     zone.set = true;
     const frameAspect = video.videoWidth / video.videoHeight || 16 / 9;
-    zone.hh = reach();
+    zone.hh = Math.min(reach(), (SAFE_BOTTOM - SAFE_TOP) / 2);
     zone.hw = clamp((zone.hh * (innerWidth / innerHeight)) / frameAspect, 0.08, 0.42);
     zone.cx = clamp(px, zone.hw, 1 - zone.hw);
-    zone.cy = clamp(py, zone.hh, 1 - zone.hh);
+    // where the hand first shows up is screen centre, but never so low that the bottom row is out of view
+    zone.cy = clamp(py, SAFE_TOP + zone.hh, SAFE_BOTTOM - zone.hh);
   }
   let nx = (px - zone.cx) / (2 * zone.hw) + 0.5;
   let ny = (py - zone.cy) / (2 * zone.hh) + 0.5;
+  if (ny > 0.5) ny = 0.5 + (ny - 0.5) * DOWN_GAIN;
   if (nx < 0) { zone.cx += nx * 2 * zone.hw; nx = 0; }
   if (nx > 1) { zone.cx += (nx - 1) * 2 * zone.hw; nx = 1; }
-  if (ny < 0) { zone.cy += ny * 2 * zone.hh; ny = 0; }
-  if (ny > 1) { zone.cy += (ny - 1) * 2 * zone.hh; ny = 1; }
+  if (ny < 0) { zone.cy = Math.max(SAFE_TOP + zone.hh, zone.cy + ny * 2 * zone.hh); ny = 0; }
+  if (ny > 1) ny = 1; // never drag the area further down: just pin to the bottom row
+  handLow = py > SAFE_BOTTOM + 0.08;
   return [nx, ny];
+}
+// The aim area, drawn on the camera preview so players can see where to keep their hand.
+function drawZone() {
+  if (!zone.set) return;
+  const W = skel.width, H = skel.height;
+  const x = (1 - zone.cx - zone.hw) * W, y = (zone.cy - zone.hh) * H; // canvas is mirrored by CSS
+  skelCtx.save();
+  skelCtx.setLineDash([6, 5]); skelCtx.lineWidth = Math.max(2, W / 200);
+  skelCtx.strokeStyle = handLow ? 'rgba(255,90,60,.95)' : 'rgba(255,176,0,.85)';
+  skelCtx.strokeRect(x, y, zone.hw * 2 * W, (zone.hh + zone.hh / DOWN_GAIN) * H); // bottom = where the bottom row is reached
+  skelCtx.restore();
 }
 
 let statusKey = '';
@@ -722,13 +741,13 @@ function trackHand(now) {
     trigger.update(null, now);
     drawSkeleton(null, false);
     const gone = now - lastHandAt;
-    if (gone > 500 && !mouseAiming) {
+    if (gone > 900 && !mouseAiming) {
       laser.classList.remove('on', 'aiming');
       setLocked(null);
       filtX.reset(); filtY.reset();
       aimHistory.length = 0;
     }
-    if (gone > 1200) zone.set = false;
+    if (gone > 4000) zone.set = false; // keep the aim area through short dropouts
     if (gone > 500) setStatus('idle', 'No hand seen. Hold a finger gun up where the camera box can see it.');
     checks(false, false, false); motion.length = 0;
     debug(null);
@@ -740,6 +759,7 @@ function trackHand(now) {
   const a = analyze(hand.world, trigger.isGun);
   const fired = trigger.update(a, now);
   drawSkeleton(hand, trigger.isGun);
+  drawZone();
 
   // Aim with the whole index finger, not just the tip.
   const lm = hand.landmarks;
@@ -784,7 +804,8 @@ function trackHand(now) {
   } else { dwellCard = null; laser.classList.remove('dwell'); }
   checks(true, pointing, now - firedFlash < 350);
 
-  if (pointing) setStatus(easy ? 'aimE' : 'aim', easy ? 'Aiming. Hold on a target until the ring fills, or flick to fire.' : 'Aiming. Flick your hand sideways or tilt the gun to fire.', 'live');
+  if (handLow) setStatus('low', 'Hand too low for the camera. Raise it a little: chest height reaches the bottom row.', 'error');
+  else if (pointing) setStatus(easy ? 'aimE' : 'aim', easy ? 'Aiming. Hold on a target until the ring fills, or flick to fire.' : 'Aiming. Flick your hand sideways or tilt the gun to fire.', 'live');
   else setStatus('hand', 'Hand found. Make a finger gun: index finger out, other fingers curled.', 'live');
   debug(a);
 }
