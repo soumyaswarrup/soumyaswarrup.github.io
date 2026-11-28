@@ -685,12 +685,16 @@ body.shielded .card.real:not(.dead) { box-shadow: inset 0 0 0 1px rgba(0,0,0,.35
 .career .rk { margin: 0 0 4px; font-size: 16px; color: var(--ink-dim); }
 .career .rk b { font: 900 30px/1.1 var(--stencil); color: var(--amber); display: block; }
 .career .used { margin: 0 0 12px; font-size: 14px; color: #8fd1ff; }
+.career .used > b { display: block; margin-bottom: 6px; color: var(--ink); font: 800 18px/1.1 var(--display); }
+.career .used ul { margin: 0; padding: 0; list-style: none; display: grid; gap: 6px; text-align: left; }
+.career .used li { padding: 8px 10px; border-radius: 6px; background: rgba(58,166,238,.1); color: #d6ecfb; line-height: 1.4; }
+.career .used li b { color: #8fd1ff; }
 .career .share { width: 100%; font-size: 18px; }
 
 @media (max-width: 760px) {
   .charge { order: 5; flex-basis: 100%; grid-template-columns: auto 1fr; align-items: center; min-width: 0; }
   :root { --hud-h: 112px; }
-  #toast, body:not(.tapmode) #toast { left: 50%; bottom: 150px; font-size: 13.5px; }
+  #toast { display: none; }
 }
 /* phones held sideways: one slim row of controls */
 @media (max-height: 520px) and (orientation: landscape) {
@@ -712,7 +716,7 @@ body.shielded .card.real:not(.dead) { box-shadow: inset 0 0 0 1px rgba(0,0,0,.35
   .card .host { display: none; }
   .panel { padding: 22px 16px 14px; }
   .panel h1 { font-size: 44px; }
-  #toast, body:not(.tapmode) #toast { bottom: 8px; left: 50%; }
+  #toast { display: none; }
 }
 
 @media (prefers-reduced-motion: reduce) {

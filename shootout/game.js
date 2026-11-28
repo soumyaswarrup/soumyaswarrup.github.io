@@ -396,7 +396,9 @@ const CHARGE_PER = 3;
 let charge = 0, modIndex = 0, shieldUntil = 0, modsUsed = new Set();
 const toastEl = $('toast');
 let toastTimer = null;
+const phoneLayout = () => matchMedia('(max-width: 760px), (max-height: 520px) and (orientation: landscape)').matches;
 function toast(html) {
+  if (phoneLayout()) return; // on phones the explanation waits for the end screen
   toastEl.innerHTML = '<span class="tz">ZeroHack OT</span> ' + html;
   toastEl.classList.add('on');
   clearTimeout(toastTimer); toastTimer = setTimeout(() => toastEl.classList.remove('on'), 3600);
@@ -436,15 +438,20 @@ function deployModule() {
     setTimeout(() => { if (performance.now() >= shieldUntil) document.body.classList.remove('shielded'); }, 8050);
   }
 }
+/* modules listed on the end screen */
 const RANKS = [[0, 'Trainee operator'], [3, 'Plant operator'], [5, 'OT defender'], [8, 'Threat hunter'], [12, 'Decoy master'], [18, 'SOC legend']];
 const rankFor = (k) => RANKS.filter(([min]) => k >= min).pop()[1];
 function renderCareer(ovId) {
   const box = document.querySelector(`#${ovId} .career`);
   const r = rankFor(score.kills);
   box.querySelector('.rk').innerHTML = `Your rank: <b>${r}</b>`;
-  box.querySelector('.used').textContent = modsUsed.size
-    ? `ZeroHack OT modules you deployed: ${[...modsUsed].join(', ')}.`
-    : 'Shoot 3 intruders to deploy your first ZeroHack OT module.';
+  const used = box.querySelector('.used');
+  if (modsUsed.size) {
+    const h = document.createElement('b'); h.textContent = 'ZeroHack OT modules you deployed';
+    const ul = document.createElement('ul');
+    for (const m of MODULES) if (modsUsed.has(m.name)) { const li = document.createElement('li'); li.innerHTML = m.toast; ul.append(li); }
+    used.replaceChildren(h, ul);
+  } else used.textContent = 'Shoot 3 intruders to deploy your first ZeroHack OT module.';
   box.querySelector('.share').onclick = async () => {
     const text = `I scored ${score.kills} and ranked ${r} defending a power plant in WhizHack Shootout. Beat me:`;
     const url = 'https://soumyaswarrup.github.io/shootout/';
