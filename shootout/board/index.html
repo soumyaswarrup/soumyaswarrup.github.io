@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>WhizHack Shootout: today's leaderboard</title>
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Big+Shoulders+Display:wght@800;900&family=Big+Shoulders+Stencil+Display:wght@900&display=swap">
+<style>
+  :root { --bezel:#16191c; --ink:#efe9d6; --dim:#b9b4a4; --amber:#ffb000; --green:#3ddc84; --red:#e5321f; }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; margin: 0; }
+  body {
+    display: grid; grid-template-columns: 1.15fr 1fr; gap: 4vw; align-items: center;
+    padding: 5vh 5vw; color: var(--ink); font-family: "Atkinson Hyperlegible", sans-serif; overflow: hidden;
+    background: repeating-linear-gradient(0deg, rgba(255,255,255,.018) 0 1px, transparent 1px 3px), radial-gradient(120% 90% at 50% 0%, #535c65, #474f57 45%, #3a4148);
+  }
+  h1 { margin: 0 0 2vh; font: 900 clamp(48px, 8vw, 150px)/.88 "Big Shoulders Stencil Display", sans-serif; text-shadow: 0 4px 0 #000; }
+  .pitch { margin: 0 0 4vh; font-size: clamp(18px, 1.7vw, 30px); line-height: 1.4; color: var(--dim); max-width: 32ch; }
+  .pitch b { color: var(--ink); }
+  .qr { display: flex; gap: 2vw; align-items: center; }
+  .qr img { width: clamp(140px, 17vw, 300px); aspect-ratio: 1; background: #fff; padding: 12px; border-radius: 8px; box-shadow: 0 0 0 6px var(--bezel); }
+  .qr p { margin: 0; font-size: clamp(16px, 1.5vw, 26px); color: var(--dim); }
+  .qr p b { display: block; font: 900 clamp(26px, 2.6vw, 46px)/1 "Big Shoulders Display", sans-serif; color: var(--amber); margin-bottom: 6px; }
+  .board { padding: 3vh 2.4vw; border-radius: 14px; background: #050606; box-shadow: inset 0 4px 14px rgba(0,0,0,.9), 0 0 0 6px var(--bezel); }
+  .board h2 { margin: 0 0 2vh; font: 800 clamp(26px, 2.6vw, 48px)/1 "Big Shoulders Display", sans-serif; display: flex; align-items: center; gap: 14px; }
+  .live { width: 14px; height: 14px; border-radius: 50%; background: var(--red); box-shadow: 0 0 12px 3px rgba(255,70,40,.6); animation: blink 1s steps(2) infinite; }
+  @keyframes blink { 50% { opacity: .25; } }
+  ol { margin: 0; padding: 0; list-style: none; counter-reset: r; }
+  li { counter-increment: r; display: flex; align-items: baseline; gap: 1.2vw; padding: 1.6vh .6vw; border-top: 1px solid #1a1e21; font-size: clamp(22px, 2.4vw, 44px); }
+  li::before { content: counter(r); width: 1.3em; font: 900 1.1em "Big Shoulders Display", sans-serif; color: #6f675a; }
+  li:first-child::before { color: var(--amber); }
+  li span { flex: 1; }
+  li b { font: 900 1.4em/1 "Big Shoulders Display", sans-serif; color: var(--amber); text-shadow: 0 0 14px rgba(255,176,0,.5); }
+  li.new { animation: flash 1.6s ease-out; }
+  @keyframes flash { 0% { background: rgba(61,220,132,.35); } 100% { background: none; } }
+  .empty { color: var(--dim); font-size: clamp(20px, 2vw, 34px); padding: 2vh 0; }
+  @media (max-width: 800px) { body { grid-template-columns: 1fr; overflow: auto; } }
+  @media (prefers-reduced-motion: reduce) { .live, li.new { animation: none; } }
+</style>
+</head>
+<body>
+  <section>
+    <h1>WhizHack Shootout</h1>
+    <p class="pitch">Make a finger gun, shoot the intruders hiding on a power plant's network, and <b>spare the real PLCs</b>. Top score today wins bragging rights. 5 kills unlocks <b>The Decoy Files</b> comic.</p>
+    <div class="qr">
+      <img src="https://api.qrserver.com/v1/create-qr-code/?size=600x600&margin=0&data=https%3A%2F%2Fsoumyaswarrup.github.io%2Fshootout%2F" alt="QR code to play WhizHack Shootout">
+      <p><b>Scan to play</b>on your phone, 90 seconds</p>
+    </div>
+  </section>
+  <section class="board">
+    <h2><span class="live"></span>Today's top 5</h2>
+    <ol id="list"></ol>
+  </section>
+<script>
+const API = 'https://juemnyijhvqlpxrvsibg.supabase.co/rest/v1/rpc/ss_leaderboard_today';
+const KEY = 'sb_publishable_LDopq-erBLDteakwk08pOQ_qKnIafQI';
+let last = '';
+async function load() {
+  try {
+    const r = await fetch(API, { method: 'POST', headers: { 'Content-Type': 'application/json', apikey: KEY }, body: '{}' });
+    const rows = await r.json();
+    const sig = JSON.stringify(rows);
+    if (sig === last) return;
+    const prev = new Set(last ? JSON.parse(last).map((x) => x.name + x.best_score) : []);
+    last = sig;
+    const ol = document.getElementById('list');
+    if (!rows.length) { ol.innerHTML = '<li class="empty">No scores yet today. Be the first.</li>'; return; }
+    ol.replaceChildren(...rows.map((x) => {
+      const li = document.createElement('li');
+      if (prev.size && !prev.has(x.name + x.best_score)) li.className = 'new';
+      const n = document.createElement('span'); n.textContent = x.name;
+      const s = document.createElement('b'); s.textContent = x.best_score;
+      li.append(n, s); return li;
+    }));
+  } catch {}
+}
+load(); setInterval(load, 8000);
+</script>
+</body>
+</html>
