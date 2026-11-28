@@ -77,13 +77,13 @@ function buildWave() {
   const reals = pickN(REAL, nReal).map((d) => ({ ...d, kind: 'real' }));
   const list = [
     ...reals,
-    ...pickN(DECOYS, nDecoy).map((d) => ({ ...d, kind: 'decoy', badge: { cls: 'decoy', text: 'WHIZHACK DECOY' } })),
-    ...pickN(THREATS, nThreat).map((d) => ({ ...d, kind: 'threat', badge: { cls: 'threat', text: 'INTRUDER' } })),
-    ...pickN(APTS, nApt).map((d) => ({ ...d, kind: 'threat', bounty: true, badge: { cls: 'wanted', text: 'WANTED · APT GROUP' } })),
+    ...pickN(DECOYS, nDecoy).map((d) => ({ ...d, kind: 'decoy', badge: { cls: 'decoy', text: 'Decoy' } })),
+    ...pickN(THREATS, nThreat).map((d) => ({ ...d, kind: 'threat', badge: { cls: 'threat', text: 'Intruder' } })),
+    ...pickN(APTS, nApt).map((d) => ({ ...d, kind: 'threat', bounty: true, badge: { cls: 'wanted', text: 'Wanted: APT' } })),
   ];
   // one disguised intruder is a clone of a real device's name (the original's DUPLICATE tab)
   const cloneOf = reals[(Math.random() * reals.length) | 0];
-  list.push({ title: cloneOf.title, host: `10.0.${(Math.random() * 3 + 6) | 0}.${(Math.random() * 200 + 20) | 0} · same name, new MAC`, img: cloneOf.img, kind: 'hidden', badge: { cls: 'dupe', text: 'DUPLICATE' } });
+  list.push({ title: cloneOf.title, host: `10.0.${(Math.random() * 3 + 6) | 0}.${(Math.random() * 200 + 20) | 0} · same name, new MAC`, img: cloneOf.img, kind: 'hidden', badge: { cls: 'dupe', text: 'Duplicate?' } });
   pickN(DISGUISED, nHidden - 1).forEach((d) => list.push({ ...d, kind: 'hidden' }));
 
   devices = new Map();
@@ -139,7 +139,7 @@ addEventListener('resize', layout);
 function expose(d, el) {
   d.kind = 'threat';
   d.exposed = true;
-  d.badge = { cls: 'threat', text: 'EXPOSED BY DECOY' };
+  d.badge = { cls: 'threat', text: 'Exposed by decoy' };
   const wasLocked = el === locked;
   fillCard(el, d);
   if (wasLocked) el.classList.add('locked');
@@ -157,7 +157,7 @@ function expose(d, el) {
     line.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 900, easing: 'ease-in' }).onfinish = () => line.remove();
     restart(decoyEl, 'tripped');
   }
-  pop(r.left + r.width / 2, r.top + 16, 'DECOY TRIPPED', 'blue');
+  pop(r.left + r.width / 2, r.top + 16, 'Decoy tripped', 'blue');
   blip();
 }
 
@@ -175,6 +175,7 @@ function updateStats() {
   $('s-accuracy').textContent = score.shots ? `${Math.round((score.kills / score.shots) * 100)}%` : '–';
   $('s-streak').textContent = String(score.best);
   $('s-own').textContent = String(score.own);
+  [...$('lamps').children].forEach((l, i) => l.classList.toggle('on', i < score.kills));
 }
 
 function showBanner(text, sticky = false) {
@@ -187,7 +188,7 @@ function showBanner(text, sticky = false) {
 function checkSweep() {
   const left = [...devices.values()].filter((d) => !d.dead && (d.kind === 'threat' || d.kind === 'hidden')).length;
   if (left === 0 && state === 'play') {
-    setTimeout(() => showBanner(`CLEAN SWEEP · WAVE ${wave}`), 350);
+    setTimeout(() => showBanner(`Clean sweep, wave ${wave}`), 350);
     setTimeout(() => { if (state === 'play') buildWave(); }, 1500);
   }
 }
@@ -382,6 +383,79 @@ function shatter(card, x, y) {
   });
 }
 
+
+// ------------------------------------------------ ZeroHack OT modules ----
+// Product showcase: every 3 intruders charges the next ZeroHack OT module.
+const buzz = (p) => { try { navigator.vibrate && navigator.vibrate(p); } catch {} };
+const MODULES = [
+  { id: 'trace', name: 'Trace OT', banner: 'Trace OT online', toast: '<b>Trace OT</b> decoy endpoints unmasked every disguised intruder on the panel.' },
+  { id: 'ips', name: 'Edge IPS', banner: 'Edge IPS: blocked', toast: '<b>Edge IPS</b> stopped the most dangerous intruder before it reached the plant.' },
+  { id: 'cva', name: 'CVA', banner: 'CVA: PLCs hardened', toast: '<b>CVA</b> patched and hardened your real PLCs. No penalty for hitting them for 8 seconds.' },
+];
+const CHARGE_PER = 3;
+let charge = 0, modIndex = 0, shieldUntil = 0, modsUsed = new Set();
+const toastEl = $('toast');
+let toastTimer = null;
+function toast(html) {
+  toastEl.innerHTML = '<span class="tz">ZeroHack OT</span> ' + html;
+  toastEl.classList.add('on');
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => toastEl.classList.remove('on'), 3600);
+}
+function renderCharge() {
+  $('chargeBar').style.width = `${(charge / CHARGE_PER) * 100}%`;
+  $('nextMod').textContent = MODULES[modIndex % MODULES.length].name;
+}
+function addCharge() {
+  charge += 1;
+  if (charge >= CHARGE_PER) { charge = 0; deployModule(); }
+  renderCharge();
+}
+function cardOf(d) { return range.querySelector(`.card[data-id="${d.id}"]`); }
+function deployModule() {
+  const m = MODULES[modIndex % MODULES.length]; modIndex += 1; modsUsed.add(m.name);
+  setTimeout(() => { if (state === 'play') { showBanner(m.banner); fanfare(4); } }, 1000); buzz([30, 40, 30]); toast(m.toast);
+  if (m.id === 'trace') {
+    for (const d of devices.values()) if (d.kind === 'hidden' && !d.dead) { const el = cardOf(d); if (el) expose(d, el); }
+  } else if (m.id === 'ips') {
+    const live = [...devices.values()].filter((d) => !d.dead && (d.kind === 'threat' || d.kind === 'hidden'));
+    const d = live.find((x) => x.bounty) || live.find((x) => x.kind === 'hidden') || live[0];
+    const el = d && cardOf(d);
+    if (el) setTimeout(() => {
+      if (d.dead || state !== 'play') return;
+      const r = el.getBoundingClientRect(), x = r.left + r.width / 2, y = r.top + r.height / 2;
+      crash(); shatter(el, x, y); el.classList.remove('locked'); el.classList.add('dead'); d.dead = true;
+      if (locked === el) locked = null;
+      const pts = d.bounty || d.kind === 'hidden' ? 2 : 1;
+      score.kills += pts; pop(x, y, `Edge IPS blocked +${pts}`, 'good'); updateStats();
+      if (score.kills >= GOAL && !wonOnce) return win();
+      checkSweep();
+    }, 500);
+  } else if (m.id === 'cva') {
+    shieldUntil = performance.now() + 8000;
+    document.body.classList.add('shielded');
+    setTimeout(() => { if (performance.now() >= shieldUntil) document.body.classList.remove('shielded'); }, 8050);
+  }
+}
+const RANKS = [[0, 'Trainee operator'], [3, 'Plant operator'], [5, 'OT defender'], [8, 'Threat hunter'], [12, 'Decoy master'], [18, 'SOC legend']];
+const rankFor = (k) => RANKS.filter(([min]) => k >= min).pop()[1];
+function renderCareer(ovId) {
+  const box = document.querySelector(`#${ovId} .career`);
+  const r = rankFor(score.kills);
+  box.querySelector('.rk').innerHTML = `Your rank: <b>${r}</b>`;
+  box.querySelector('.used').textContent = modsUsed.size
+    ? `ZeroHack OT modules you deployed: ${[...modsUsed].join(', ')}.`
+    : 'Shoot 3 intruders to deploy your first ZeroHack OT module.';
+  box.querySelector('.share').onclick = async () => {
+    const text = `I scored ${score.kills} and ranked ${r} defending a power plant in WhizHack Shootout. Beat me:`;
+    const url = 'https://soumyaswarrup.github.io/shootout/';
+    try {
+      if (navigator.share) await navigator.share({ title: 'WhizHack Shootout', text, url });
+      else { await navigator.clipboard.writeText(`${text} ${url}`); box.querySelector('.share').textContent = 'Copied. Paste it anywhere'; }
+      try { rpc('ss_log_event', { p_device: DEVICE, p_kind: 'share', p_detail: r }); } catch {}
+    } catch {}
+  };
+}
+
 // ------------------------------------------------- aiming and shooting ----
 
 let locked = null;
@@ -453,15 +527,18 @@ function shoot(x, y, card) {
 
   if (d.kind === 'decoy') {
     ting(); sparks(x, y);
-    pop(x, y, "BULLETPROOF · IT'S YOUR DECOY", 'blue');
+    pop(x, y, "Bulletproof: that's your decoy", 'blue');
     restart(card, 'ricochet');
     updateStats();
     return;
   }
+  if (d.kind === 'real' && now < shieldUntil) {
+    ting(); sparks(x, y); pop(x, y, 'Shielded by CVA', 'good'); restart(card, 'ricochet'); updateStats(); return;
+  }
   if (d.kind === 'real') {
-    alarm(); sparks(x, y);
+    alarm(); sparks(x, y); buzz([70, 50, 70]);
     score.kills = Math.max(0, score.kills - 2); score.own += 1; score.streak = 0;
-    pop(x, y, 'PLANT TRIP · −2', 'bad');
+    pop(x, y, 'Plant tripped −2', 'bad');
     restart(card, 'ricochet');
     updateStats();
     return;
@@ -469,7 +546,8 @@ function shoot(x, y, card) {
 
   // threat or still-hidden intruder: down it goes
   const early = d.kind === 'hidden';
-  const pts = early || d.bounty ? 2 : 1;
+  const rush = endsAt - now <= 10000 && !wonOnce;
+  const pts = (early || d.bounty ? 2 : 1) * (rush ? 2 : 1);
   crash();
   shatter(card, x, y);
   card.classList.remove('locked');
@@ -481,9 +559,11 @@ function shoot(x, y, card) {
   score.streak += 1;
   score.best = Math.max(score.best, score.streak);
   score.lastKillAt = now;
-  if (d.bounty) pop(x, y, 'BOUNTY CLAIMED · +2');
-  else if (early) pop(x, y, 'SHARP EYE · CAUGHT IT BEFORE THE DECOY · +2', 'good');
-  else pop(x, y, '+1');
+  buzz(25);
+  addCharge();
+  if (d.bounty) pop(x, y, `Bounty claimed +${pts}`);
+  else if (early) pop(x, y, `Sharp eye +${pts}`, 'good');
+  else pop(x, y, rush ? `Double +${pts}` : '+1');
   const name = STREAK_NAMES[Math.min(score.streak, STREAK_NAMES.length - 1)];
   if (name) {
     showBanner(name);
@@ -509,12 +589,18 @@ const aimHistory = [];
 
 // The hand controls the laser like a trackpad: wherever the hand first shows
 // up becomes the middle of the screen, and a comfortable reach covers all of it.
+const isTouch = matchMedia('(pointer: coarse)').matches;
+let easy = (() => { try { const v = localStorage.getItem('shootout.easy'); return v === null ? isTouch : v === '1'; } catch { return isTouch; } })();
 const zone = { set: false, cx: 0.5, cy: 0.5, hw: 0.2, hh: 0.26 };
+const reach = () => (easy ? 0.15 : 0.26); // easy aim: a small hand movement covers the whole screen
+const DWELL_MS = 850;
+let dwellCard = null, dwellStart = 0;
 function handToScreen(px, py) {
   if (!zone.set) {
     zone.set = true;
     const frameAspect = video.videoWidth / video.videoHeight || 16 / 9;
-    zone.hw = clamp((zone.hh * (innerWidth / innerHeight)) / frameAspect, 0.12, 0.42);
+    zone.hh = reach();
+    zone.hw = clamp((zone.hh * (innerWidth / innerHeight)) / frameAspect, 0.08, 0.42);
     zone.cx = clamp(px, zone.hw, 1 - zone.hw);
     zone.cy = clamp(py, zone.hh, 1 - zone.hh);
   }
@@ -566,7 +652,7 @@ async function switchToCPU() {
 // Firing: aim with a finger gun, then either FLICK the hand sideways or TILT
 // the gun onto its side. The shot goes where you were aiming just before the move.
 const SLOW = /[?&]slowcam/.test(location.search) ? 4 : 1; // for low-fps test rigs
-const FIRE = { flickPalms: 1.0, flickMs: 220 * SLOW, tiltDeg: 45, tiltMs: 450 * SLOW, coolMs: 650, steadySpeed: 2.2 };
+const FIRE = { flickPalms: 0.8, flickMs: 220 * SLOW, tiltDeg: 45, tiltMs: 450 * SLOW, coolMs: 650, steadySpeed: 2.2 };
 const motion = []; // recent { t, x, y, roll, palm } in video pixels
 let pointingAt = -1e9, coolUntil = 0, steadyAim = null, firedFlash = 0;
 let home = null; // pose the hand fired from; the move back to it must not fire again
@@ -674,9 +760,19 @@ function trackHand(now) {
     coolUntil = now + FIRE.coolMs;
     firedFlash = now;
   }
+  // Easy aim: keep the laser on one target and it fires when the ring fills.
+  if (easy && pointing && shown.card && !shown.card.classList.contains('dead') && state === 'play') {
+    if (dwellCard !== shown.card) { dwellCard = shown.card; dwellStart = now; }
+    const p = Math.min(1, (now - dwellStart) / DWELL_MS);
+    laser.style.setProperty('--dwell', p.toFixed(3)); laser.classList.add('dwell');
+    if (p >= 1 && now >= coolUntil) {
+      shoot(shown.x, shown.y, shown.card);
+      coolUntil = now + 450; firedFlash = now; dwellCard = null;
+    }
+  } else { dwellCard = null; laser.classList.remove('dwell'); }
   checks(true, pointing, now - firedFlash < 350);
 
-  if (pointing) setStatus('aim', 'Aiming. Flick your hand sideways or tilt the gun to fire.', 'live');
+  if (pointing) setStatus(easy ? 'aimE' : 'aim', easy ? 'Aiming. Hold on a target until the ring fills, or flick to fire.' : 'Aiming. Flick your hand sideways or tilt the gun to fire.', 'live');
   else setStatus('hand', 'Hand found. Make a finger gun: index finger out, other fingers curled.', 'live');
   debug(a);
 }
@@ -701,7 +797,10 @@ function tick(now) {
     }
     const left = Math.max(0, Math.ceil((endsAt - now) / 1000));
     const t = $('timer');
-    if (t.textContent !== String(left)) { t.textContent = String(left); t.classList.toggle('low', left <= 10); }
+    if (t.textContent !== String(left)) {
+      t.textContent = String(left); t.classList.toggle('low', left <= 10);
+      if (left === 10 && !wonOnce) { showBanner('Double points'); fanfare(3); document.body.classList.add('rush'); }
+    }
     if (left <= 0) timeUp();
   }
 }
@@ -767,7 +866,7 @@ async function startCamera() {
     stopCamera();
     return false;
   } finally {
-    btn.disabled = false; btn.textContent = '👉 Play with finger gun';
+    btn.disabled = false; btn.textContent = 'Play with finger gun';
   }
 }
 function stopCamera() {
@@ -793,19 +892,110 @@ addEventListener('click', (e) => {
   shoot(e.clientX, e.clientY, under && under.closest ? under.closest('#range .card:not(.dead)') : null);
 });
 addEventListener('keydown', (e) => {
+  if (e.target.closest && e.target.closest('input, textarea')) return;
   if (e.key === 'd' || e.key === 'D') debugEl.hidden = !debugEl.hidden;
   else if ((e.key === 'r' || e.key === 'R') && state !== 'menu') startRound();
 });
 if (/[?&]debug/.test(location.search)) debugEl.hidden = false;
+
+
+// ------------------------------------------------- players + database ----
+// Same Supabase project and pattern as Decoy Dash / Merge Rush, tables ss_*.
+const API_URL = 'https://juemnyijhvqlpxrvsibg.supabase.co', API_KEY = 'sb_publishable_LDopq-erBLDteakwk08pOQ_qKnIafQI';
+const store = { get(k, d) { try { const v = localStorage.getItem('shootout.' + k); return v === null ? d : JSON.parse(v); } catch { return d; } }, set(k, v) { try { localStorage.setItem('shootout.' + k, JSON.stringify(v)); } catch {} } };
+let DEVICE = store.get('device', null);
+if (!DEVICE) { DEVICE = crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36) + Math.random().toString(36).slice(2, 12); store.set('device', DEVICE); }
+async function rpc(fn, args) {
+  const r = await fetch(`${API_URL}/rest/v1/rpc/${fn}`, { method: 'POST', headers: { 'Content-Type': 'application/json', apikey: API_KEY }, body: JSON.stringify(args || {}) });
+  if (!r.ok) { let m = 'Error ' + r.status; try { m = (await r.json()).message || m; } catch {} throw new Error(m); }
+  const t = await r.text(); return t ? JSON.parse(t) : null;
+}
+const PERSONAL=new Set(["gmail.com","googlemail.com","yahoo.com","yahoo.co.in","yahoo.in","ymail.com","rocketmail.com","hotmail.com","hotmail.co.in","outlook.com","outlook.in","live.com","live.in","msn.com","icloud.com","me.com","mac.com","aol.com","protonmail.com","proton.me","pm.me","zohomail.com","zohomail.in","gmx.com","gmx.net","mail.com","yandex.com","yandex.ru","mail.ru","rediffmail.com","rediff.com","tutanota.com","tuta.io","fastmail.com","hey.com","qq.com","163.com","126.com","duck.com","indiatimes.com","sify.com"])
+;
+const TEMP_RE = /(mailinator|yopmail|guerrilla|sharklasers|10minute|20minute|tempmail|temp-mail|tmpmail|throwaway|trashmail|trash-mail|dispostable|maildrop|getnada|fakeinbox|fakemail|burner|spam|discard|mailnesia|mohmal|emailondeck|1secmail|mailsac|dropmail|minuteinbox|mytemp|tempinbox|tempr\.|wegwerf|jetable)/;
+const EMAIL_RE = /^[^@\s]+@[^@\s]+\.[^@\s]{2,}$/;
+const WORK_MSG = { personal: 'Use your work email. Gmail, Yahoo, Outlook and other personal addresses are not accepted.', temporary: 'Disposable emails are not accepted. Use your work email.', invalid: 'Enter a valid work email, like priya@company.com.' };
+const SERVER_MSG = { 'work email required': WORK_MSG.personal, 'temporary email not allowed': WORK_MSG.temporary, 'bad email': WORK_MSG.invalid };
+function emailKind(em) { if (!EMAIL_RE.test(em)) return 'invalid'; const d = em.split('@')[1]; if (PERSONAL.has(d)) return 'personal'; if (TEMP_RE.test(d)) return 'temporary'; return 'ok'; }
+const cleanName = (v) => (v || '').replace(/[<>&"]/g, '').replace(/\s+/g, ' ').trim().slice(0, 40);
+const nameEl = $('pName'), emailEl = $('pEmail'), consentEl = $('pConsent');
+nameEl.value = store.get('name', ''); emailEl.value = store.get('email', ''); consentEl.checked = !!store.get('consent', false);
+function formError(m) { $('ferr').textContent = m; }
+[nameEl, emailEl, consentEl].forEach((el) => el.addEventListener('input', () => formError('')));
+let registered = store.get('regKey', null);
+let registering = false;
+// Returns true once the player is saved. Ask once per device; later rounds skip straight in.
+async function ensurePlayer() {
+  if (registering) return false;
+  const n = cleanName(nameEl.value), em = (emailEl.value || '').trim().toLowerCase();
+  if (n.length < 2) { formError('Enter your name.'); nameEl.focus(); return false; }
+  const k = emailKind(em); if (k !== 'ok') { formError(WORK_MSG[k]); emailEl.focus(); return false; }
+  if (!consentEl.checked) { formError('Tick the box so WhizHack can store your details.'); consentEl.focus(); return false; }
+  formError('');
+  store.set('name', n); store.set('email', em); store.set('consent', true);
+  const key = n + '|' + em;
+  if (registered === key) return true;
+  registering = true;
+  try {
+    await Promise.race([rpc('ss_register_player', { p_device: DEVICE, p_name: n, p_email: em, p_consent: true }), new Promise((_, r) => setTimeout(() => r(new Error('timeout')), 6000))]);
+    registered = key; store.set('regKey', key); return true;
+  } catch (e) {
+    const m = SERVER_MSG[e.message];
+    if (m) { formError(m); emailEl.focus(); return false; }
+    return true; // network trouble at the booth should never block play; the run still counts locally
+  } finally { registering = false; }
+}
+const firstName = () => (store.get('name', '') || 'You').split(' ')[0];
+async function loadBoard() { try { return (await rpc('ss_leaderboard_today')) || []; } catch { return null; } }
+function renderBoard(id, rows, mine) {
+  const box = $(id); const ol = box.querySelector('ol'); const rank = box.querySelector('.rank');
+  if (!rows) { box.hidden = true; return; }
+  box.hidden = false;
+  const me = firstName();
+  let myPlace = -1;
+  ol.replaceChildren(...(rows.length ? rows : [{ name: 'Nobody yet', best_score: 0 }]).map((r, i) => {
+    const li = document.createElement('li');
+    const isMe = mine != null && myPlace < 0 && r.name === me && r.best_score === mine;
+    if (isMe) { li.className = 'me'; myPlace = i; }
+    const nm = document.createElement('span'); nm.textContent = r.name;
+    const sc = document.createElement('b'); sc.textContent = String(r.best_score);
+    li.append(nm, sc); return li;
+  }));
+  if (mine == null) rank.textContent = '';
+  else if (myPlace === 0) rank.textContent = `You're number 1 today. Hold the line.`;
+  else if (myPlace > 0) rank.textContent = `You're number ${myPlace + 1} today.`;
+  else if (rows.length >= 5) rank.textContent = `${rows[4].best_score + 1} gets you onto the board.`;
+  else rank.textContent = '';
+}
+async function refreshTopLine() {
+  const rows = await loadBoard();
+  const el = $('topLine');
+  el.textContent = rows && rows.length ? `Today's best: ${rows[0].name} with ${rows[0].best_score}. Beat it.` : '';
+}
+let submitted = false;
+async function submitRun() {
+  if (submitted) return; submitted = true;
+  const best = store.get('best', 0);
+  if (score.kills > best) store.set('best', score.kills);
+  const pb = $('pbNote'); if (pb) pb.textContent = score.kills > best && best > 0 ? `New personal best. Your old one was ${best}.` : '';
+  if (registered) {
+    try { await rpc('ss_submit_run', { p_device: DEVICE, p_score: score.kills, p_shots: score.shots, p_best_streak: score.best, p_own_goals: score.own, p_wave: wave, p_mode: finder ? 'gun' : 'tap' }); } catch {}
+  }
+  const rows = await loadBoard();
+  renderBoard(state === 'won' ? 'boardWin' : 'boardOver', rows, registered ? score.kills : null);
+}
+refreshTopLine();
 
 // ------------------------------------------------------------- rounds ----
 
 function show(id) { for (const o of document.querySelectorAll('.ov')) o.classList.toggle('on', o.id === id); }
 function startRound() {
   Object.assign(score, { shots: 0, kills: 0, streak: 0, best: 0, own: 0, lastKillAt: -1e9 });
-  wave = 0; wonOnce = false;
+  wave = 0; wonOnce = false; submitted = false;
+  charge = 0; modIndex = 0; shieldUntil = 0; modsUsed = new Set(); renderCharge(); document.body.classList.remove('shielded'); toastEl.classList.remove('on');
   banner.classList.remove('go', 'stay');
   show(null);
+  document.body.classList.remove('rush');
   state = 'play';
   endsAt = performance.now() + ROUND_SECS * 1000;
   buildWave();
@@ -818,12 +1008,15 @@ const LESSONS = [
 ];
 function timeUp() {
   state = 'over';
+  document.body.classList.remove('rush');
   laser.classList.remove('on', 'aiming');
   $('overKills').textContent = String(score.kills);
-  $('overSub').textContent = `intruders shot · ${Math.max(0, GOAL - score.kills)} more to unlock the comic`;
+  $('overSub').textContent = `intruders shot. ${Math.max(0, GOAL - score.kills)} more unlocks the comic.`;
   $('lesson').innerHTML = LESSONS[(Math.random() * LESSONS.length) | 0];
-  $('bSwitch').textContent = finder ? 'Switch to tap' : '👉 Try the finger gun';
+  $('bSwitch').textContent = finder ? 'Switch to tap' : 'Try the finger gun';
+  renderCareer('ovOver');
   show('ovOver');
+  submitRun();
 }
 let cdTimer = null;
 function win() {
@@ -832,7 +1025,9 @@ function win() {
   setTimeout(() => {
     banner.classList.remove('stay');
     $('winKills').textContent = String(score.kills);
+    renderCareer('ovWin');
     show('ovWin');
+    submitRun();
     const total = 5, t0 = performance.now();
     cdTimer = setInterval(() => {
       const el = (performance.now() - t0) / 1000;
@@ -843,8 +1038,8 @@ function win() {
   }, 1500);
 }
 
-$('bCam').onclick = async () => { audio(); if (finder || (await startCamera())) startRound(); };
-$('bTap').onclick = () => { audio(); stopCamera(); startRound(); };
+$('bCam').onclick = async () => { audio(); if (!(await ensurePlayer())) return; if (finder || (await startCamera())) startRound(); };
+$('bTap').onclick = async () => { audio(); if (!(await ensurePlayer())) return; stopCamera(); startRound(); };
 $('bAgain').onclick = () => { audio(); startRound(); };
 $('restart').onclick = (e) => { e.stopPropagation(); if (state !== 'menu') startRound(); };
 $('bSwitch').onclick = async () => {
@@ -853,11 +1048,14 @@ $('bSwitch').onclick = async () => {
   show('ovStart'); state = 'menu';
   if (await startCamera()) startRound();
 };
-$('bStay').onclick = () => { if (cdTimer) clearInterval(cdTimer); cdTimer = null; show(null); state = 'play'; endsAt = performance.now() + 30000; checkSweep(); };
+$('bStay').onclick = () => { submitted = false; if (cdTimer) clearInterval(cdTimer); cdTimer = null; show(null); state = 'play'; endsAt = performance.now() + 30000; checkSweep(); };
 
 // Test hook for automated checks.
-window.__range = { get state() { return state; }, get kills() { return score.kills; }, set kills(v) { score.kills = v; updateStats(); }, devices: () => [...devices.values()], shoot };
+window.__range = { get state() { return state; }, get kills() { return score.kills; }, set kills(v) { score.kills = v; updateStats(); }, devices: () => [...devices.values()], shoot, end: () => { endsAt = performance.now(); } };
 
+const easyEl = $('easyAim');
+easyEl.checked = easy;
+easyEl.addEventListener('change', () => { easy = easyEl.checked; zone.set = false; try { localStorage.setItem('shootout.easy', easy ? '1' : '0'); } catch {} });
 document.body.classList.add('tapmode');
 buildWave();
 requestAnimationFrame(tick);

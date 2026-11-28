@@ -4,7 +4,10 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
     <title>WhizHack Shootout — finger-gun OT security game</title>
-    <meta name="theme-color" content="#0a0f0e">
+    <meta name="theme-color" content="#16191c">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Big+Shoulders+Display:wght@600;800;900&family=Big+Shoulders+Stencil+Display:wght@800;900&display=swap">
     <meta name="description" content="Make a finger gun at your camera and shoot the intruders hiding on a power plant's network. Spare the real PLCs, use the decoys. A WhizHack game for AISS 2026.">
     <meta property="og:type" content="website">
     <meta property="og:title" content="WhizHack Shootout: finger-gun the intruders off the plant network">
@@ -16,8 +19,19 @@
   </head>
   <body>
     <header class="ui hud">
-      <div class="brand"><span class="brand-dot"></span>WHIZHACK SHOOTOUT</div>
-      <div class="stats"><b id="kills">0</b>/5 intruders shot <span class="sep">·</span> wave <b id="wave">1</b> <span class="sep">·</span> <b id="timer">90</b>s</div>
+      <div class="brand"><span class="brand-dot"></span><span>WhizHack <b>Shootout</b></span></div>
+      <div class="meter" aria-label="Intruders shot towards the goal of 5">
+        <div class="lamps" id="lamps" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
+        <span class="count"><b id="kills">0</b> of 5 shot</span>
+      </div>
+      <div class="charge" id="charge" title="Shoot intruders to charge the next ZeroHack OT module">
+        <span class="cl">ZeroHack <b id="nextMod">Trace OT</b></span>
+        <span class="cbar"><i id="chargeBar"></i></span>
+      </div>
+      <div class="readouts">
+        <div class="ro"><span>Wave</span><b id="wave">1</b></div>
+        <div class="ro"><span>Time</span><b id="timer">90</b></div>
+      </div>
       <div class="actions">
         <button id="restart" type="button">Restart <kbd>R</kbd></button>
       </div>
@@ -31,7 +45,7 @@
         <canvas id="skeleton" width="320" height="240"></canvas>
       </div>
       <select id="camera" aria-label="Camera" hidden></select>
-      <div class="checks" id="checks"><span id="ckHand">✋ Hand</span><span id="ckGun">👉 Gun pose</span><span id="ckThumb">💥 Fire</span></div>
+      <div class="checks" id="checks"><span id="ckHand">Hand</span><span id="ckGun">Gun pose</span><span id="ckThumb">Fire</span></div>
       <div id="status">Camera off. Tap or click to shoot.</div>
       <dl class="score">
         <div><dt>Accuracy</dt><dd id="s-accuracy">–</dd></div>
@@ -51,23 +65,32 @@
     <div id="laser" aria-hidden="true"><i></i></div>
     <div id="flash" aria-hidden="true"></div>
     <div id="banner" aria-live="polite"></div>
+    <div id="toast" aria-live="polite"></div>
 
     <!-- start -->
     <div class="ov ui on" id="ovStart">
-      <div class="panel">
-        <div class="kicker"><span class="brand-dot"></span>WhizHack · AISS 2026 · OT security</div>
-        <h1>WHIZHACK SHOOTOUT</h1>
+      <div class="panel start">
+        <div class="plate"><span class="brand-dot"></span>WhizHack at AISS 2026</div>
+        <h1>WhizHack Shootout</h1>
         <p class="lead">Intruders are hiding on a power plant's network. Make a finger gun and move your hand to aim the red laser. To fire, <b>flick your hand sideways</b> or <b>tilt the gun on its side</b>.</p>
         <div class="legend">
-          <div class="lg threat"><img src="art/crawler.webp" alt=""><div><b>Intruders</b> Shoot them. Red cards, plus anything a decoy exposes.</div></div>
-          <div class="lg real"><img src="art/plc.webp" alt=""><div><b>Real equipment</b> Don't shoot. Hitting a PLC trips the plant: −2.</div></div>
-          <div class="lg decoy"><img src="art/decoy.webp" alt=""><div><b>WhizHack decoys</b> Bulletproof. Disguised intruders that touch one get exposed.</div></div>
-          <div class="lg dupe"><img src="art/plc.webp" alt=""><div><b>Look twice</b> Two PLC-07s? One is a clone. Odd IPs and 3 AM logins are intruders too: +2.</div></div>
+          <div class="lg threat"><span class="win"><img src="art/crawler.webp" alt=""></span><div><b>Red windows are intruders</b> Shoot them, plus anything a decoy exposes.</div></div>
+          <div class="lg real"><span class="win"><img src="art/plc.webp" alt=""></span><div><b>White windows are real equipment</b> Don't shoot. Hitting a PLC trips the plant: −2.</div></div>
+          <div class="lg decoy"><span class="win"><img src="art/decoy.webp" alt=""></span><div><b>Blue windows are WhizHack decoys</b> Bulletproof. Disguised intruders that touch one get exposed.</div></div>
+          <div class="lg dupe"><span class="win"><img src="art/hmi.webp" alt=""></span><div><b>Some white windows lie</b> A second PLC-07, an odd IP, a 3 AM login. Catch them early for +2.</div></div>
         </div>
-        <p class="goal">Shoot 5 intruders in 90 seconds to unlock <b>The Decoy Files</b> comic</p>
+        <p class="mods">Every 3 intruders you shoot charges a <b>ZeroHack OT</b> module: <b>Trace OT</b> unmasks disguised intruders, <b>Edge IPS</b> blocks the biggest threat for you, and <b>CVA</b> shields your real PLCs.</p>
+        <form class="signup" id="signup" novalidate onsubmit="return false">
+          <label>Your name<input id="pName" autocomplete="name" maxlength="40" placeholder="Priya Sharma"></label>
+          <label>Work email<input id="pEmail" type="email" inputmode="email" autocomplete="email" maxlength="120" placeholder="priya@company.com"></label>
+          <label class="consent"><input type="checkbox" id="pConsent"> WhizHack can store my name and work email for this event and contact me about OT security.</label>
+          <p class="ferr" id="ferr" role="alert"></p>
+        </form>
+        <label class="easy"><input type="checkbox" id="easyAim"> <span><b>Easy aim</b> Seated, or playing on a phone? Hold the laser on a target for a moment and it fires by itself. You need less hand movement too.</span></label>
+        <p class="goal"><span class="lamps on5" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span><span>Shoot 5 intruders in 90 seconds to unlock <b>The Decoy Files</b> comic</span><span class="topline" id="topLine"></span></p>
         <div class="btns">
-          <button class="big" id="bCam" type="button">👉 Play with finger gun</button>
-          <button class="big ghost" id="bTap" type="button">Play with tap / mouse</button>
+          <button class="big" id="bCam" type="button">Play with finger gun</button>
+          <button class="big ghost" id="bTap" type="button">Play with tap or mouse</button>
         </div>
         <p class="err" id="camErr"></p>
         <p class="foot">Works best on a laptop webcam. Your camera stays on your device. Gesture engine from <a href="https://github.com/rajvishahhh/finger-gun-tabs" target="_blank" rel="noopener">Finger Gun Tabs</a> by Rajvi Shah (MIT), with Google MediaPipe.</p>
@@ -77,11 +100,14 @@
     <!-- time up -->
     <div class="ov ui" id="ovOver">
       <div class="panel">
-        <div class="kicker red"><span class="brand-dot"></span>ZeroHack OT alert</div>
-        <h1 class="red">TIME'S UP</h1>
+        <div class="plate red"><span class="brand-dot"></span>ZeroHack OT alert</div>
+        <h1 class="red">Time's up</h1>
         <div class="bignum" id="overKills">0</div>
         <p class="sub" id="overSub">intruders shot</p>
+        <p class="pb" id="pbNote"></p>
         <p class="lesson" id="lesson"></p>
+        <div class="career"><p class="rk"></p><p class="used"></p><button class="big ghost share" type="button">Share my score</button></div>
+        <div class="board" id="boardOver"><h2>Today's top 5</h2><ol></ol><p class="rank"></p></div>
         <div class="btns">
           <button class="big" id="bAgain" type="button">Play again</button>
           <button class="big ghost" id="bSwitch" type="button">Switch to tap</button>
@@ -92,11 +118,13 @@
     <!-- win -->
     <div class="ov ui" id="ovWin">
       <div class="panel">
-        <div class="kicker"><span class="brand-dot"></span>ZeroHack OT · all clear</div>
-        <h1 class="mint">PLANT SECURED</h1>
+        <div class="plate green"><span class="brand-dot"></span>ZeroHack OT: all clear</div>
+        <h1 class="mint">Plant secured</h1>
         <p class="sub">You shot <b id="winKills">5</b> intruders and spared the real equipment.</p>
         <div class="comicrow"><img src="../decoy-dash/comic/pages/page-01.jpg" alt="The Decoy Files #1 cover"><p><b>The Decoy Files #1</b> is unlocked. Opening it in <b id="cdN">5</b>s…</p></div>
         <div class="cd"><i id="cdBar"></i></div>
+        <div class="career"><p class="rk"></p><p class="used"></p><button class="big ghost share" type="button">Share my score</button></div>
+        <div class="board" id="boardWin"><h2>Today's top 5</h2><ol></ol><p class="rank"></p></div>
         <div class="btns">
           <a class="big" href="comic/">Read the comic now</a>
           <button class="big ghost" id="bStay" type="button">Stay and keep shooting</button>
