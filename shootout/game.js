@@ -429,7 +429,7 @@ function deployModule() {
       if (locked === el) locked = null;
       const pts = d.bounty || d.kind === 'hidden' ? 2 : 1;
       score.kills += pts; pop(x, y, `Edge IPS blocked +${pts}`, 'good'); updateStats();
-      if (score.kills >= GOAL && !wonOnce) return win();
+      if (score.kills >= GOAL && !wonOnce) win();
       checkSweep();
     }, 500);
   } else if (m.id === 'cva') {
@@ -558,7 +558,7 @@ function shoot(x, y, card) {
 
   // threat or still-hidden intruder: down it goes
   const early = d.kind === 'hidden';
-  const rush = endsAt - now <= 10000 && !wonOnce;
+  const rush = endsAt - now <= 10000;
   const pts = (early || d.bounty ? 2 : 1) * (rush ? 2 : 1);
   crash();
   shatter(card, x, y);
@@ -582,7 +582,7 @@ function shoot(x, y, card) {
     fanfare(Math.min(score.streak, 7) - 2);
   }
   updateStats();
-  if (score.kills >= GOAL && !wonOnce) return win();
+  if (score.kills >= GOAL && !wonOnce) win();
   checkSweep();
 }
 
@@ -811,7 +811,7 @@ function tick(now) {
     const t = $('timer');
     if (t.textContent !== String(left)) {
       t.textContent = String(left); t.classList.toggle('low', left <= 10);
-      if (left === 10 && !wonOnce) { showBanner('Double points'); fanfare(3); document.body.classList.add('rush'); }
+      if (left === 10) { showBanner('Double points'); fanfare(3); document.body.classList.add('rush'); }
     }
     if (left <= 0) timeUp();
   }
@@ -1019,6 +1019,13 @@ const LESSONS = [
   'Cloned device names, 3 AM logins and devices missing from the asset list are real warning signs. <b>Asset visibility</b> is the first step to catching them.',
 ];
 function timeUp() {
+  if (wonOnce) {
+    state = 'won';
+    laser.classList.remove('on', 'aiming'); document.body.classList.remove('rush'); banner.classList.remove('go', 'stay');
+    $('winKills').textContent = String(score.kills);
+    renderCareer('ovWin'); show('ovWin'); submitRun();
+    return;
+  }
   state = 'over';
   document.body.classList.remove('rush');
   laser.classList.remove('on', 'aiming');
@@ -1032,15 +1039,9 @@ function timeUp() {
 }
 let cdTimer = null;
 function win() {
-  wonOnce = true; state = 'won';
-  setTimeout(() => showBanner('PLANT SECURED', true), 300);
-  setTimeout(() => {
-    banner.classList.remove('stay');
-    $('winKills').textContent = String(score.kills);
-    renderCareer('ovWin');
-    show('ovWin');
-    submitRun();
-  }, 1500);
+  // 5 kills: unlock the comic but keep playing; the end screen comes when time runs out
+  wonOnce = true;
+  setTimeout(() => { if (state === 'play') { showBanner('Comic unlocked'); fanfare(5); buzz([40, 60, 40]); } }, 300);
 }
 
 $('bCam').onclick = async () => { audio(); if (!(await ensurePlayer())) return; if (finder || (await startCamera())) startRound(); };
@@ -1053,7 +1054,7 @@ $('bSwitch').onclick = async () => {
   show('ovStart'); state = 'menu';
   if (await startCamera()) startRound();
 };
-$('bStay').onclick = () => { submitted = false; if (cdTimer) clearInterval(cdTimer); cdTimer = null; show(null); state = 'play'; endsAt = performance.now() + 30000; checkSweep(); };
+$('bStay').onclick = () => { audio(); startRound(); };
 
 // Test hook for automated checks.
 window.__range = { get state() { return state; }, get kills() { return score.kills; }, set kills(v) { score.kills = v; updateStats(); }, devices: () => [...devices.values()], shoot, end: () => { endsAt = performance.now(); } };
