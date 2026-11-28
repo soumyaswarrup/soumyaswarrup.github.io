@@ -383,6 +383,79 @@ function shatter(card, x, y) {
   });
 }
 
+
+// ------------------------------------------------ ZeroHack OT modules ----
+// Product showcase: every 3 intruders charges the next ZeroHack OT module.
+const buzz = (p) => { try { navigator.vibrate && navigator.vibrate(p); } catch {} };
+const MODULES = [
+  { id: 'trace', name: 'Trace OT', banner: 'Trace OT online', toast: '<b>Trace OT</b> decoy endpoints unmasked every disguised intruder on the panel.' },
+  { id: 'ips', name: 'Edge IPS', banner: 'Edge IPS: blocked', toast: '<b>Edge IPS</b> stopped the most dangerous intruder before it reached the plant.' },
+  { id: 'cva', name: 'CVA', banner: 'CVA: PLCs hardened', toast: '<b>CVA</b> patched and hardened your real PLCs. No penalty for hitting them for 8 seconds.' },
+];
+const CHARGE_PER = 3;
+let charge = 0, modIndex = 0, shieldUntil = 0, modsUsed = new Set();
+const toastEl = $('toast');
+let toastTimer = null;
+function toast(html) {
+  toastEl.innerHTML = '<span class="tz">ZeroHack OT</span> ' + html;
+  toastEl.classList.add('on');
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => toastEl.classList.remove('on'), 3600);
+}
+function renderCharge() {
+  $('chargeBar').style.width = `${(charge / CHARGE_PER) * 100}%`;
+  $('nextMod').textContent = MODULES[modIndex % MODULES.length].name;
+}
+function addCharge() {
+  charge += 1;
+  if (charge >= CHARGE_PER) { charge = 0; deployModule(); }
+  renderCharge();
+}
+function cardOf(d) { return range.querySelector(`.card[data-id="${d.id}"]`); }
+function deployModule() {
+  const m = MODULES[modIndex % MODULES.length]; modIndex += 1; modsUsed.add(m.name);
+  setTimeout(() => { if (state === 'play') { showBanner(m.banner); fanfare(4); } }, 1000); buzz([30, 40, 30]); toast(m.toast);
+  if (m.id === 'trace') {
+    for (const d of devices.values()) if (d.kind === 'hidden' && !d.dead) { const el = cardOf(d); if (el) expose(d, el); }
+  } else if (m.id === 'ips') {
+    const live = [...devices.values()].filter((d) => !d.dead && (d.kind === 'threat' || d.kind === 'hidden'));
+    const d = live.find((x) => x.bounty) || live.find((x) => x.kind === 'hidden') || live[0];
+    const el = d && cardOf(d);
+    if (el) setTimeout(() => {
+      if (d.dead || state !== 'play') return;
+      const r = el.getBoundingClientRect(), x = r.left + r.width / 2, y = r.top + r.height / 2;
+      crash(); shatter(el, x, y); el.classList.remove('locked'); el.classList.add('dead'); d.dead = true;
+      if (locked === el) locked = null;
+      const pts = d.bounty || d.kind === 'hidden' ? 2 : 1;
+      score.kills += pts; pop(x, y, `Edge IPS blocked +${pts}`, 'good'); updateStats();
+      if (score.kills >= GOAL && !wonOnce) return win();
+      checkSweep();
+    }, 500);
+  } else if (m.id === 'cva') {
+    shieldUntil = performance.now() + 8000;
+    document.body.classList.add('shielded');
+    setTimeout(() => { if (performance.now() >= shieldUntil) document.body.classList.remove('shielded'); }, 8050);
+  }
+}
+const RANKS = [[0, 'Trainee operator'], [3, 'Plant operator'], [5, 'OT defender'], [8, 'Threat hunter'], [12, 'Decoy master'], [18, 'SOC legend']];
+const rankFor = (k) => RANKS.filter(([min]) => k >= min).pop()[1];
+function renderCareer(ovId) {
+  const box = document.querySelector(`#${ovId} .career`);
+  const r = rankFor(score.kills);
+  box.querySelector('.rk').innerHTML = `Your rank: <b>${r}</b>`;
+  box.querySelector('.used').textContent = modsUsed.size
+    ? `ZeroHack OT modules you deployed: ${[...modsUsed].join(', ')}.`
+    : 'Shoot 3 intruders to deploy your first ZeroHack OT module.';
+  box.querySelector('.share').onclick = async () => {
+    const text = `I scored ${score.kills} and ranked ${r} defending a power plant in WhizHack Shootout. Beat me:`;
+    const url = 'https://soumyaswarrup.github.io/shootout/';
+    try {
+      if (navigator.share) await navigator.share({ title: 'WhizHack Shootout', text, url });
+      else { await navigator.clipboard.writeText(`${text} ${url}`); box.querySelector('.share').textContent = 'Copied. Paste it anywhere'; }
+      try { rpc('ss_log_event', { p_device: DEVICE, p_kind: 'share', p_detail: r }); } catch {}
+    } catch {}
+  };
+}
+
 // ------------------------------------------------- aiming and shooting ----
 
 let locked = null;
@@ -459,8 +532,11 @@ function shoot(x, y, card) {
     updateStats();
     return;
   }
+  if (d.kind === 'real' && now < shieldUntil) {
+    ting(); sparks(x, y); pop(x, y, 'Shielded by CVA', 'good'); restart(card, 'ricochet'); updateStats(); return;
+  }
   if (d.kind === 'real') {
-    alarm(); sparks(x, y);
+    alarm(); sparks(x, y); buzz([70, 50, 70]);
     score.kills = Math.max(0, score.kills - 2); score.own += 1; score.streak = 0;
     pop(x, y, 'Plant tripped −2', 'bad');
     restart(card, 'ricochet');
@@ -483,6 +559,8 @@ function shoot(x, y, card) {
   score.streak += 1;
   score.best = Math.max(score.best, score.streak);
   score.lastKillAt = now;
+  buzz(25);
+  addCharge();
   if (d.bounty) pop(x, y, `Bounty claimed +${pts}`);
   else if (early) pop(x, y, `Sharp eye +${pts}`, 'good');
   else pop(x, y, rush ? `Double +${pts}` : '+1');
@@ -511,12 +589,18 @@ const aimHistory = [];
 
 // The hand controls the laser like a trackpad: wherever the hand first shows
 // up becomes the middle of the screen, and a comfortable reach covers all of it.
+const isTouch = matchMedia('(pointer: coarse)').matches;
+let easy = (() => { try { const v = localStorage.getItem('shootout.easy'); return v === null ? isTouch : v === '1'; } catch { return isTouch; } })();
 const zone = { set: false, cx: 0.5, cy: 0.5, hw: 0.2, hh: 0.26 };
+const reach = () => (easy ? 0.15 : 0.26); // easy aim: a small hand movement covers the whole screen
+const DWELL_MS = 850;
+let dwellCard = null, dwellStart = 0;
 function handToScreen(px, py) {
   if (!zone.set) {
     zone.set = true;
     const frameAspect = video.videoWidth / video.videoHeight || 16 / 9;
-    zone.hw = clamp((zone.hh * (innerWidth / innerHeight)) / frameAspect, 0.12, 0.42);
+    zone.hh = reach();
+    zone.hw = clamp((zone.hh * (innerWidth / innerHeight)) / frameAspect, 0.08, 0.42);
     zone.cx = clamp(px, zone.hw, 1 - zone.hw);
     zone.cy = clamp(py, zone.hh, 1 - zone.hh);
   }
@@ -568,7 +652,7 @@ async function switchToCPU() {
 // Firing: aim with a finger gun, then either FLICK the hand sideways or TILT
 // the gun onto its side. The shot goes where you were aiming just before the move.
 const SLOW = /[?&]slowcam/.test(location.search) ? 4 : 1; // for low-fps test rigs
-const FIRE = { flickPalms: 1.0, flickMs: 220 * SLOW, tiltDeg: 45, tiltMs: 450 * SLOW, coolMs: 650, steadySpeed: 2.2 };
+const FIRE = { flickPalms: 0.8, flickMs: 220 * SLOW, tiltDeg: 45, tiltMs: 450 * SLOW, coolMs: 650, steadySpeed: 2.2 };
 const motion = []; // recent { t, x, y, roll, palm } in video pixels
 let pointingAt = -1e9, coolUntil = 0, steadyAim = null, firedFlash = 0;
 let home = null; // pose the hand fired from; the move back to it must not fire again
@@ -676,9 +760,19 @@ function trackHand(now) {
     coolUntil = now + FIRE.coolMs;
     firedFlash = now;
   }
+  // Easy aim: keep the laser on one target and it fires when the ring fills.
+  if (easy && pointing && shown.card && !shown.card.classList.contains('dead') && state === 'play') {
+    if (dwellCard !== shown.card) { dwellCard = shown.card; dwellStart = now; }
+    const p = Math.min(1, (now - dwellStart) / DWELL_MS);
+    laser.style.setProperty('--dwell', p.toFixed(3)); laser.classList.add('dwell');
+    if (p >= 1 && now >= coolUntil) {
+      shoot(shown.x, shown.y, shown.card);
+      coolUntil = now + 450; firedFlash = now; dwellCard = null;
+    }
+  } else { dwellCard = null; laser.classList.remove('dwell'); }
   checks(true, pointing, now - firedFlash < 350);
 
-  if (pointing) setStatus('aim', 'Aiming. Flick your hand sideways or tilt the gun to fire.', 'live');
+  if (pointing) setStatus(easy ? 'aimE' : 'aim', easy ? 'Aiming. Hold on a target until the ring fills, or flick to fire.' : 'Aiming. Flick your hand sideways or tilt the gun to fire.', 'live');
   else setStatus('hand', 'Hand found. Make a finger gun: index finger out, other fingers curled.', 'live');
   debug(a);
 }
@@ -898,6 +992,7 @@ function show(id) { for (const o of document.querySelectorAll('.ov')) o.classLis
 function startRound() {
   Object.assign(score, { shots: 0, kills: 0, streak: 0, best: 0, own: 0, lastKillAt: -1e9 });
   wave = 0; wonOnce = false; submitted = false;
+  charge = 0; modIndex = 0; shieldUntil = 0; modsUsed = new Set(); renderCharge(); document.body.classList.remove('shielded'); toastEl.classList.remove('on');
   banner.classList.remove('go', 'stay');
   show(null);
   document.body.classList.remove('rush');
@@ -919,6 +1014,7 @@ function timeUp() {
   $('overSub').textContent = `intruders shot. ${Math.max(0, GOAL - score.kills)} more unlocks the comic.`;
   $('lesson').innerHTML = LESSONS[(Math.random() * LESSONS.length) | 0];
   $('bSwitch').textContent = finder ? 'Switch to tap' : 'Try the finger gun';
+  renderCareer('ovOver');
   show('ovOver');
   submitRun();
 }
@@ -929,6 +1025,7 @@ function win() {
   setTimeout(() => {
     banner.classList.remove('stay');
     $('winKills').textContent = String(score.kills);
+    renderCareer('ovWin');
     show('ovWin');
     submitRun();
     const total = 5, t0 = performance.now();
@@ -956,6 +1053,9 @@ $('bStay').onclick = () => { submitted = false; if (cdTimer) clearInterval(cdTim
 // Test hook for automated checks.
 window.__range = { get state() { return state; }, get kills() { return score.kills; }, set kills(v) { score.kills = v; updateStats(); }, devices: () => [...devices.values()], shoot, end: () => { endsAt = performance.now(); } };
 
+const easyEl = $('easyAim');
+easyEl.checked = easy;
+easyEl.addEventListener('change', () => { easy = easyEl.checked; zone.set = false; try { localStorage.setItem('shootout.easy', easy ? '1' : '0'); } catch {} });
 document.body.classList.add('tapmode');
 buildWave();
 requestAnimationFrame(tick);

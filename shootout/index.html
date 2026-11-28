@@ -24,6 +24,10 @@
         <div class="lamps" id="lamps" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
         <span class="count"><b id="kills">0</b> of 5 shot</span>
       </div>
+      <div class="charge" id="charge" title="Shoot intruders to charge the next ZeroHack OT module">
+        <span class="cl">ZeroHack <b id="nextMod">Trace OT</b></span>
+        <span class="cbar"><i id="chargeBar"></i></span>
+      </div>
       <div class="readouts">
         <div class="ro"><span>Wave</span><b id="wave">1</b></div>
         <div class="ro"><span>Time</span><b id="timer">90</b></div>
@@ -61,6 +65,7 @@
     <div id="laser" aria-hidden="true"><i></i></div>
     <div id="flash" aria-hidden="true"></div>
     <div id="banner" aria-live="polite"></div>
+    <div id="toast" aria-live="polite"></div>
 
     <!-- start -->
     <div class="ov ui on" id="ovStart">
@@ -74,12 +79,14 @@
           <div class="lg decoy"><span class="win"><img src="art/decoy.webp" alt=""></span><div><b>Blue windows are WhizHack decoys</b> Bulletproof. Disguised intruders that touch one get exposed.</div></div>
           <div class="lg dupe"><span class="win"><img src="art/hmi.webp" alt=""></span><div><b>Some white windows lie</b> A second PLC-07, an odd IP, a 3 AM login. Catch them early for +2.</div></div>
         </div>
+        <p class="mods">Every 3 intruders you shoot charges a <b>ZeroHack OT</b> module: <b>Trace OT</b> unmasks disguised intruders, <b>Edge IPS</b> blocks the biggest threat for you, and <b>CVA</b> shields your real PLCs.</p>
         <form class="signup" id="signup" novalidate onsubmit="return false">
           <label>Your name<input id="pName" autocomplete="name" maxlength="40" placeholder="Priya Sharma"></label>
           <label>Work email<input id="pEmail" type="email" inputmode="email" autocomplete="email" maxlength="120" placeholder="priya@company.com"></label>
           <label class="consent"><input type="checkbox" id="pConsent"> WhizHack can store my name and work email for this event and contact me about OT security.</label>
           <p class="ferr" id="ferr" role="alert"></p>
         </form>
+        <label class="easy"><input type="checkbox" id="easyAim"> <span><b>Easy aim</b> Seated, or playing on a phone? Hold the laser on a target for a moment and it fires by itself. You need less hand movement too.</span></label>
         <p class="goal"><span class="lamps on5" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span><span>Shoot 5 intruders in 90 seconds to unlock <b>The Decoy Files</b> comic</span><span class="topline" id="topLine"></span></p>
         <div class="btns">
           <button class="big" id="bCam" type="button">Play with finger gun</button>
@@ -99,6 +106,7 @@
         <p class="sub" id="overSub">intruders shot</p>
         <p class="pb" id="pbNote"></p>
         <p class="lesson" id="lesson"></p>
+        <div class="career"><p class="rk"></p><p class="used"></p><button class="big ghost share" type="button">Share my score</button></div>
         <div class="board" id="boardOver"><h2>Today's top 5</h2><ol></ol><p class="rank"></p></div>
         <div class="btns">
           <button class="big" id="bAgain" type="button">Play again</button>
@@ -115,6 +123,7 @@
         <p class="sub">You shot <b id="winKills">5</b> intruders and spared the real equipment.</p>
         <div class="comicrow"><img src="../decoy-dash/comic/pages/page-01.jpg" alt="The Decoy Files #1 cover"><p><b>The Decoy Files #1</b> is unlocked. Opening it in <b id="cdN">5</b>s…</p></div>
         <div class="cd"><i id="cdBar"></i></div>
+        <div class="career"><p class="rk"></p><p class="used"></p><button class="big ghost share" type="button">Share my score</button></div>
         <div class="board" id="boardWin"><h2>Today's top 5</h2><ol></ol><p class="rank"></p></div>
         <div class="btns">
           <a class="big" href="comic/">Read the comic now</a>

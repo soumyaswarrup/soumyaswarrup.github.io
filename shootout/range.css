@@ -646,7 +646,77 @@ body.tapmode #phoneStatus { display: none !important; }
 body.rush #range { box-shadow: inset 0 3px 10px rgba(0,0,0,.6), 0 0 0 2px #1b1f23, 0 0 0 5px rgba(255,176,0,.55), 0 0 40px 6px rgba(255,176,0,.25); }
 @media (max-width: 760px) { .signup { grid-template-columns: 1fr; } }
 
+
+/* ================= ZeroHack charge, easy aim, toast, career, shield === */
+.charge { display: grid; gap: 5px; min-width: 150px; }
+.charge .cl { font-size: 12px; color: var(--muted); white-space: nowrap; }
+.charge .cl b { color: #8fd1ff; }
+.cbar { display: block; height: 8px; border-radius: 4px; background: #050606; box-shadow: inset 0 1px 3px #000, 0 0 0 1px #33393f; overflow: hidden; }
+.cbar i { display: block; height: 100%; width: 0; background: linear-gradient(90deg, #1f7fc4, var(--blue)); box-shadow: 0 0 10px var(--blue); transition: width .25s; }
+
+#laser.dwell i::after { display: block; }
+
+.easy { display: flex; gap: 10px; align-items: flex-start; margin: 0 0 14px; padding: 12px; border-radius: 6px; background: rgba(58,166,238,.08); font-size: 13.5px; line-height: 1.4; color: var(--ink-dim); cursor: pointer; }
+.easy b { display: block; color: var(--ink); font-size: 14.5px; }
+.easy input { width: 22px; height: 22px; margin: 0; flex: none; accent-color: var(--blue); cursor: pointer; }
+.mods { margin: -4px 0 16px; font-size: 13.5px; line-height: 1.45; color: var(--ink-dim); }
+.mods b { color: #8fd1ff; }
+
+#toast {
+  position: fixed; left: 50%; bottom: 18px; z-index: 46;
+  width: min(560px, calc(100vw - 24px));
+  transform: translate(-50%, 140%);
+  padding: 12px 14px;
+  border-radius: 8px;
+  background: #0d1a24;
+  box-shadow: 0 0 0 2px #1f7fc4, 0 14px 40px rgba(0,0,0,.5);
+  color: #d6ecfb; font-size: 14.5px; line-height: 1.4;
+  pointer-events: none;
+  transition: transform .35s cubic-bezier(.2,.9,.3,1);
+}
+#toast.on { transform: translate(-50%, 0); }
+#toast b { color: #fff; }
+#toast .tz { display: inline-block; margin-right: 4px; padding: 1px 7px; border-radius: 3px; background: var(--blue); color: #03263d; font: 800 14px/1.3 var(--display); }
+body:not(.tapmode) #toast { left: calc((100vw - var(--cam-w) - 30px) / 2); }
+
+body.shielded .card.real:not(.dead) { box-shadow: inset 0 0 0 1px rgba(0,0,0,.35), inset 0 3px 0 rgba(255,255,255,.4), 0 0 0 5px var(--bezel), 0 0 0 8px var(--green), 0 0 26px 6px rgba(61,220,132,.45); }
+
+.career { margin: 0 0 16px; text-align: center; }
+.career .rk { margin: 0 0 4px; font-size: 16px; color: var(--ink-dim); }
+.career .rk b { font: 900 30px/1.1 var(--stencil); color: var(--amber); display: block; }
+.career .used { margin: 0 0 12px; font-size: 14px; color: #8fd1ff; }
+.career .share { width: 100%; font-size: 18px; }
+
+@media (max-width: 760px) {
+  .charge { order: 5; flex-basis: 100%; grid-template-columns: auto 1fr; align-items: center; min-width: 0; }
+  :root { --hud-h: 112px; }
+  #toast, body:not(.tapmode) #toast { left: 50%; bottom: 150px; font-size: 13.5px; }
+}
+/* phones held sideways: one slim row of controls */
+@media (max-height: 520px) and (orientation: landscape) {
+  :root { --hud-h: 52px; --cam-w: 150px; }
+  .hud { flex-wrap: nowrap; height: var(--hud-h); padding: 0 10px; gap: 12px; }
+  .brand span { display: none; }
+  .count { display: none; }
+  .lamps i { width: 12px; height: 12px; }
+  .charge { order: 0; flex-basis: auto; min-width: 110px; display: grid; }
+  .ro { padding: 3px 7px 2px; } .ro b { font-size: 19px; } .ro span { display: none; }
+  .actions kbd { display: none; }
+  #range { inset: calc(var(--hud-h) + 6px) calc(var(--cam-w) + 18px) 6px 6px; padding: 10px; gap: 12px; }
+  body.tapmode #range { right: 6px; }
+  .cam { top: calc(var(--hud-h) + 6px); bottom: auto; right: 6px; width: var(--cam-w); padding: 5px; }
+  .cam .score, .cam .howto, .cam .checks, #camera { display: none; }
+  .cam #status { display: block; font-size: 11px; min-height: 0; }
+  #phoneStatus { display: none !important; }
+  #banner { left: calc((100vw - var(--cam-w) - 18px) / 2); font-size: 38px; }
+  .card .host { display: none; }
+  .panel { padding: 22px 16px 14px; }
+  .panel h1 { font-size: 44px; }
+  #toast, body:not(.tapmode) #toast { bottom: 8px; left: 50%; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   body.recoil, #flash.go, .card, .card.ricochet, .card.threat, .card.threat.exposed, .card.tripped, .lg .win, #timer.low, .plate .brand-dot { animation: none !important; }
+  #toast { transition: none; }
   #banner.go, #banner.stay { animation-duration: .01s; opacity: 1; }
 }
