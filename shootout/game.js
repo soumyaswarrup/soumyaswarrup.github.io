@@ -6,7 +6,7 @@
 import { createTracker, analyze, GunTrigger, HandFinder, OneEuro, HAND_EDGES, TUNING } from './hand.js';
 
 const GOAL = 5;
-const ROUND_SECS = 90;
+const ROUND_SECS = 60;
 const COMIC_URL = 'comic/';
 const $ = (id) => document.getElementById(id);
 const range = $('range');
@@ -602,10 +602,10 @@ const aimHistory = [];
 // The hand controls the laser like a trackpad: wherever the hand first shows
 // up becomes the middle of the screen, and a comfortable reach covers all of it.
 const isTouch = matchMedia('(pointer: coarse)').matches;
-let easy = (() => { try { const v = localStorage.getItem('shootout.easy'); return v === null ? isTouch : v === '1'; } catch { return isTouch; } })();
+let easy = (() => { try { const v = localStorage.getItem('shootout.easy2'); return v === null ? true : v === '1'; } catch { return true; } })();
 const zone = { set: false, cx: 0.5, cy: 0.5, hw: 0.2, hh: 0.26 };
 const reach = () => (easy ? 0.15 : 0.26); // easy aim: a small hand movement covers the whole screen
-const DWELL_MS = 850;
+const DWELL_MS = 750;
 let dwellCard = null, dwellStart = 0;
 // Laptop webcams cut the hand off near the bottom of the frame (desk, keyboard),
 // so the aim area must never reach down there. Its bottom edge stays above SAFE_BOTTOM.
@@ -770,7 +770,7 @@ function trackHand(now) {
   const y = filtY.filter(ny, now / 1000) * innerHeight;
 
   laser.classList.add('on');
-  laser.classList.toggle('aiming', trigger.isGun || a.index > 0.78);
+  laser.classList.toggle('aiming', easy || trigger.isGun || a.index > 0.78);
   const shown = aim(x, y, true);
   aimHistory.push({ t: now, ...shown });
   while (aimHistory.length > 1 && now - aimHistory[0].t > 500) aimHistory.shift();
@@ -793,7 +793,7 @@ function trackHand(now) {
     firedFlash = now;
   }
   // Easy aim: keep the laser on one target and it fires when the ring fills.
-  if (easy && pointing && shown.card && !shown.card.classList.contains('dead') && state === 'play') {
+  if (easy && shown.card && !shown.card.classList.contains('dead') && state === 'play') {
     if (dwellCard !== shown.card) { dwellCard = shown.card; dwellStart = now; }
     const p = Math.min(1, (now - dwellStart) / DWELL_MS);
     laser.style.setProperty('--dwell', p.toFixed(3)); laser.classList.add('dwell');
@@ -806,7 +806,7 @@ function trackHand(now) {
 
   if (handLow) setStatus('low', 'Hand too low for the camera. Raise it a little: chest height reaches the bottom row.', 'error');
   else if (pointing) setStatus(easy ? 'aimE' : 'aim', easy ? 'Aiming. Hold on a target until the ring fills, or flick to fire.' : 'Aiming. Flick your hand sideways or tilt the gun to fire.', 'live');
-  else setStatus('hand', 'Hand found. Make a finger gun: index finger out, other fingers curled.', 'live');
+  else setStatus('hand', easy ? 'Hand found. Move it to aim and hold on a target to fire. A finger gun is steadier.' : 'Hand found. Make a finger gun: index finger out, other fingers curled.', 'live');
   debug(a);
 }
 function debug(a) {
@@ -1188,7 +1188,7 @@ document.querySelectorAll('.career .cert').forEach((b) => { b.onclick = () => { 
 
 const easyEl = $('easyAim');
 easyEl.checked = easy;
-easyEl.addEventListener('change', () => { easy = easyEl.checked; zone.set = false; try { localStorage.setItem('shootout.easy', easy ? '1' : '0'); } catch {} });
+easyEl.addEventListener('change', () => { easy = easyEl.checked; zone.set = false; try { localStorage.setItem('shootout.easy2', easy ? '1' : '0'); } catch {} });
 document.body.classList.add('tapmode');
 buildWave();
 requestAnimationFrame(tick);
