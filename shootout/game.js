@@ -439,12 +439,17 @@ function deployModule() {
   }
 }
 /* modules listed on the end screen */
-const RANKS = [[0, 'Trainee operator'], [3, 'Plant operator'], [5, 'OT defender'], [8, 'Threat hunter'], [12, 'Decoy master'], [18, 'SOC legend']];
+// an OT security career ladder: each score threshold is a promotion
+const RANKS = [[0, 'Trainee operator'], [2, 'Plant operator'], [4, 'Control room engineer'], [5, 'OT security analyst'], [7, 'OT security engineer'], [9, 'ICS threat hunter'], [12, 'Deception specialist'], [15, 'OT security architect'], [20, 'Plant CISO']];
 const rankFor = (k) => RANKS.filter(([min]) => k >= min).pop()[1];
+const rankLevel = (k) => RANKS.filter(([min]) => k >= min).length; // 1..9
+const nextRank = (k) => RANKS.find(([min]) => min > k);
 function renderCareer(ovId) {
   const box = document.querySelector(`#${ovId} .career`);
   const r = rankFor(score.kills);
-  box.querySelector('.rk').innerHTML = `Your rank: <b>${r}</b>`;
+  const nx = nextRank(score.kills);
+  box.querySelector('.rk').innerHTML = `Level ${rankLevel(score.kills)} of ${RANKS.length}<b>${r}</b>` +
+    (nx ? `<small>${nx[0] - score.kills} more for a promotion to ${nx[1]}</small>` : '<small>Top of the ladder.</small>');
   const used = box.querySelector('.used');
   if (modsUsed.size) {
     const h = document.createElement('b'); h.textContent = 'ZeroHack OT modules you deployed';
@@ -1035,13 +1040,6 @@ function win() {
     renderCareer('ovWin');
     show('ovWin');
     submitRun();
-    const total = 5, t0 = performance.now();
-    cdTimer = setInterval(() => {
-      const el = (performance.now() - t0) / 1000;
-      $('cdBar').style.width = Math.min(100, (el / total) * 100) + '%';
-      $('cdN').textContent = String(Math.max(0, Math.ceil(total - el)));
-      if (el >= total) { clearInterval(cdTimer); cdTimer = null; location.href = COMIC_URL; }
-    }, 100);
   }, 1500);
 }
 
@@ -1104,14 +1102,32 @@ async function drawCert(name, rank, kills, mods) {
   c.font = '900 46px "Big Shoulders Display", sans-serif';
   let fs = 46; while (fs > 26) { c.font = `900 ${fs}px "Big Shoulders Display", sans-serif`; if (c.measureText(rank).width <= rw - 30) break; fs -= 2; }
   c.fillText(rank, rx + rw / 2, ry + 96);
-  c.font = '700 20px "Atkinson Hyperlegible", sans-serif'; c.fillText(`Score ${kills}`, rx + rw / 2, ry + 130);
+  c.font = '700 20px "Atkinson Hyperlegible", sans-serif'; c.fillText(`Score ${kills}  |  Level ${rankLevel(kills)} of ${RANKS.length}`, rx + rw / 2, ry + 128);
+  // level pips under the rank window
+  const lv = rankLevel(kills), pw = 22, gap = 8, px0 = rx + rw / 2 - (RANKS.length * pw + (RANKS.length - 1) * gap) / 2;
+  for (let i = 0; i < RANKS.length; i++) {
+    c.fillStyle = '#16191c'; rr(c, px0 + i * (pw + gap), ry + rh + 26, pw, 10, 3); c.fill();
+    if (i < lv) { c.fillStyle = '#ffb000'; rr(c, px0 + i * (pw + gap) + 2, ry + rh + 28, pw - 4, 6, 2); c.fill(); }
+  }
   c.textAlign = 'left';
   // footer
-  c.fillStyle = '#16191c'; c.fillRect(96, 548, W - 192, 2);
+  c.fillStyle = '#16191c'; c.fillRect(96, 548, 820, 2);
   c.font = '700 22px "Atkinson Hyperlegible", sans-serif'; c.fillStyle = '#34383c';
   const d = new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' });
   c.fillText(`Issued ${d}`, 96, 590);
-  c.textAlign = 'right'; c.fillText('Play at soumyaswarrup.github.io/shootout', W - 96, 590); c.textAlign = 'left';
+  const cid = 'WH-SS-' + (DEVICE.replace(/[^a-z0-9]/gi, '').slice(-6) + kills.toString(36)).toUpperCase();
+  c.fillText(`Credential ID ${cid}`, 400, 590);
+  // seal: double ring, decoy shield, issuer
+  const sx = 1010, sy = 560, R = 62;
+  c.fillStyle = '#155f99'; c.beginPath(); c.arc(sx, sy, R, 0, Math.PI * 2); c.fill();
+  c.strokeStyle = '#efe9d6'; c.lineWidth = 3; c.beginPath(); c.arc(sx, sy, R - 8, 0, Math.PI * 2); c.stroke();
+  c.lineWidth = 1.5; c.beginPath(); c.arc(sx, sy, R - 14, 0, Math.PI * 2); c.stroke();
+  c.fillStyle = '#efe9d6'; c.textAlign = 'center';
+  c.font = '800 17px "Big Shoulders Display", sans-serif'; c.fillText('WHIZHACK', sx, sy - 18);
+  c.lineWidth = 3; c.beginPath(); c.moveTo(sx, sy - 10); c.lineTo(sx + 13, sy - 5); c.lineTo(sx + 13, sy + 4); c.quadraticCurveTo(sx + 12, sy + 14, sx, sy + 19); c.quadraticCurveTo(sx - 12, sy + 14, sx - 13, sy + 4); c.lineTo(sx - 13, sy - 5); c.closePath(); c.stroke();
+  c.beginPath(); c.arc(sx, sy + 4, 3, 0, Math.PI * 2); c.fill();
+  c.font = '800 14px "Big Shoulders Display", sans-serif'; c.fillText('VERIFIED  2026', sx, sy + 38);
+  c.textAlign = 'left';
   // green "secured" pilot lamp
   const lg = c.createRadialGradient(1088, 120, 2, 1092, 124, 22); lg.addColorStop(0, '#e8fff1'); lg.addColorStop(.45, '#3ddc84'); lg.addColorStop(1, '#12733f');
   c.fillStyle = '#16191c'; c.beginPath(); c.arc(1092, 124, 26, 0, Math.PI * 2); c.fill();
