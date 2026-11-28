@@ -606,6 +606,46 @@ body.tapmode #phoneStatus { display: none !important; }
   .big { font-size: 21px; }
 }
 
+
+/* ======================================== sign-up, leaderboard, rush === */
+.signup { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 0 0 16px; }
+.signup label { display: grid; gap: 5px; font-size: 13.5px; font-weight: 700; color: var(--ink-dim); }
+.signup input:not([type=checkbox]) {
+  font: 16px var(--body); color: var(--ink);
+  padding: 11px 12px;
+  border: 0; border-radius: 6px;
+  background: #0d0f11;
+  box-shadow: inset 0 2px 5px rgba(0,0,0,.8), 0 0 0 1px #3a4148;
+  user-select: text; cursor: text;
+}
+.signup input::placeholder { color: #565e66; }
+.signup input:focus { outline: none; box-shadow: inset 0 2px 5px rgba(0,0,0,.8), 0 0 0 2px var(--amber); }
+.signup .consent { grid-column: 1 / -1; display: flex; gap: 10px; align-items: flex-start; font-weight: 400; font-size: 13px; line-height: 1.4; cursor: pointer; }
+.signup .consent input { width: 20px; height: 20px; margin: 0; flex: none; accent-color: var(--green); cursor: pointer; }
+.ferr { grid-column: 1 / -1; margin: 0; color: #ff8a6e; font-size: 14px; font-weight: 700; }
+.ferr:empty { display: none; }
+.topline { flex-basis: 100%; color: var(--amber); font-weight: 700; }
+.topline:empty { display: none; }
+
+.board { margin: 0 0 18px; padding: 12px 14px; border-radius: 6px; background: #050606; box-shadow: inset 0 2px 8px rgba(0,0,0,.9); }
+.board[hidden] { display: none; }
+.board h2 { margin: 0 0 8px; font: 800 20px/1 var(--display); color: var(--ink); }
+.board ol { margin: 0; padding: 0; list-style: none; counter-reset: rk; }
+.board li { counter-increment: rk; display: flex; align-items: baseline; gap: 10px; padding: 5px 4px; border-top: 1px solid #1a1e21; font-size: 15px; color: var(--ink-dim); }
+.board li::before { content: counter(rk); width: 1.4em; font: 800 18px var(--display); color: #6f675a; }
+.board li span { flex: 1; }
+.board li b { font: 800 22px/1 var(--display); color: var(--amber); text-shadow: 0 0 8px rgba(255,176,0,.5); font-variant-numeric: tabular-nums; }
+.board li.me { background: rgba(61,220,132,.1); color: var(--ink); border-radius: 4px; }
+.board li.me::before { color: var(--green); }
+.board .rank { margin: 8px 0 0; color: var(--green); font-weight: 700; font-size: 14px; }
+.board .rank:empty { display: none; }
+.pb { text-align: center; margin: -8px 0 14px; color: var(--green); font-weight: 700; }
+.pb:empty { display: none; }
+
+/* final 10 seconds: double points, the panel runs hot */
+body.rush #range { box-shadow: inset 0 3px 10px rgba(0,0,0,.6), 0 0 0 2px #1b1f23, 0 0 0 5px rgba(255,176,0,.55), 0 0 40px 6px rgba(255,176,0,.25); }
+@media (max-width: 760px) { .signup { grid-template-columns: 1fr; } }
+
 @media (prefers-reduced-motion: reduce) {
   body.recoil, #flash.go, .card, .card.ricochet, .card.threat, .card.threat.exposed, .card.tripped, .lg .win, #timer.low, .plate .brand-dot { animation: none !important; }
   #banner.go, #banner.stay { animation-duration: .01s; opacity: 1; }

@@ -470,7 +470,8 @@ function shoot(x, y, card) {
 
   // threat or still-hidden intruder: down it goes
   const early = d.kind === 'hidden';
-  const pts = early || d.bounty ? 2 : 1;
+  const rush = endsAt - now <= 10000 && !wonOnce;
+  const pts = (early || d.bounty ? 2 : 1) * (rush ? 2 : 1);
   crash();
   shatter(card, x, y);
   card.classList.remove('locked');
@@ -482,9 +483,9 @@ function shoot(x, y, card) {
   score.streak += 1;
   score.best = Math.max(score.best, score.streak);
   score.lastKillAt = now;
-  if (d.bounty) pop(x, y, 'Bounty claimed +2');
-  else if (early) pop(x, y, 'Sharp eye +2', 'good');
-  else pop(x, y, '+1');
+  if (d.bounty) pop(x, y, `Bounty claimed +${pts}`);
+  else if (early) pop(x, y, `Sharp eye +${pts}`, 'good');
+  else pop(x, y, rush ? `Double +${pts}` : '+1');
   const name = STREAK_NAMES[Math.min(score.streak, STREAK_NAMES.length - 1)];
   if (name) {
     showBanner(name);
@@ -702,7 +703,10 @@ function tick(now) {
     }
     const left = Math.max(0, Math.ceil((endsAt - now) / 1000));
     const t = $('timer');
-    if (t.textContent !== String(left)) { t.textContent = String(left); t.classList.toggle('low', left <= 10); }
+    if (t.textContent !== String(left)) {
+      t.textContent = String(left); t.classList.toggle('low', left <= 10);
+      if (left === 10 && !wonOnce) { showBanner('Double points'); fanfare(3); document.body.classList.add('rush'); }
+    }
     if (left <= 0) timeUp();
   }
 }
@@ -794,19 +798,109 @@ addEventListener('click', (e) => {
   shoot(e.clientX, e.clientY, under && under.closest ? under.closest('#range .card:not(.dead)') : null);
 });
 addEventListener('keydown', (e) => {
+  if (e.target.closest && e.target.closest('input, textarea')) return;
   if (e.key === 'd' || e.key === 'D') debugEl.hidden = !debugEl.hidden;
   else if ((e.key === 'r' || e.key === 'R') && state !== 'menu') startRound();
 });
 if (/[?&]debug/.test(location.search)) debugEl.hidden = false;
+
+
+// ------------------------------------------------- players + database ----
+// Same Supabase project and pattern as Decoy Dash / Merge Rush, tables ss_*.
+const API_URL = 'https://juemnyijhvqlpxrvsibg.supabase.co', API_KEY = 'sb_publishable_LDopq-erBLDteakwk08pOQ_qKnIafQI';
+const store = { get(k, d) { try { const v = localStorage.getItem('shootout.' + k); return v === null ? d : JSON.parse(v); } catch { return d; } }, set(k, v) { try { localStorage.setItem('shootout.' + k, JSON.stringify(v)); } catch {} } };
+let DEVICE = store.get('device', null);
+if (!DEVICE) { DEVICE = crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36) + Math.random().toString(36).slice(2, 12); store.set('device', DEVICE); }
+async function rpc(fn, args) {
+  const r = await fetch(`${API_URL}/rest/v1/rpc/${fn}`, { method: 'POST', headers: { 'Content-Type': 'application/json', apikey: API_KEY }, body: JSON.stringify(args || {}) });
+  if (!r.ok) { let m = 'Error ' + r.status; try { m = (await r.json()).message || m; } catch {} throw new Error(m); }
+  const t = await r.text(); return t ? JSON.parse(t) : null;
+}
+const PERSONAL=new Set(["gmail.com","googlemail.com","yahoo.com","yahoo.co.in","yahoo.in","ymail.com","rocketmail.com","hotmail.com","hotmail.co.in","outlook.com","outlook.in","live.com","live.in","msn.com","icloud.com","me.com","mac.com","aol.com","protonmail.com","proton.me","pm.me","zohomail.com","zohomail.in","gmx.com","gmx.net","mail.com","yandex.com","yandex.ru","mail.ru","rediffmail.com","rediff.com","tutanota.com","tuta.io","fastmail.com","hey.com","qq.com","163.com","126.com","duck.com","indiatimes.com","sify.com"])
+;
+const TEMP_RE = /(mailinator|yopmail|guerrilla|sharklasers|10minute|20minute|tempmail|temp-mail|tmpmail|throwaway|trashmail|trash-mail|dispostable|maildrop|getnada|fakeinbox|fakemail|burner|spam|discard|mailnesia|mohmal|emailondeck|1secmail|mailsac|dropmail|minuteinbox|mytemp|tempinbox|tempr\.|wegwerf|jetable)/;
+const EMAIL_RE = /^[^@\s]+@[^@\s]+\.[^@\s]{2,}$/;
+const WORK_MSG = { personal: 'Use your work email. Gmail, Yahoo, Outlook and other personal addresses are not accepted.', temporary: 'Disposable emails are not accepted. Use your work email.', invalid: 'Enter a valid work email, like priya@company.com.' };
+const SERVER_MSG = { 'work email required': WORK_MSG.personal, 'temporary email not allowed': WORK_MSG.temporary, 'bad email': WORK_MSG.invalid };
+function emailKind(em) { if (!EMAIL_RE.test(em)) return 'invalid'; const d = em.split('@')[1]; if (PERSONAL.has(d)) return 'personal'; if (TEMP_RE.test(d)) return 'temporary'; return 'ok'; }
+const cleanName = (v) => (v || '').replace(/[<>&"]/g, '').replace(/\s+/g, ' ').trim().slice(0, 40);
+const nameEl = $('pName'), emailEl = $('pEmail'), consentEl = $('pConsent');
+nameEl.value = store.get('name', ''); emailEl.value = store.get('email', ''); consentEl.checked = !!store.get('consent', false);
+function formError(m) { $('ferr').textContent = m; }
+[nameEl, emailEl, consentEl].forEach((el) => el.addEventListener('input', () => formError('')));
+let registered = store.get('regKey', null);
+let registering = false;
+// Returns true once the player is saved. Ask once per device; later rounds skip straight in.
+async function ensurePlayer() {
+  if (registering) return false;
+  const n = cleanName(nameEl.value), em = (emailEl.value || '').trim().toLowerCase();
+  if (n.length < 2) { formError('Enter your name.'); nameEl.focus(); return false; }
+  const k = emailKind(em); if (k !== 'ok') { formError(WORK_MSG[k]); emailEl.focus(); return false; }
+  if (!consentEl.checked) { formError('Tick the box so WhizHack can store your details.'); consentEl.focus(); return false; }
+  formError('');
+  store.set('name', n); store.set('email', em); store.set('consent', true);
+  const key = n + '|' + em;
+  if (registered === key) return true;
+  registering = true;
+  try {
+    await Promise.race([rpc('ss_register_player', { p_device: DEVICE, p_name: n, p_email: em, p_consent: true }), new Promise((_, r) => setTimeout(() => r(new Error('timeout')), 6000))]);
+    registered = key; store.set('regKey', key); return true;
+  } catch (e) {
+    const m = SERVER_MSG[e.message];
+    if (m) { formError(m); emailEl.focus(); return false; }
+    return true; // network trouble at the booth should never block play; the run still counts locally
+  } finally { registering = false; }
+}
+const firstName = () => (store.get('name', '') || 'You').split(' ')[0];
+async function loadBoard() { try { return (await rpc('ss_leaderboard_today')) || []; } catch { return null; } }
+function renderBoard(id, rows, mine) {
+  const box = $(id); const ol = box.querySelector('ol'); const rank = box.querySelector('.rank');
+  if (!rows) { box.hidden = true; return; }
+  box.hidden = false;
+  const me = firstName();
+  let myPlace = -1;
+  ol.replaceChildren(...(rows.length ? rows : [{ name: 'Nobody yet', best_score: 0 }]).map((r, i) => {
+    const li = document.createElement('li');
+    const isMe = mine != null && myPlace < 0 && r.name === me && r.best_score === mine;
+    if (isMe) { li.className = 'me'; myPlace = i; }
+    const nm = document.createElement('span'); nm.textContent = r.name;
+    const sc = document.createElement('b'); sc.textContent = String(r.best_score);
+    li.append(nm, sc); return li;
+  }));
+  if (mine == null) rank.textContent = '';
+  else if (myPlace === 0) rank.textContent = `You're number 1 today. Hold the line.`;
+  else if (myPlace > 0) rank.textContent = `You're number ${myPlace + 1} today.`;
+  else if (rows.length >= 5) rank.textContent = `${rows[4].best_score + 1} gets you onto the board.`;
+  else rank.textContent = '';
+}
+async function refreshTopLine() {
+  const rows = await loadBoard();
+  const el = $('topLine');
+  el.textContent = rows && rows.length ? `Today's best: ${rows[0].name} with ${rows[0].best_score}. Beat it.` : '';
+}
+let submitted = false;
+async function submitRun() {
+  if (submitted) return; submitted = true;
+  const best = store.get('best', 0);
+  if (score.kills > best) store.set('best', score.kills);
+  const pb = $('pbNote'); if (pb) pb.textContent = score.kills > best && best > 0 ? `New personal best. Your old one was ${best}.` : '';
+  if (registered) {
+    try { await rpc('ss_submit_run', { p_device: DEVICE, p_score: score.kills, p_shots: score.shots, p_best_streak: score.best, p_own_goals: score.own, p_wave: wave, p_mode: finder ? 'gun' : 'tap' }); } catch {}
+  }
+  const rows = await loadBoard();
+  renderBoard(state === 'won' ? 'boardWin' : 'boardOver', rows, registered ? score.kills : null);
+}
+refreshTopLine();
 
 // ------------------------------------------------------------- rounds ----
 
 function show(id) { for (const o of document.querySelectorAll('.ov')) o.classList.toggle('on', o.id === id); }
 function startRound() {
   Object.assign(score, { shots: 0, kills: 0, streak: 0, best: 0, own: 0, lastKillAt: -1e9 });
-  wave = 0; wonOnce = false;
+  wave = 0; wonOnce = false; submitted = false;
   banner.classList.remove('go', 'stay');
   show(null);
+  document.body.classList.remove('rush');
   state = 'play';
   endsAt = performance.now() + ROUND_SECS * 1000;
   buildWave();
@@ -819,12 +913,14 @@ const LESSONS = [
 ];
 function timeUp() {
   state = 'over';
+  document.body.classList.remove('rush');
   laser.classList.remove('on', 'aiming');
   $('overKills').textContent = String(score.kills);
   $('overSub').textContent = `intruders shot. ${Math.max(0, GOAL - score.kills)} more unlocks the comic.`;
   $('lesson').innerHTML = LESSONS[(Math.random() * LESSONS.length) | 0];
   $('bSwitch').textContent = finder ? 'Switch to tap' : 'Try the finger gun';
   show('ovOver');
+  submitRun();
 }
 let cdTimer = null;
 function win() {
@@ -834,6 +930,7 @@ function win() {
     banner.classList.remove('stay');
     $('winKills').textContent = String(score.kills);
     show('ovWin');
+    submitRun();
     const total = 5, t0 = performance.now();
     cdTimer = setInterval(() => {
       const el = (performance.now() - t0) / 1000;
@@ -844,8 +941,8 @@ function win() {
   }, 1500);
 }
 
-$('bCam').onclick = async () => { audio(); if (finder || (await startCamera())) startRound(); };
-$('bTap').onclick = () => { audio(); stopCamera(); startRound(); };
+$('bCam').onclick = async () => { audio(); if (!(await ensurePlayer())) return; if (finder || (await startCamera())) startRound(); };
+$('bTap').onclick = async () => { audio(); if (!(await ensurePlayer())) return; stopCamera(); startRound(); };
 $('bAgain').onclick = () => { audio(); startRound(); };
 $('restart').onclick = (e) => { e.stopPropagation(); if (state !== 'menu') startRound(); };
 $('bSwitch').onclick = async () => {
@@ -854,10 +951,10 @@ $('bSwitch').onclick = async () => {
   show('ovStart'); state = 'menu';
   if (await startCamera()) startRound();
 };
-$('bStay').onclick = () => { if (cdTimer) clearInterval(cdTimer); cdTimer = null; show(null); state = 'play'; endsAt = performance.now() + 30000; checkSweep(); };
+$('bStay').onclick = () => { submitted = false; if (cdTimer) clearInterval(cdTimer); cdTimer = null; show(null); state = 'play'; endsAt = performance.now() + 30000; checkSweep(); };
 
 // Test hook for automated checks.
-window.__range = { get state() { return state; }, get kills() { return score.kills; }, set kills(v) { score.kills = v; updateStats(); }, devices: () => [...devices.values()], shoot };
+window.__range = { get state() { return state; }, get kills() { return score.kills; }, set kills(v) { score.kills = v; updateStats(); }, devices: () => [...devices.values()], shoot, end: () => { endsAt = performance.now(); } };
 
 document.body.classList.add('tapmode');
 buildWave();

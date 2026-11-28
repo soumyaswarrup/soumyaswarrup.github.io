@@ -74,7 +74,13 @@
           <div class="lg decoy"><span class="win"><img src="art/decoy.webp" alt=""></span><div><b>Blue windows are WhizHack decoys</b> Bulletproof. Disguised intruders that touch one get exposed.</div></div>
           <div class="lg dupe"><span class="win"><img src="art/hmi.webp" alt=""></span><div><b>Some white windows lie</b> A second PLC-07, an odd IP, a 3 AM login. Catch them early for +2.</div></div>
         </div>
-        <p class="goal"><span class="lamps on5" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span><span>Shoot 5 intruders in 90 seconds to unlock <b>The Decoy Files</b> comic</span></p>
+        <form class="signup" id="signup" novalidate onsubmit="return false">
+          <label>Your name<input id="pName" autocomplete="name" maxlength="40" placeholder="Priya Sharma"></label>
+          <label>Work email<input id="pEmail" type="email" inputmode="email" autocomplete="email" maxlength="120" placeholder="priya@company.com"></label>
+          <label class="consent"><input type="checkbox" id="pConsent"> WhizHack can store my name and work email for this event and contact me about OT security.</label>
+          <p class="ferr" id="ferr" role="alert"></p>
+        </form>
+        <p class="goal"><span class="lamps on5" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span><span>Shoot 5 intruders in 90 seconds to unlock <b>The Decoy Files</b> comic</span><span class="topline" id="topLine"></span></p>
         <div class="btns">
           <button class="big" id="bCam" type="button">Play with finger gun</button>
           <button class="big ghost" id="bTap" type="button">Play with tap or mouse</button>
@@ -91,7 +97,9 @@
         <h1 class="red">Time's up</h1>
         <div class="bignum" id="overKills">0</div>
         <p class="sub" id="overSub">intruders shot</p>
+        <p class="pb" id="pbNote"></p>
         <p class="lesson" id="lesson"></p>
+        <div class="board" id="boardOver"><h2>Today's top 5</h2><ol></ol><p class="rank"></p></div>
         <div class="btns">
           <button class="big" id="bAgain" type="button">Play again</button>
           <button class="big ghost" id="bSwitch" type="button">Switch to tap</button>
@@ -107,6 +115,7 @@
         <p class="sub">You shot <b id="winKills">5</b> intruders and spared the real equipment.</p>
         <div class="comicrow"><img src="../decoy-dash/comic/pages/page-01.jpg" alt="The Decoy Files #1 cover"><p><b>The Decoy Files #1</b> is unlocked. Opening it in <b id="cdN">5</b>s…</p></div>
         <div class="cd"><i id="cdBar"></i></div>
+        <div class="board" id="boardWin"><h2>Today's top 5</h2><ol></ol><p class="rank"></p></div>
         <div class="btns">
           <a class="big" href="comic/">Read the comic now</a>
           <button class="big ghost" id="bStay" type="button">Stay and keep shooting</button>

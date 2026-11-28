@@ -42,5 +42,6 @@ const box=document.getElementById('pages');
 for(let i=1;i<=16;i++){const im=document.createElement('img');im.loading=i<3?'eager':'lazy';im.decoding='async';
 im.src='../../decoy-dash/comic/pages/page-'+String(i).padStart(2,'0')+'.jpg';im.alt='The Decoy Files #1, page '+i;box.appendChild(im)}
 </script>
+<script>try{const d=JSON.parse(localStorage.getItem('shootout.device'));if(d)fetch('https://juemnyijhvqlpxrvsibg.supabase.co/rest/v1/rpc/ss_log_event',{method:'POST',keepalive:true,headers:{'Content-Type':'application/json',apikey:'sb_publishable_LDopq-erBLDteakwk08pOQ_qKnIafQI'},body:JSON.stringify({p_device:d,p_kind:'comic_open',p_detail:'shootout'})}).catch(()=>{})}catch(e){}</script>
 </body>
 </html>
