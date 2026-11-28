@@ -1060,6 +1060,94 @@ $('bStay').onclick = () => { submitted = false; if (cdTimer) clearInterval(cdTim
 // Test hook for automated checks.
 window.__range = { get state() { return state; }, get kills() { return score.kills; }, set kills(v) { score.kills = v; updateStats(); }, devices: () => [...devices.values()], shoot, end: () => { endsAt = performance.now(); } };
 
+
+// --------------------------------------------------------- certificate ----
+// A LinkedIn-ready image (1200x675) drawn on a canvas, in the annunciator style.
+const GAME_URL = 'https://soumyaswarrup.github.io/shootout/';
+let certBlob = null, certFrom = null, certCaption = '';
+function rr(c, x, y, w, h, r) { c.beginPath(); c.roundRect ? c.roundRect(x, y, w, h, r) : c.rect(x, y, w, h); }
+async function drawCert(name, rank, kills, mods) {
+  try { await Promise.all(['900 80px "Big Shoulders Stencil Display"', '800 40px "Big Shoulders Display"', '700 24px "Atkinson Hyperlegible"', '400 24px "Atkinson Hyperlegible"'].map((f) => document.fonts.load(f))); } catch {}
+  const W = 1200, H = 675, cv = document.createElement('canvas'); cv.width = W; cv.height = H;
+  const c = cv.getContext('2d');
+  // cabinet + bezel
+  c.fillStyle = '#474f57'; c.fillRect(0, 0, W, H);
+  c.fillStyle = '#16191c'; rr(c, 28, 28, W - 56, H - 56, 18); c.fill();
+  // lamp-white window
+  const g = c.createLinearGradient(0, 48, 0, H - 48); g.addColorStop(0, '#efe9d6'); g.addColorStop(1, '#d4cdb7');
+  c.fillStyle = g; rr(c, 48, 48, W - 96, H - 96, 6); c.fill();
+  // hazard stripe
+  c.save(); rr(c, 48, 48, W - 96, 18, 6); c.clip();
+  for (let x = 30; x < W + 40; x += 36) { c.fillStyle = '#f2c200'; c.beginPath(); c.moveTo(x, 48); c.lineTo(x + 18, 48); c.lineTo(x, 66); c.lineTo(x - 18, 66); c.fill(); }
+  c.restore();
+  c.fillStyle = '#16191c'; c.textBaseline = 'alphabetic';
+  c.font = '700 24px "Atkinson Hyperlegible", sans-serif'; c.fillStyle = '#5b5a52';
+  c.fillText('WhizHack Technologies  |  AISS 2026', 96, 122);
+  c.font = '900 76px "Big Shoulders Stencil Display", "Big Shoulders Display", sans-serif'; c.fillStyle = '#16191c';
+  c.fillText('Certified OT Defender', 96, 200);
+  c.font = '400 26px "Atkinson Hyperlegible", sans-serif'; c.fillStyle = '#4a4a44';
+  c.fillText('This certifies that', 96, 262);
+  c.font = '800 84px "Big Shoulders Display", sans-serif'; c.fillStyle = '#16191c';
+  let nm = name; while (c.measureText(nm).width > 720 && nm.length > 3) nm = nm.slice(0, -1);
+  c.fillText(nm, 96, 350);
+  c.font = '400 26px "Atkinson Hyperlegible", sans-serif'; c.fillStyle = '#34383c';
+  c.fillText("defended a power plant's network in WhizHack Shootout,", 96, 404);
+  c.fillText(`shooting ${kills} intruder${kills === 1 ? '' : 's'} while sparing the real PLCs.`, 96, 440);
+  if (mods.length) { c.font = '700 22px "Atkinson Hyperlegible", sans-serif'; c.fillStyle = '#155f99'; c.fillText(`ZeroHack OT modules deployed: ${mods.join(', ')}`, 96, 488); }
+  // rank lamp (lit amber window)
+  const rx = 820, ry = 230, rw = 280, rh = 150;
+  c.fillStyle = '#16191c'; rr(c, rx - 10, ry - 10, rw + 20, rh + 20, 10); c.fill();
+  const ag = c.createRadialGradient(rx + rw / 2, ry + 50, 10, rx + rw / 2, ry + 70, 190); ag.addColorStop(0, '#ffe08a'); ag.addColorStop(.55, '#ffb000'); ag.addColorStop(1, '#b87400');
+  c.fillStyle = ag; rr(c, rx, ry, rw, rh, 4); c.fill();
+  c.fillStyle = '#2a1800'; c.textAlign = 'center';
+  c.font = '700 20px "Atkinson Hyperlegible", sans-serif'; c.fillText('Rank', rx + rw / 2, ry + 42);
+  c.font = '900 46px "Big Shoulders Display", sans-serif';
+  let fs = 46; while (fs > 26) { c.font = `900 ${fs}px "Big Shoulders Display", sans-serif`; if (c.measureText(rank).width <= rw - 30) break; fs -= 2; }
+  c.fillText(rank, rx + rw / 2, ry + 96);
+  c.font = '700 20px "Atkinson Hyperlegible", sans-serif'; c.fillText(`Score ${kills}`, rx + rw / 2, ry + 130);
+  c.textAlign = 'left';
+  // footer
+  c.fillStyle = '#16191c'; c.fillRect(96, 548, W - 192, 2);
+  c.font = '700 22px "Atkinson Hyperlegible", sans-serif'; c.fillStyle = '#34383c';
+  const d = new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' });
+  c.fillText(`Issued ${d}`, 96, 590);
+  c.textAlign = 'right'; c.fillText('Play at soumyaswarrup.github.io/shootout', W - 96, 590); c.textAlign = 'left';
+  // green "secured" pilot lamp
+  const lg = c.createRadialGradient(1088, 120, 2, 1092, 124, 22); lg.addColorStop(0, '#e8fff1'); lg.addColorStop(.45, '#3ddc84'); lg.addColorStop(1, '#12733f');
+  c.fillStyle = '#16191c'; c.beginPath(); c.arc(1092, 124, 26, 0, Math.PI * 2); c.fill();
+  c.fillStyle = lg; c.beginPath(); c.arc(1092, 124, 20, 0, Math.PI * 2); c.fill();
+  return new Promise((res) => cv.toBlob((b) => res(b), 'image/png'));
+}
+async function openCert(fromOv) {
+  certFrom = fromOv;
+  const name = (store.get('name', '') || 'OT Defender'), rank = rankFor(score.kills), mods = [...modsUsed];
+  certCaption = `I just earned my Certified OT Defender certificate in WhizHack Shootout at AISS 2026: ${score.kills} intruders shot, rank ${rank}. Finger-gun the attackers off a power plant network and spare the real PLCs. Think you can beat me? ${GAME_URL} #OTSecurity #AISS2026 #WhizHack`;
+  certBlob = await drawCert(name, rank, score.kills, mods);
+  $('certImg').src = URL.createObjectURL(certBlob);
+  show('ovCert');
+  try { rpc('ss_log_event', { p_device: DEVICE, p_kind: 'share', p_detail: 'certificate' }); } catch {}
+}
+const copyCaption = async () => { try { await navigator.clipboard.writeText(certCaption); return true; } catch { return false; } };
+$('cShare').onclick = async () => {
+  const file = new File([certBlob], 'whizhack-ot-defender.png', { type: 'image/png' });
+  await copyCaption();
+  if (navigator.canShare && navigator.canShare({ files: [file] })) {
+    try { await navigator.share({ files: [file], text: certCaption, title: 'WhizHack Shootout certificate' }); return; } catch (e) { if (e && e.name === 'AbortError') return; }
+  }
+  // laptop: download the image and open a LinkedIn post with the link
+  $('cDown').click();
+  window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(GAME_URL)}`, '_blank', 'noopener');
+  $('cNote').textContent = 'The certificate downloaded and the caption is copied. In LinkedIn, paste the caption and attach the image.';
+};
+$('cDown').onclick = () => { const a = document.createElement('a'); a.href = URL.createObjectURL(certBlob); a.download = 'whizhack-ot-defender.png'; a.click(); };
+$('cAdd').onclick = () => {
+  const d = new Date();
+  const q = new URLSearchParams({ startTask: 'CERTIFICATION_NAME', name: 'Certified OT Defender: WhizHack Shootout (AISS 2026)', organizationName: 'WhizHack Technologies', issueYear: String(d.getFullYear()), issueMonth: String(d.getMonth() + 1), certUrl: GAME_URL });
+  window.open(`https://www.linkedin.com/profile/add?${q}`, '_blank', 'noopener');
+};
+$('cBack').onclick = () => show(certFrom || 'ovOver');
+document.querySelectorAll('.career .cert').forEach((b) => { b.onclick = () => { if (cdTimer) { clearInterval(cdTimer); cdTimer = null; } openCert(b.closest('.ov').id); }; });
+
 const easyEl = $('easyAim');
 easyEl.checked = easy;
 easyEl.addEventListener('change', () => { easy = easyEl.checked; zone.set = false; try { localStorage.setItem('shootout.easy', easy ? '1' : '0'); } catch {} });
