@@ -106,8 +106,8 @@ function fillCard(el, d) {
   const look = d.kind === 'hidden' ? 'real' : d.kind;
   el.className = `card ${look}` + (d.badge ? ` ${d.badge.cls}` : '');
   el.dataset.id = String(d.id);
-  const img = document.createElement('img');
-  img.alt = ''; img.draggable = false; img.src = `art/${d.img}.webp`;
+  const img = document.createElement('span');
+  img.className = 'ico'; img.style.setProperty('--ico', `url(icons/${d.img}.svg)`);
   const title = document.createElement('div');
   title.className = 'title'; title.textContent = d.title;
   const host = document.createElement('div');
