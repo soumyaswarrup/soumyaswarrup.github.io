@@ -77,13 +77,13 @@ function buildWave() {
   const reals = pickN(REAL, nReal).map((d) => ({ ...d, kind: 'real' }));
   const list = [
     ...reals,
-    ...pickN(DECOYS, nDecoy).map((d) => ({ ...d, kind: 'decoy', badge: { cls: 'decoy', text: 'WHIZHACK DECOY' } })),
-    ...pickN(THREATS, nThreat).map((d) => ({ ...d, kind: 'threat', badge: { cls: 'threat', text: 'INTRUDER' } })),
-    ...pickN(APTS, nApt).map((d) => ({ ...d, kind: 'threat', bounty: true, badge: { cls: 'wanted', text: 'WANTED · APT GROUP' } })),
+    ...pickN(DECOYS, nDecoy).map((d) => ({ ...d, kind: 'decoy', badge: { cls: 'decoy', text: 'Decoy' } })),
+    ...pickN(THREATS, nThreat).map((d) => ({ ...d, kind: 'threat', badge: { cls: 'threat', text: 'Intruder' } })),
+    ...pickN(APTS, nApt).map((d) => ({ ...d, kind: 'threat', bounty: true, badge: { cls: 'wanted', text: 'Wanted: APT' } })),
   ];
   // one disguised intruder is a clone of a real device's name (the original's DUPLICATE tab)
   const cloneOf = reals[(Math.random() * reals.length) | 0];
-  list.push({ title: cloneOf.title, host: `10.0.${(Math.random() * 3 + 6) | 0}.${(Math.random() * 200 + 20) | 0} · same name, new MAC`, img: cloneOf.img, kind: 'hidden', badge: { cls: 'dupe', text: 'DUPLICATE' } });
+  list.push({ title: cloneOf.title, host: `10.0.${(Math.random() * 3 + 6) | 0}.${(Math.random() * 200 + 20) | 0} · same name, new MAC`, img: cloneOf.img, kind: 'hidden', badge: { cls: 'dupe', text: 'Duplicate?' } });
   pickN(DISGUISED, nHidden - 1).forEach((d) => list.push({ ...d, kind: 'hidden' }));
 
   devices = new Map();
@@ -139,7 +139,7 @@ addEventListener('resize', layout);
 function expose(d, el) {
   d.kind = 'threat';
   d.exposed = true;
-  d.badge = { cls: 'threat', text: 'EXPOSED BY DECOY' };
+  d.badge = { cls: 'threat', text: 'Exposed by decoy' };
   const wasLocked = el === locked;
   fillCard(el, d);
   if (wasLocked) el.classList.add('locked');
@@ -157,7 +157,7 @@ function expose(d, el) {
     line.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 900, easing: 'ease-in' }).onfinish = () => line.remove();
     restart(decoyEl, 'tripped');
   }
-  pop(r.left + r.width / 2, r.top + 16, 'DECOY TRIPPED', 'blue');
+  pop(r.left + r.width / 2, r.top + 16, 'Decoy tripped', 'blue');
   blip();
 }
 
@@ -175,6 +175,7 @@ function updateStats() {
   $('s-accuracy').textContent = score.shots ? `${Math.round((score.kills / score.shots) * 100)}%` : '–';
   $('s-streak').textContent = String(score.best);
   $('s-own').textContent = String(score.own);
+  [...$('lamps').children].forEach((l, i) => l.classList.toggle('on', i < score.kills));
 }
 
 function showBanner(text, sticky = false) {
@@ -187,7 +188,7 @@ function showBanner(text, sticky = false) {
 function checkSweep() {
   const left = [...devices.values()].filter((d) => !d.dead && (d.kind === 'threat' || d.kind === 'hidden')).length;
   if (left === 0 && state === 'play') {
-    setTimeout(() => showBanner(`CLEAN SWEEP · WAVE ${wave}`), 350);
+    setTimeout(() => showBanner(`Clean sweep, wave ${wave}`), 350);
     setTimeout(() => { if (state === 'play') buildWave(); }, 1500);
   }
 }
@@ -453,7 +454,7 @@ function shoot(x, y, card) {
 
   if (d.kind === 'decoy') {
     ting(); sparks(x, y);
-    pop(x, y, "BULLETPROOF · IT'S YOUR DECOY", 'blue');
+    pop(x, y, "Bulletproof: that's your decoy", 'blue');
     restart(card, 'ricochet');
     updateStats();
     return;
@@ -461,7 +462,7 @@ function shoot(x, y, card) {
   if (d.kind === 'real') {
     alarm(); sparks(x, y);
     score.kills = Math.max(0, score.kills - 2); score.own += 1; score.streak = 0;
-    pop(x, y, 'PLANT TRIP · −2', 'bad');
+    pop(x, y, 'Plant tripped −2', 'bad');
     restart(card, 'ricochet');
     updateStats();
     return;
@@ -481,8 +482,8 @@ function shoot(x, y, card) {
   score.streak += 1;
   score.best = Math.max(score.best, score.streak);
   score.lastKillAt = now;
-  if (d.bounty) pop(x, y, 'BOUNTY CLAIMED · +2');
-  else if (early) pop(x, y, 'SHARP EYE · CAUGHT IT BEFORE THE DECOY · +2', 'good');
+  if (d.bounty) pop(x, y, 'Bounty claimed +2');
+  else if (early) pop(x, y, 'Sharp eye +2', 'good');
   else pop(x, y, '+1');
   const name = STREAK_NAMES[Math.min(score.streak, STREAK_NAMES.length - 1)];
   if (name) {
@@ -767,7 +768,7 @@ async function startCamera() {
     stopCamera();
     return false;
   } finally {
-    btn.disabled = false; btn.textContent = '👉 Play with finger gun';
+    btn.disabled = false; btn.textContent = 'Play with finger gun';
   }
 }
 function stopCamera() {
@@ -820,9 +821,9 @@ function timeUp() {
   state = 'over';
   laser.classList.remove('on', 'aiming');
   $('overKills').textContent = String(score.kills);
-  $('overSub').textContent = `intruders shot · ${Math.max(0, GOAL - score.kills)} more to unlock the comic`;
+  $('overSub').textContent = `intruders shot. ${Math.max(0, GOAL - score.kills)} more unlocks the comic.`;
   $('lesson').innerHTML = LESSONS[(Math.random() * LESSONS.length) | 0];
-  $('bSwitch').textContent = finder ? 'Switch to tap' : '👉 Try the finger gun';
+  $('bSwitch').textContent = finder ? 'Switch to tap' : 'Try the finger gun';
   show('ovOver');
 }
 let cdTimer = null;
