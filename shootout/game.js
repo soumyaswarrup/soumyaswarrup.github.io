@@ -914,7 +914,7 @@ const PERSONAL=new Set(["gmail.com","googlemail.com","yahoo.com","yahoo.co.in","
 ;
 const TEMP_RE = /(mailinator|yopmail|guerrilla|sharklasers|10minute|20minute|tempmail|temp-mail|tmpmail|throwaway|trashmail|trash-mail|dispostable|maildrop|getnada|fakeinbox|fakemail|burner|spam|discard|mailnesia|mohmal|emailondeck|1secmail|mailsac|dropmail|minuteinbox|mytemp|tempinbox|tempr\.|wegwerf|jetable)/;
 const EMAIL_RE = /^[^@\s]+@[^@\s]+\.[^@\s]{2,}$/;
-const WORK_MSG = { personal: 'Use your work email. Gmail, Yahoo, Outlook and other personal addresses are not accepted.', temporary: 'Disposable emails are not accepted. Use your work email.', invalid: 'Enter a valid work email, like priya@company.com.' };
+const WORK_MSG = { personal: 'Use your work email. Gmail, Yahoo, Outlook and other personal addresses are not accepted.', temporary: 'Disposable emails are not accepted. Use your work email.', invalid: 'Enter a valid work email, like raj@company.com.' };
 const SERVER_MSG = { 'work email required': WORK_MSG.personal, 'temporary email not allowed': WORK_MSG.temporary, 'bad email': WORK_MSG.invalid };
 function emailKind(em) { if (!EMAIL_RE.test(em)) return 'invalid'; const d = em.split('@')[1]; if (PERSONAL.has(d)) return 'personal'; if (TEMP_RE.test(d)) return 'temporary'; return 'ok'; }
 const cleanName = (v) => (v || '').replace(/[<>&"]/g, '').replace(/\s+/g, ' ').trim().slice(0, 40);
